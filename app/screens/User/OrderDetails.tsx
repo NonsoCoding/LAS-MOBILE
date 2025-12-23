@@ -64,88 +64,92 @@ const OrderDetails = ({}: NewOrdersProps) => {
           </View>
         </View>
       </View>
-      <View style={[tw`p-5 gap-4 bottom-15`]}>
-        <View style={[tw`bg-white gap-6 rounded- p-5`]}>
-          <View style={[tw`gap-4`]}>
-            <View style={[tw`flex-row justify-between items-center`]}>
-              <Text style={[tw`text-2xl`]}>Order details</Text>
-              <Phone color={themeColors.primaryColor} />
+      <View style={[tw`flex-1 gap-4`]}>
+        <View style={[tw`gap-3 px-5 bottom-10`]}>
+          <View style={[tw`bg-white gap-6 rounded- p-5`]}>
+            <View style={[tw`gap-4`]}>
+              <View style={[tw`flex-row justify-between items-center`]}>
+                <Text style={[tw`text-2xl`]}>Order details</Text>
+                <Phone color={themeColors.primaryColor} />
+              </View>
+              <View style={[tw`border-b`]} />
             </View>
-            <View style={[tw`border-b`]} />
-          </View>
-          <View style={[]}>
-            <View>
-              {orderDetails.map((items, index) => {
-                return (
-                  <View key={index} style={[tw``, {}]}>
-                    <View style={[tw`flex-row justify-between`]}>
-                      <Text style={[tw`py-3 text-gray-500`]}>{items.name}</Text>
-                      <Text>{items.info}</Text>
+            <View style={[]}>
+              <View>
+                {orderDetails.map((items, index) => {
+                  return (
+                    <View key={index} style={[tw``, {}]}>
+                      <View style={[tw`flex-row justify-between`]}>
+                        <Text style={[tw`py-3 text-gray-500`]}>
+                          {items.name}
+                        </Text>
+                        <Text>{items.info}</Text>
+                      </View>
                     </View>
-                  </View>
-                );
-              })}
+                  );
+                })}
+              </View>
+              <View style={[tw`flex-row justify-between`]}>
+                <Text style={[tw`text-xl text-gray-500`]}>Total</Text>
+                <Text>₦2,000</Text>
+              </View>
             </View>
-            <View style={[tw`flex-row justify-between`]}>
-              <Text style={[tw`text-xl text-gray-500`]}>Total</Text>
-              <Text>₦2,000</Text>
+          </View>
+          <View style={[tw`bg-white p-5 rounded-lg gap-5`]}>
+            <View style={[tw`gap-4`]}>
+              <View style={[tw`flex-row justify-between items-center`]}>
+                <Text style={[tw`text-2xl`]}>Order details</Text>
+                <Phone color={themeColors.primaryColor} />
+              </View>
+              <View style={[tw`border-b`]} />
+            </View>
+            <View style={[tw`gap-3 flex-row items-center`]}>
+              <View
+                style={[
+                  tw`self-start p-2 rounded-full`,
+                  {
+                    backgroundColor: "#4CB05033",
+                  },
+                ]}
+              >
+                <Box color={"#4CB050"} />
+              </View>
+              <View>
+                <Text style={[tw``]}>Card Payment</Text>
+                <Text style={[tw`font-light`]}>
+                  Pay with credit or debit card
+                </Text>
+              </View>
+            </View>
+            <View style={[tw`gap-3 flex-row items-center`]}>
+              <View
+                style={[
+                  tw`self-start p-2 rounded-full`,
+                  {
+                    backgroundColor: "#4CB05033",
+                  },
+                ]}
+              >
+                <Box color={"#4CB050"} />
+              </View>
+              <View>
+                <Text style={[tw``]}>Mobile Wallet</Text>
+                <Text style={[tw`font-light`]}>Pay with mobile money</Text>
+              </View>
             </View>
           </View>
         </View>
-        <View style={[tw`bg-white p-5 rounded-lg gap-5`]}>
-          <View style={[tw`gap-4`]}>
-            <View style={[tw`flex-row justify-between items-center`]}>
-              <Text style={[tw`text-2xl`]}>Order details</Text>
-              <Phone color={themeColors.primaryColor} />
-            </View>
-            <View style={[tw`border-b`]} />
-          </View>
-          <View style={[tw`gap-3 flex-row items-center`]}>
-            <View
-              style={[
-                tw`self-start p-2 rounded-full`,
-                {
-                  backgroundColor: "#4CB05033",
-                },
-              ]}
-            >
-              <Box color={"#4CB050"} />
-            </View>
-            <View>
-              <Text style={[tw``]}>Card Payment</Text>
-              <Text style={[tw`font-light`]}>
-                Pay with credit or debit card
-              </Text>
-            </View>
-          </View>
-          <View style={[tw`gap-3 flex-row items-center`]}>
-            <View
-              style={[
-                tw`self-start p-2 rounded-full`,
-                {
-                  backgroundColor: "#4CB05033",
-                },
-              ]}
-            >
-              <Box color={"#4CB050"} />
-            </View>
-            <View>
-              <Text style={[tw``]}>Mobile Wallet</Text>
-              <Text style={[tw`font-light`]}>Pay with mobile money</Text>
-            </View>
-          </View>
+        <View style={[tw`bg-white flex-1 h-100 justify-center px-5`]}>
+          <PrimaryButton
+            bgColors={themeColors.primaryColor}
+            height={50}
+            onpress={() => {
+              router.push("/(drawer)/TrackOrders");
+            }}
+            text={"Continue to payment"}
+            textColor="white"
+          />
         </View>
-      </View>
-      <View style={[tw`bg-white flex-1 justify-center px-5`]}>
-        <PrimaryButton
-          bgColors={themeColors.primaryColor}
-          height={50}
-          onpress={() => {
-            router.push("/(drawer)/TrackOrders");
-          }}
-          text={"Continue to payment"}
-          textColor="white"
-        />
       </View>
     </View>
   );

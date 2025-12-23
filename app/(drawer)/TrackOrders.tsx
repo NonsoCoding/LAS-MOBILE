@@ -1,4 +1,3 @@
-import PrimaryButton from "@/components/Buttons/PrimaryButton";
 import Colors from "@/constants/Colors";
 import tw from "@/constants/tailwind";
 import { DrawerActions } from "@react-navigation/native";
@@ -160,7 +159,7 @@ const TrackOrders = ({}: NewOrdersProps) => {
             </View>
           </View>
         </View>
-        <View style={[tw`bg-white h-30 justify-center px-5`]}>
+        {/* <View style={[tw`bg-white h-30 justify-center px-5`]}>
           <PrimaryButton
             bgColors={themeColors.primaryColor}
             height={50}
@@ -170,7 +169,7 @@ const TrackOrders = ({}: NewOrdersProps) => {
             text={"Continue to payment"}
             textColor="white"
           />
-        </View>
+        </View> */}
       </View>
     </View>
   );
