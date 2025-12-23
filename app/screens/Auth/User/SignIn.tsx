@@ -1,7 +1,6 @@
 import PrimaryButton from "@/components/Buttons/PrimaryButton";
 import TextInputFields from "@/components/Inputs/TextInputFields";
 import SharedLayout from "@/components/Layout/SharedLayout";
-import CompleteModal from "@/components/Modals/CompleteModal";
 import { loginUser, resendOtp } from "@/components/services/api/authApi";
 import useAuthStore from "@/components/store/authStore";
 import yup from "@/components/utils/formik";
@@ -273,14 +272,6 @@ export default function UserSignInIndex() {
                 </Text>
               </TouchableOpacity>
             </View>
-            <CompleteModal
-              visible
-              onClose={() => {}}
-              title="Registration
-Successful"
-              titleSubInfo1="Your account has been successful created."
-              titleSubInfo2="After documents approval you can start your Workorders."
-            />
           </View>
         )}
       </Formik>

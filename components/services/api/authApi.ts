@@ -1,4 +1,4 @@
-const apiUrl = "https://web-production-afa76.up.railway.app";
+const apiUrl = process.env.EXPO_PUBLIC_API_URL;
 
 export const loginUser = async (email: string, password: string) => {
   try {
