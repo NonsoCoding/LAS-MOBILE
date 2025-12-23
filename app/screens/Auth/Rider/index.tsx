@@ -1,4 +1,5 @@
 import PrimaryButton from "@/components/Buttons/PrimaryButton";
+import PasswordTextInputFields from "@/components/Inputs/PasswordTextInputField";
 import TextInputFields from "@/components/Inputs/TextInputFields";
 import SharedLayout from "@/components/Layout/SharedLayout";
 import Colors from "@/constants/Colors";
@@ -195,6 +196,7 @@ export default function RiderAuthIndex() {
                           placeholderText="Email"
                           iconSize={18}
                           value={values.email}
+                          placeholderTextColor="black"
                           onChangeText={handleChange("email")}
                           onBlur={handleBlur("email")}
                           keyboardType="email-address"
@@ -208,15 +210,16 @@ export default function RiderAuthIndex() {
                       </View>
 
                       <View>
-                        <TextInputFields
+                        <PasswordTextInputFields
                           icon={Lock}
                           iconColor={themeColors.primaryColor}
                           placeholderText="Password"
                           iconSize={18}
+                          placeholderTextColor="black"
                           value={values.password}
                           onChangeText={handleChange("password")}
                           onBlur={handleBlur("password")}
-                          secureTextEntry
+                          secureTextEntry={true}
                         />
                         {touched.password && errors.password && (
                           <Text style={[tw`text-red-500 text-xs mt-1`]}>
@@ -232,6 +235,7 @@ export default function RiderAuthIndex() {
                             iconColor={themeColors.primaryColor}
                             iconSize={18}
                             value={values.firstName}
+                            placeholderTextColor="black"
                             onChangeText={handleChange("firstName")}
                             onBlur={handleBlur("firstName")}
                             placeholderText="First Name"
@@ -248,6 +252,7 @@ export default function RiderAuthIndex() {
                             icon={User}
                             iconColor={themeColors.primaryColor}
                             iconSize={18}
+                            placeholderTextColor="black"
                             value={values.lastName}
                             onChangeText={handleChange("lastName")}
                             onBlur={handleBlur("lastName")}
@@ -267,6 +272,7 @@ export default function RiderAuthIndex() {
                           iconColor={themeColors.primaryColor}
                           iconSize={18}
                           value={values.phoneNumber}
+                          placeholderTextColor="black"
                           onChangeText={handleChange("phoneNumber")}
                           onBlur={handleBlur("phoneNumber")}
                           placeholderText="+234 9163440787"
@@ -284,6 +290,7 @@ export default function RiderAuthIndex() {
                           icon={Car}
                           iconColor={themeColors.primaryColor}
                           iconSize={18}
+                          placeholderTextColor="black"
                           value={values.plateNumber}
                           onChangeText={handleChange("plateNumber")}
                           onBlur={handleBlur("plateNumber")}

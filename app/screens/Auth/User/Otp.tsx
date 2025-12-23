@@ -1,6 +1,7 @@
 import PrimaryButton from "@/components/Buttons/PrimaryButton";
 import SharedLayout from "@/components/Layout/SharedLayout";
 import { verifyOtp } from "@/components/services/api/authApi";
+import useAuthStore from "@/components/store/authStore";
 import Colors from "@/constants/Colors";
 import tw from "@/constants/tailwind";
 import { useRouter } from "expo-router";
@@ -32,6 +33,18 @@ const UserOtpScreen = () => {
       setLoading(true);
       const res = await verifyOtp(otp);
       if (res?.message === "Email verified successfully.") {
+        // Update the user's email verification status in the store
+        const currentUser = useAuthStore.getState().user;
+        if (currentUser) {
+          await useAuthStore
+            .getState()
+            .login(
+              useAuthStore.getState().accessToken || "",
+              useAuthStore.getState().refreshToken || "",
+              { ...currentUser, is_email_verified: true }
+            );
+        }
+
         console.log("Navigating to rider drawer");
         router.replace("/(drawer)");
 

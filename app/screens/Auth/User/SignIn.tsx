@@ -1,4 +1,5 @@
 import PrimaryButton from "@/components/Buttons/PrimaryButton";
+import PasswordTextInputFields from "@/components/Inputs/PasswordTextInputField";
 import TextInputFields from "@/components/Inputs/TextInputFields";
 import SharedLayout from "@/components/Layout/SharedLayout";
 import { loginUser, resendOtp } from "@/components/services/api/authApi";
@@ -151,6 +152,69 @@ export default function UserSignInIndex() {
                   proceed
                 </Text>
               </View>
+
+              <View style={[tw`gap-3`]}>
+                <View style={[tw`gap-3`]}>
+                  <View>
+                    <TextInputFields
+                      icon={AtSign}
+                      iconColor={themeColors.primaryColor}
+                      placeholderText="Email"
+                      iconSize={18}
+                      placeholderTextColor="black"
+                      value={values.email}
+                      onChangeText={handleChange("email")}
+                      onBlur={handleBlur("email")}
+                      keyboardType="email-address"
+                      autoCapitalize="none"
+                    />
+                    {touched.email && errors.email && (
+                      <Text style={[tw`text-red-500 text-xs mt-1`]}>
+                        {errors.email}
+                      </Text>
+                    )}
+                  </View>
+                  <View>
+                    <PasswordTextInputFields
+                      icon={Lock}
+                      iconColor={themeColors.primaryColor}
+                      placeholderText="Password"
+                      iconSize={18}
+                      placeholderTextColor="black"
+                      value={values.password}
+                      onChangeText={handleChange("password")}
+                      onBlur={handleBlur("password")}
+                      secureTextEntry={true}
+                    />
+                    {touched.password && errors.password && (
+                      <Text style={[tw`text-red-500 text-xs mt-1`]}>
+                        {errors.password}
+                      </Text>
+                    )}
+                  </View>
+                </View>
+                <TouchableOpacity
+                  onPress={() => {
+                    router.push("/screens/forgottenPassword");
+                  }}
+                >
+                  <Text
+                    style={[
+                      tw`font-light`,
+                      {
+                        color: themeColors.primaryTextColor,
+                      },
+                    ]}
+                  >
+                    Forgotten Password
+                  </Text>
+                </TouchableOpacity>
+              </View>
+              <View style={[tw`flex-row items-center gap-3`]}>
+                <View style={[tw`flex-1 h-px bg-gray-300`]} />
+                <Text style={[tw`text-gray-500 text-sm`]}>or</Text>
+                <View style={[tw`flex-1 h-px bg-gray-300`]} />
+              </View>
               <View style={[tw`gap-3`]}>
                 <TouchableOpacity
                   onPress={handleGoogleSignIn}
@@ -179,69 +243,6 @@ export default function UserSignInIndex() {
                     <Text style={[tw`font-light`]}>Continue with Apple</Text>
                   </TouchableOpacity>
                 )}
-              </View>
-              <View style={[tw`flex-row items-center gap-3`]}>
-                <View style={[tw`flex-1 h-px bg-gray-300`]} />
-                <Text style={[tw`text-gray-500 text-sm`]}>or</Text>
-                <View style={[tw`flex-1 h-px bg-gray-300`]} />
-              </View>
-
-              <View style={[tw`gap-3`]}>
-                <View style={[tw`gap-3`]}>
-                  <View>
-                    <TextInputFields
-                      icon={AtSign}
-                      iconColor={themeColors.primaryColor}
-                      placeholderText="Email"
-                      iconSize={18}
-                      placeholderTextColor="black"
-                      value={values.email}
-                      onChangeText={handleChange("email")}
-                      onBlur={handleBlur("email")}
-                      keyboardType="email-address"
-                      autoCapitalize="none"
-                    />
-                    {touched.email && errors.email && (
-                      <Text style={[tw`text-red-500 text-xs mt-1`]}>
-                        {errors.email}
-                      </Text>
-                    )}
-                  </View>
-                  <View>
-                    <TextInputFields
-                      icon={Lock}
-                      iconColor={themeColors.primaryColor}
-                      placeholderText="Password"
-                      iconSize={18}
-                      placeholderTextColor="black"
-                      value={values.password}
-                      onChangeText={handleChange("password")}
-                      onBlur={handleBlur("password")}
-                      secureTextEntry
-                    />
-                    {touched.password && errors.password && (
-                      <Text style={[tw`text-red-500 text-xs mt-1`]}>
-                        {errors.password}
-                      </Text>
-                    )}
-                  </View>
-                </View>
-                <TouchableOpacity
-                  onPress={() => {
-                    router.push("/screens/forgottenPassword");
-                  }}
-                >
-                  <Text
-                    style={[
-                      tw`font-light`,
-                      {
-                        color: themeColors.primaryTextColor,
-                      },
-                    ]}
-                  >
-                    Forgotten Password
-                  </Text>
-                </TouchableOpacity>
               </View>
             </View>
             <View style={[tw`gap-2`]}>

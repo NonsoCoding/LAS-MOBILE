@@ -1,6 +1,7 @@
 import PrimaryButton from "@/components/Buttons/PrimaryButton";
 import SharedLayout from "@/components/Layout/SharedLayout";
 import { verifyOtp } from "@/components/services/api/authApi";
+import useAuthStore from "@/components/store/authStore";
 import useRiderAuthStore from "@/components/store/RiderAuthStore";
 import Colors from "@/constants/Colors";
 import tw from "@/constants/tailwind";
@@ -32,17 +33,20 @@ const OtpScreen = () => {
       return;
     }
 
-    setLoading(true);
-
     try {
+      setLoading(true);
       const res = await verifyOtp(otp);
-      console.log("Verification result:", res);
-
       if (res?.message === "Email verified successfully.") {
-        // If the verification response includes tokens and user data, save them
-        if (res?.tokens && res?.user) {
-          await login(res.tokens.access, res.tokens.refresh, res.user);
-          console.log("User logged in and tokens saved to store");
+        // Update the user's email verification status in the store
+        const currentUser = useAuthStore.getState().user;
+        if (currentUser) {
+          await useAuthStore
+            .getState()
+            .login(
+              useAuthStore.getState().accessToken || "",
+              useAuthStore.getState().refreshToken || "",
+              { ...currentUser, is_email_verified: true }
+            );
         }
 
         console.log("Navigating to rider drawer");
@@ -58,11 +62,7 @@ const OtpScreen = () => {
         );
       }
     } catch (error: any) {
-      console.error("Verification error:", error);
-      Alert.alert(
-        "Error",
-        error?.message || "Unable to verify OTP. Please try again."
-      );
+      Alert.alert("Error", error?.message || "Something went wrong");
     } finally {
       setLoading(false);
     }

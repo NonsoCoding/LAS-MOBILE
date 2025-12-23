@@ -64,7 +64,7 @@ const NewOrders = ({}: NewOrdersProps) => {
         <View style={[tw`bg-white gap-6 rounded- p-5`]}>
           <View style={[tw`gap-4`]}>
             <View style={[tw`flex-row justify-between items-center`]}>
-              <Text style={[tw`text-2xl`]}>Order details</Text>
+              <Text style={[tw`text-xl`]}>Order details</Text>
               <Phone color={themeColors.primaryColor} />
             </View>
             <View style={[tw`border-b`]} />
@@ -78,7 +78,7 @@ const NewOrders = ({}: NewOrdersProps) => {
           ]}
         >
           <View style={[tw`gap-2 w-[80%]`]}>
-            <Text style={[tw`text-2xl`]}>Pick Location</Text>
+            <Text style={[tw`text-xl`]}>Pick Location</Text>
             <Text style={[tw`font-light`]}>
               Danziyal Plaza, Olusegun Obasanjo Way, Central Business District
             </Text>
@@ -100,7 +100,7 @@ const NewOrders = ({}: NewOrdersProps) => {
           ]}
         >
           <View style={[tw`gap-2 w-[80%]`]}>
-            <Text style={[tw`text-2xl`]}>Pick Location</Text>
+            <Text style={[tw`text-xl`]}>Pick Location</Text>
             <Text style={[tw`font-light`]}>
               Danziyal Plaza, Olusegun Obasanjo Way, Central Business District
             </Text>

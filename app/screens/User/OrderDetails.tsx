@@ -2,7 +2,7 @@ import PrimaryButton from "@/components/Buttons/PrimaryButton";
 import Colors from "@/constants/Colors";
 import tw from "@/constants/tailwind";
 import { DrawerActions } from "@react-navigation/native";
-import { useNavigation } from "expo-router";
+import { useNavigation, useRouter } from "expo-router";
 import { AlignCenter, ArrowLeft, Bell, Box, Phone } from "lucide-react-native";
 import { Text, TouchableOpacity, useColorScheme, View } from "react-native";
 
@@ -12,6 +12,7 @@ const OrderDetails = ({}: NewOrdersProps) => {
   const colorScheme = useColorScheme();
   const themeColors = Colors[colorScheme ?? "light"];
   const navigation = useNavigation();
+  const router = useRouter();
 
   const orderDetails = [
     { name: "item", info: "Load scanner device" },
@@ -49,7 +50,11 @@ const OrderDetails = ({}: NewOrdersProps) => {
           </View>
           <View style={[tw`gap-2`]}>
             <View style={[tw`flex-row items-center gap-3`, {}]}>
-              <TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => {
+                  router.back();
+                }}
+              >
                 <ArrowLeft color={themeColors.text} />
               </TouchableOpacity>
               <Text style={[tw`text-3xl font-bold text-white`, {}]}>
@@ -107,7 +112,7 @@ const OrderDetails = ({}: NewOrdersProps) => {
               <Box color={"#4CB050"} />
             </View>
             <View>
-              <Text style={[tw`text-xl`]}>Card Payment</Text>
+              <Text style={[tw``]}>Card Payment</Text>
               <Text style={[tw`font-light`]}>
                 Pay with credit or debit card
               </Text>
@@ -125,16 +130,19 @@ const OrderDetails = ({}: NewOrdersProps) => {
               <Box color={"#4CB050"} />
             </View>
             <View>
-              <Text style={[tw`text-xl`]}>Mobile Wallet</Text>
+              <Text style={[tw``]}>Mobile Wallet</Text>
               <Text style={[tw`font-light`]}>Pay with mobile money</Text>
             </View>
           </View>
         </View>
       </View>
-      <View style={[tw`bg-white  justify-center px-5`]}>
+      <View style={[tw`bg-white flex-1 justify-center px-5`]}>
         <PrimaryButton
           bgColors={themeColors.primaryColor}
           height={50}
+          onpress={() => {
+            router.push("/(drawer)/TrackOrders");
+          }}
           text={"Continue to payment"}
           textColor="white"
         />

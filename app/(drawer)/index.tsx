@@ -87,7 +87,7 @@ const UserHomePage = ({}: UserHomePageProps) => {
           <View style={[tw`gap-2`]}>
             <View style={[tw`flex-row items-center justify-between`, {}]}>
               <Text style={[tw`text-3xl font-bold text-white`, {}]}>
-                Hey {user?.first_name}!
+                Hey {user?.last_name}!
               </Text>
             </View>
             <View>

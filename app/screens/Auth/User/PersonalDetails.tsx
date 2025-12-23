@@ -2,6 +2,7 @@ import PrimaryButton from "@/components/Buttons/PrimaryButton";
 import TextInputFields from "@/components/Inputs/TextInputFields";
 import SharedLayout from "@/components/Layout/SharedLayout";
 import { registeredUser } from "@/components/services/api/authApi";
+import useAuthStore from "@/components/store/authStore";
 import Colors from "@/constants/Colors";
 import tw from "@/constants/tailwind";
 import * as DocumentPicker from "expo-document-picker";
@@ -146,9 +147,28 @@ export default function UserPersonalDetailsIndex() {
     try {
       const response = await registeredUser(formData);
 
-      if (response.success || response.user || response.token) {
-        Alert.alert("Success", "Account created successfully!");
-        router.replace("/screens/Otp");
+      if (
+        response.success ||
+        response.user ||
+        response.token ||
+        response.tokens
+      ) {
+        // Save tokens and user data to auth store
+        if (response.tokens && response.user) {
+          await useAuthStore
+            .getState()
+            .login(
+              response.tokens.access,
+              response.tokens.refresh,
+              response.user
+            );
+        }
+
+        Alert.alert(
+          "Success",
+          "An OTP has been sent to your email. Please verify"
+        );
+        router.replace("/screens/Auth/User/Otp");
       } else {
         Alert.alert(
           "Registration Failed",

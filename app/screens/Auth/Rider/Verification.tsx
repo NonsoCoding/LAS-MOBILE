@@ -1,6 +1,7 @@
 import PrimaryButton from "@/components/Buttons/PrimaryButton";
 import SharedLayout from "@/components/Layout/SharedLayout";
 import { registeredRider } from "@/components/services/api/authApi";
+import useAuthStore from "@/components/store/authStore";
 import Colors from "@/constants/Colors";
 import tw from "@/constants/tailwind";
 import * as DocumentPicker from "expo-document-picker";
@@ -164,6 +165,15 @@ const Verification = () => {
         response.token ||
         response.tokens
       ) {
+        if (response.tokens && response.user) {
+          await useAuthStore
+            .getState()
+            .login(
+              response.tokens.access,
+              response.tokens.refresh,
+              response.user
+            );
+        }
         Alert.alert(
           "Success",
           "Your account has been created successfully! Please check your email for verification code.",
@@ -219,12 +229,14 @@ const Verification = () => {
         >
           <View style={[tw`gap-8`]}>
             <View style={[tw`gap-3`]}>
-              <Text style={[tw`text-3xl font-bold text-[#003C7A]`]}>
-                Account
-              </Text>
-              <Text style={[tw`text-3xl font-bold text-[#CC1A21]`]}>
-                Verification
-              </Text>
+              <View style={[tw`flex-row gap-2`]}>
+                <Text style={[tw`text-3xl font-bold text-[#003C7A]`]}>
+                  Account
+                </Text>
+                <Text style={[tw`text-3xl font-bold text-[#CC1A21]`]}>
+                  Verification
+                </Text>
+              </View>
               <Text style={[tw`font-light text-gray-600`]}>
                 Kindly provide us your legal documentation to complete the
                 verification process

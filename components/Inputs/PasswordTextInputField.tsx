@@ -1,36 +1,78 @@
 import tw from "@/constants/tailwind";
-import { Ionicons } from "@expo/vector-icons";
+import { Eye, EyeOff, LucideIcon } from "lucide-react-native";
 import { useState } from "react";
-import { TextInput, TouchableOpacity, View } from "react-native";
+import {
+  KeyboardTypeOptions,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
-interface PasswordTextInputFieldsProps {
+interface TextInputFieldsProps {
   placeholderText?: string;
   value?: string;
-  onChangeText: (text: string) => void;
+  onChangeText?: (text: string) => void;
+  onBlur?: (e: any) => void;
+  icon?: LucideIcon;
+  iconSize?: number;
+  keyboardType?: KeyboardTypeOptions;
+  placeholderTextColor?: string;
+  iconColor?: string;
+  autoCapitalize?: "none" | "sentences" | "words" | "characters";
+  secureTextEntry?: boolean;
 }
 
 const PasswordTextInputFields = ({
   placeholderText,
-  value,
   onChangeText,
-}: PasswordTextInputFieldsProps) => {
-  const [secure, setSecure] = useState(true);
+  icon: Icon,
+  value,
+  iconColor,
+  iconSize = 20,
+  keyboardType = "default",
+  autoCapitalize = "none",
+  onBlur,
+  placeholderTextColor = "#999",
+  secureTextEntry = false,
+}: TextInputFieldsProps) => {
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+
+  const togglePasswordVisibility = () => {
+    setIsPasswordVisible(!isPasswordVisible);
+  };
 
   return (
-    <View style={tw`flex-row items-center border-b border-b-gray-400`}>
+    <View
+      style={[
+        tw`py-4.5 text-[17px] gap-2 flex-row items-center rounded border border-gray-200 px-3`,
+        {},
+      ]}
+    >
+      {Icon && (
+        <View style={[tw``]}>
+          <Icon size={iconSize} color={iconColor} />
+        </View>
+      )}
       <TextInput
         placeholder={placeholderText}
-        style={[tw`flex-1 text-[17px] pt-4 pb-2`, {}]}
-        secureTextEntry={secure}
-        value={value}
         onChangeText={onChangeText}
+        value={value}
+        keyboardType={keyboardType}
+        autoCapitalize={autoCapitalize}
+        placeholderTextColor={placeholderTextColor}
+        onBlur={onBlur}
+        secureTextEntry={secureTextEntry && !isPasswordVisible}
+        style={[tw`flex-1 font-light text-black`, {}]}
       />
-      <TouchableOpacity
-        onPress={() => setSecure((prev) => !prev)}
-        style={tw`ml-2`}
-      >
-        <Ionicons name={secure ? "eye-off" : "eye"} size={24} color="#888" />
-      </TouchableOpacity>
+      {secureTextEntry && (
+        <TouchableOpacity onPress={togglePasswordVisibility} style={tw`ml-2`}>
+          {isPasswordVisible ? (
+            <EyeOff size={iconSize} color={iconColor || "#999"} />
+          ) : (
+            <Eye size={iconSize} color={iconColor || "#999"} />
+          )}
+        </TouchableOpacity>
+      )}
     </View>
   );
 };

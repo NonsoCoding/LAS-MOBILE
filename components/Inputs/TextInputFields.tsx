@@ -50,7 +50,7 @@ const TextInputFields = ({
         placeholderTextColor={placeholderTextColor}
         onBlur={onBlur}
         secureTextEntry={secureTextEntry}
-        style={[tw`w-full font-light`, {}]}
+        style={[tw`w-full font-light text-black`, {}]}
       />
     </View>
   );
