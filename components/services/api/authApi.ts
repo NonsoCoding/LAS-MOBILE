@@ -71,7 +71,7 @@ export const registeredRider = async (data: FormData | any) => {
 
     const headers: HeadersInit = isFormData
       ? {
-          // Don't set Content-Type for FormData - let the browser set it with boundary
+          // Don't set Content-Type for FormData - let the browser set it with boundar
         }
       : {
           "Content-Type": "application/json",
