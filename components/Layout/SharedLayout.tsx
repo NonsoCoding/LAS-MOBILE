@@ -7,7 +7,7 @@ interface SharedLayoutProps {
 }
 
 const SharedLayout = ({ children }: SharedLayoutProps) => {
-  return <View style={[tw`flex-1 py-15 px-5 bg-white`]}>{children}</View>;
+  return <View style={[tw`flex-1 py-15 px-5 bg-[#19488A]`]}>{children}</View>;
 };
 
 export default SharedLayout;

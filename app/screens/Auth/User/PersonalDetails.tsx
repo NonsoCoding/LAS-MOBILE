@@ -1,6 +1,5 @@
 import PrimaryButton from "@/components/Buttons/PrimaryButton";
 import TextInputFields from "@/components/Inputs/TextInputFields";
-import SharedLayout from "@/components/Layout/SharedLayout";
 import { registeredUser } from "@/components/services/api/authApi";
 import useAuthStore from "@/components/store/authStore";
 import Colors from "@/constants/Colors";
@@ -197,7 +196,7 @@ export default function UserPersonalDetailsIndex() {
           <ActivityIndicator size="large" color={themeColors.tint} />
         </View>
       ) : (
-        <SharedLayout>
+        <View>
           <Formik
             initialValues={{
               firstName: "",
@@ -355,7 +354,7 @@ export default function UserPersonalDetailsIndex() {
               </View>
             )}
           </Formik>
-        </SharedLayout>
+        </View>
       )}
     </>
   );

@@ -1,5 +1,6 @@
 import PrimaryButton from "@/components/Buttons/PrimaryButton";
 import SharedLayout from "@/components/Layout/SharedLayout";
+import CompleteModal from "@/components/Modals/CompleteModal";
 import { registeredRider } from "@/components/services/api/authApi";
 import useAuthStore from "@/components/store/authStore";
 import Colors from "@/constants/Colors";
@@ -32,6 +33,7 @@ const Verification = () => {
   const [loading, setLoading] = useState(false);
   const colorScheme = useColorScheme();
   const themeColors = Colors[colorScheme ?? "light"];
+  const [completeModalVisible, setCompleteModalVisible] = useState(false);
 
   const [documents, setDocuments] = useState<DocumentState>({
     government_id: null,
@@ -223,72 +225,74 @@ const Verification = () => {
         </View>
       ) : (
         <ScrollView
-          style={[tw`flex-1`]}
-          contentContainerStyle={[tw`pt-10 pb-6`]}
+          style={[tw``]}
+          contentContainerStyle={[tw`pt-10 flex-1`]}
           showsVerticalScrollIndicator={false}
         >
-          <View style={[tw`gap-8`]}>
-            <View style={[tw`gap-3`]}>
-              <View style={[tw`flex-row gap-2`]}>
-                <Text style={[tw`text-3xl font-bold text-[#003C7A]`]}>
-                  Account
-                </Text>
-                <Text style={[tw`text-3xl font-bold text-[#CC1A21]`]}>
-                  Verification
+          <View style={[tw`flex-1 justify-between`]}>
+            <View style={[tw`gap-8`]}>
+              <View style={[tw`gap-3`]}>
+                <View style={[tw`flex-row gap-2`]}>
+                  <Text style={[tw`text-3xl font-bold text-[#003C7A]`]}>
+                    Account
+                  </Text>
+                  <Text style={[tw`text-3xl font-bold text-[#CC1A21]`]}>
+                    Verification
+                  </Text>
+                </View>
+                <Text style={[tw`font-light text-gray-600`]}>
+                  Kindly provide us your legal documentation to complete the
+                  verification process
                 </Text>
               </View>
-              <Text style={[tw`font-light text-gray-600`]}>
-                Kindly provide us your legal documentation to complete the
-                verification process
-              </Text>
-            </View>
 
-            <View style={[tw`gap-4`]}>
-              {documentFields.map((field) => (
-                <TouchableOpacity
-                  key={field.key}
-                  style={[
-                    tw`py-4 px-4 bg-gray-50 rounded-lg border border-gray-200`,
-                    documents[field.key] && tw`bg-green-50 border-green-300`,
-                  ]}
-                  onPress={() => pickDocument(field.key)}
-                  activeOpacity={0.7}
-                >
-                  <View style={[tw`flex-row items-center justify-between`]}>
-                    <Text
-                      style={[
-                        tw`text-base`,
-                        documents[field.key]
-                          ? tw`text-green-700 font-medium`
-                          : tw`text-gray-700`,
-                      ]}
-                    >
-                      {field.label}
-                    </Text>
-
-                    <View
-                      style={[
-                        tw`p-2 rounded-full`,
-                        documents[field.key]
-                          ? tw`bg-green-100`
-                          : tw`bg-blue-100`,
-                      ]}
-                    >
-                      <Upload
-                        size={20}
-                        color={documents[field.key] ? "#15803d" : "#003C7A"}
-                      />
-                    </View>
-                  </View>
-                  {documents[field.key] && (
-                    <View style={[tw`flex-row items-center mt-2`]}>
-                      <Text style={[tw`text-sm text-green-700`]}>
-                        ✓ {documents[field.key].name || `${field.key}.jpg`}
+              <View style={[tw`gap-4`]}>
+                {documentFields.map((field) => (
+                  <TouchableOpacity
+                    key={field.key}
+                    style={[
+                      tw`py-4 px-4 bg-gray-50 rounded-lg border border-gray-200`,
+                      documents[field.key] && tw`bg-green-50 border-green-300`,
+                    ]}
+                    onPress={() => pickDocument(field.key)}
+                    activeOpacity={0.7}
+                  >
+                    <View style={[tw`flex-row items-center justify-between`]}>
+                      <Text
+                        style={[
+                          tw`text-base`,
+                          documents[field.key]
+                            ? tw`text-green-700 font-medium`
+                            : tw`text-gray-700`,
+                        ]}
+                      >
+                        {field.label}
                       </Text>
+
+                      <View
+                        style={[
+                          tw`p-2 rounded-full`,
+                          documents[field.key]
+                            ? tw`bg-green-100`
+                            : tw`bg-blue-100`,
+                        ]}
+                      >
+                        <Upload
+                          size={20}
+                          color={documents[field.key] ? "#15803d" : "#003C7A"}
+                        />
+                      </View>
                     </View>
-                  )}
-                </TouchableOpacity>
-              ))}
+                    {documents[field.key] && (
+                      <View style={[tw`flex-row items-center mt-2`]}>
+                        <Text style={[tw`text-sm text-green-700`]}>
+                          ✓ {documents[field.key].name || `${field.key}.jpg`}
+                        </Text>
+                      </View>
+                    )}
+                  </TouchableOpacity>
+                ))}
+              </View>
             </View>
 
             <View style={[tw`mt-4`]}>
@@ -303,6 +307,15 @@ const Verification = () => {
                 disabled={loading}
               />
             </View>
+            <CompleteModal
+              visible={completeModalVisible}
+              onClose={() => {
+                setCompleteModalVisible(false);
+              }}
+              title="Registration Successful"
+              titleSubInfo1="Your account has been successful created."
+              titleSubInfo2="After documents approval you can start your Workorders."
+            />
           </View>
         </ScrollView>
       )}

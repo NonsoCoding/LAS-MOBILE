@@ -23,6 +23,9 @@ const RiderHomePage = ({}: UserHomePageProps) => {
         </View>
         <OrderCard
           statusTextColor=""
+          onPress={() => {
+            
+          }}
           issuedTo="Customer"
           name="Johnson Chike"
           cardTitle="New Order"

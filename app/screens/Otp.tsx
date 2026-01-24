@@ -1,5 +1,6 @@
 import PrimaryButton from "@/components/Buttons/PrimaryButton";
 import SharedLayout from "@/components/Layout/SharedLayout";
+import CompleteModal from "@/components/Modals/CompleteModal";
 import { verifyOtp } from "@/components/services/api/authApi";
 import useAuthStore from "@/components/store/authStore";
 import useRiderAuthStore from "@/components/store/RiderAuthStore";
@@ -26,6 +27,7 @@ const OtpScreen = () => {
 
   const [otp, setOtp] = useState<string>("");
   const [loading, setLoading] = useState(false);
+  const [completeModalVisible, setCompleteModalVisible] = useState(false);
 
   const handleContinue = async () => {
     if (otp.length !== 6) {
@@ -52,9 +54,7 @@ const OtpScreen = () => {
         console.log("Navigating to rider drawer");
         router.replace("/(Rider-Drawer)");
 
-        setTimeout(() => {
-          Alert.alert("Success", "Email verified successfully!");
-        }, 100);
+        setCompleteModalVisible(true);
       } else {
         Alert.alert(
           "Verification Failed",
@@ -145,6 +145,15 @@ const OtpScreen = () => {
           textColor={themeColors.text}
           text={loading ? "Verifying..." : "Continue"}
           disabled={otp.length !== 6 || loading}
+        />
+        <CompleteModal
+          visible={completeModalVisible}
+          onClose={() => {
+            setCompleteModalVisible(false);
+          }}
+          title="Registration Successful"
+          titleSubInfo1="Your account has been successful created."
+          titleSubInfo2="After documents approval you can start your Workorders."
         />
       </View>
     </SharedLayout>

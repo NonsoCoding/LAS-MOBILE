@@ -87,7 +87,7 @@ export default function UserSignInIndex() {
       }
     } catch (error: any) {
       console.error("Login error:", error);
-      Alert.alert("Error", error?.message || "Something went wrong");
+      Alert.alert("Error", error?.message || "Something went  wrong");
     } finally {
       setLoading(false);
     }
@@ -236,7 +236,7 @@ export default function UserSignInIndex() {
               </View>
               <TouchableOpacity
                 onPress={() => {
-                  router.push("/screens"); // Update to your signup route
+                  router.push("/screens/Rider/Carrier-indemnity"); // Update to your signup route
                 }}
               >
                 <Text

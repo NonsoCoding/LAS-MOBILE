@@ -32,7 +32,7 @@ const TextInputFields = ({
   return (
     <View
       style={[
-        tw`py-4.5 text-[17px] gap-2 flex-row items-center rounded border border-gray-200 px-3`,
+        tw`py-4.5 bg-[#19488A22] text-[17px] gap-2 flex-row items-center rounded border border-gray-200 px-3`,
         {},
       ]}
     >
@@ -50,7 +50,9 @@ const TextInputFields = ({
         placeholderTextColor={placeholderTextColor}
         onBlur={onBlur}
         secureTextEntry={secureTextEntry}
-        style={[tw`w-full font-light text-black`, {}]}
+        style={[tw`w-full font-light text-black`, {
+          fontFamily: "MontserratRegular"
+        }]}
       />
     </View>
   );

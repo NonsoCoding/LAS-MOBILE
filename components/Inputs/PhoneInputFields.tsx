@@ -31,7 +31,9 @@ const PhoneNumberTextInputFields = ({
         placeholder={placeholderText}
         onChangeText={onChangeText}
         value={value}
-        style={[tw`w-full text-[17px]`, {}]}
+        style={[tw`w-full text-[17px]`, {
+          fontFamily: "MontserratRegular"
+        }]}
       />
     </View>
   );

@@ -1,7 +1,6 @@
 import PrimaryButton from "@/components/Buttons/PrimaryButton";
 import PasswordTextInputFields from "@/components/Inputs/PasswordTextInputField";
 import TextInputFields from "@/components/Inputs/TextInputFields";
-import SharedLayout from "@/components/Layout/SharedLayout";
 import { loginUser, resendOtp } from "@/components/services/api/authApi";
 import useAuthStore from "@/components/store/authStore";
 import yup from "@/components/utils/formik";
@@ -9,16 +8,14 @@ import Colors from "@/constants/Colors";
 import tw from "@/constants/tailwind";
 import { useRouter } from "expo-router";
 import { Formik } from "formik";
-import { AtSign, Lock } from "lucide-react-native";
 import React, { useState } from "react";
 import {
   Alert,
   Image,
-  Platform,
   Text,
   TouchableOpacity,
   useColorScheme,
-  View,
+  View
 } from "react-native";
 
 const validationSchema = yup.object().shape({
@@ -124,7 +121,7 @@ export default function UserSignInIndex() {
   };
 
   return (
-    <SharedLayout>
+    <View style={[tw`bg-[#19488A] flex-1`]}>
       <Formik
         initialValues={{ email: "", password: "" }}
         validationSchema={validationSchema}
@@ -138,30 +135,31 @@ export default function UserSignInIndex() {
           errors,
           touched,
         }) => (
-          <View style={[tw`flex-1 pt-10 gap-10 justify-between`]}>
-            <View style={[tw`gap-10`]}>
-              <View style={[tw`gap-3`]}>
-                <Text style={[tw`text-3xl font-bold text-[#003C7A]`]}>
-                  Sign into your Shipper
-                </Text>
-                <Text style={[tw`text-3xl font-bold text-[#CC1A21]`]}>
-                  account
-                </Text>
-                <Text style={[tw`font-light`]}>
-                  Kindly provide your valid email/phone number and password to
-                  proceed
-                </Text>
+          <View style={[tw`flex-1 pt-10 gap-10 justify-end`]}>
+              <Image
+                      source={require("../../../../assets/images/Intro_logo.png")}
+                      style={[tw`self-center h-140 w-140 absolute z-999 -top-15`]}
+                      resizeMode="contain"
+            />
+            <View style={[tw`bg-white px-5 h-120 justify-center gap-15`, {
+              borderTopRightRadius: 20,
+              borderTopLeftRadius: 20
+            }]}>
+              <View style={[tw`gap-5`]}>
+              <View style={[tw`items-center gap-3`]}>
+                  <Text style={[tw`text-2xl font-semibold`, {
+                  fontFamily: "MontserratBold"
+                }]}>Log In</Text>
+                  <Text style={[tw`w-[80%] text-center font-light`, {
+                  fontFamily: "MontserratLight"
+                }]}>Welcome back to Africa's Trusted Delivery Network.</Text>
               </View>
-
               <View style={[tw`gap-3`]}>
                 <View style={[tw`gap-3`]}>
                   <View>
                     <TextInputFields
-                      icon={AtSign}
-                      iconColor={themeColors.primaryColor}
-                      placeholderText="Email"
-                      iconSize={18}
-                      placeholderTextColor="black"
+                      placeholderText="email or phone"
+                      placeholderTextColor={"#19488A"}
                       value={values.email}
                       onChangeText={handleChange("email")}
                       onBlur={handleBlur("email")}
@@ -169,48 +167,50 @@ export default function UserSignInIndex() {
                       autoCapitalize="none"
                     />
                     {touched.email && errors.email && (
-                      <Text style={[tw`text-red-500 text-xs mt-1`]}>
+                        <Text style={[tw`text-red-500 text-xs mt-1`, {
+                        fontFamily: "MontserratRegular"
+                      }]}>
                         {errors.email}
                       </Text>
                     )}
                   </View>
                   <View>
                     <PasswordTextInputFields
-                      icon={Lock}
-                      iconColor={themeColors.primaryColor}
-                      placeholderText="Password"
-                      iconSize={18}
-                      placeholderTextColor="black"
+                      placeholderText="password"
+                      placeholderTextColor="#19488A"
                       value={values.password}
                       onChangeText={handleChange("password")}
                       onBlur={handleBlur("password")}
                       secureTextEntry={true}
                     />
                     {touched.password && errors.password && (
-                      <Text style={[tw`text-red-500 text-xs mt-1`]}>
+                        <Text style={[tw`text-red-500 text-xs mt-1`, {
+                        fontFamily: "MontserratRegular"
+                      }]}>
                         {errors.password}
                       </Text>
                     )}
                   </View>
                 </View>
-                <TouchableOpacity
+                  <TouchableOpacity
+                    style={[tw`self-end`]}
                   onPress={() => {
                     router.push("/screens/forgottenPassword");
                   }}
                 >
                   <Text
                     style={[
-                      tw`font-light`,
+                      tw`font-light text-[#CC1A21]`,
                       {
-                        color: themeColors.primaryTextColor,
-                      },
+                        fontFamily: "MontserratLight"
+                      }
                     ]}
                   >
-                    Forgotten Password
+                    Forgotten Password?
                   </Text>
                 </TouchableOpacity>
               </View>
-              <View style={[tw`flex-row items-center gap-3`]}>
+              {/* <View style={[tw`flex-row items-center gap-3`]}>
                 <View style={[tw`flex-1 h-px bg-gray-300`]} />
                 <Text style={[tw`text-gray-500 text-sm`]}>or</Text>
                 <View style={[tw`flex-1 h-px bg-gray-300`]} />
@@ -243,8 +243,7 @@ export default function UserSignInIndex() {
                     <Text style={[tw`font-light`]}>Continue with Apple</Text>
                   </TouchableOpacity>
                 )}
-              </View>
-            </View>
+              </View> */}
             <View style={[tw`gap-2`]}>
               <View style={[tw`gap-2`]}>
                 <PrimaryButton
@@ -252,30 +251,39 @@ export default function UserSignInIndex() {
                   height={50}
                   textColor="white"
                   onpress={handleSubmit}
-                  text={loading ? "Logging in..." : "Continue"}
+                  text={loading ? "Signing in..." : "Sign In"}
                   disabled={loading}
+             
                 />
               </View>
+              <View style={[tw`flex-row items-center justify-center gap-1`]}>
+                    <Text style={[tw`font-light`, {
+                  fontFamily: "MontserratLight"
+                }]}>Don't have an account?</Text>
               <TouchableOpacity
                 onPress={() => {
-                  router.replace("/screens/Auth/User/SignIn"); // Update to your signup route
+                   router.replace("/screens/Auth/User/SignIn"); // Update to your signup route
                 }}
               >
                 <Text
                   style={[
-                    tw`text-center font-light underline`,
+                    tw`text-center font-semibold`,
                     {
                       color: themeColors.primaryTextColor,
+                      fontFamily: "MontserratBold"
                     },
                   ]}
                 >
-                  Don't have an account?
+                  Sign Up
                 </Text>
               </TouchableOpacity>
+              </View>
             </View>
-          </View>
+              </View>
+            </View>
+            </View>
         )}
       </Formik>
-    </SharedLayout>
+    </View>
   );
 }

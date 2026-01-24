@@ -26,11 +26,11 @@ const PrimaryButton = ({
       disabled={disabled}
       onPress={onpress}
       style={[
-        tw`items-center justify-center rounded-full`,
+        tw`items-center justify-center rounded-md`,
         { backgroundColor: bgColors, height: height, width: width },
       ]}
     >
-      <Text style={[tw`font-semibold`, { color: textColor }]}>{text}</Text>
+      <Text style={[tw`font-semibold`, { color: textColor, fontFamily: "MontserratRegular" }]}>{text}</Text>
     </TouchableOpacity>
   );
 };

@@ -3,16 +3,18 @@ import {
   DefaultTheme,
   ThemeProvider,
 } from "@react-navigation/native";
-import { Stack } from "expo-router";
+import { SplashScreen, Stack } from "expo-router";
 import "react-native-reanimated";
 
 import { AppModeProvider, useAppMode } from "../context/AppModeContext";
 
 import { useColorScheme } from "@/components/useColorScheme";
+import { useFonts } from "expo-font";
+import { useEffect } from "react";
 
 export {
   // Catch any errors thrown by the Layout component.
-  ErrorBoundary,
+  ErrorBoundary
 } from "expo-router";
 
 export const unstable_settings = {
@@ -23,6 +25,23 @@ export const unstable_settings = {
 function RootLayoutNav() {
   const colorScheme = useColorScheme();
   const { mode } = useAppMode();
+  const [loaded, error] = useFonts({
+    // SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
+    MontserratBold: require("../assets/fonts/Montserrat-Bold.ttf"),
+    MontserratMedium: require("../assets/fonts/Montserrat-Medium.ttf"),
+    MontserratRegular: require("../assets/fonts/Montserrat-Regular.ttf"),
+    MontserratLight: require("../assets/fonts/Montserrat-Light.ttf"),
+  });
+  
+  useEffect(() => {
+    if (loaded || error) {
+      SplashScreen.hideAsync();
+    }
+  }, [loaded, error]);
+
+  if (!loaded && !error) {
+    return null
+  }
 
   return (
     <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>

@@ -44,7 +44,7 @@ const PasswordTextInputFields = ({
   return (
     <View
       style={[
-        tw`py-4.5 text-[17px] gap-2 flex-row items-center rounded border border-gray-200 px-3`,
+        tw`py-4.5 bg-[#19488A22] text-[17px] gap-2 flex-row items-center rounded border border-gray-200 px-3`,
         {},
       ]}
     >
@@ -62,14 +62,16 @@ const PasswordTextInputFields = ({
         placeholderTextColor={placeholderTextColor}
         onBlur={onBlur}
         secureTextEntry={secureTextEntry && !isPasswordVisible}
-        style={[tw`flex-1 font-light text-black`, {}]}
+        style={[tw`flex-1 font-light text-black`, {
+          fontFamily: "MontserratRegular"
+        }]}
       />
       {secureTextEntry && (
         <TouchableOpacity onPress={togglePasswordVisibility} style={tw`ml-2`}>
           {isPasswordVisible ? (
-            <EyeOff size={iconSize} color={iconColor || "#999"} />
+            <EyeOff size={iconSize} color={iconColor || "#19488A"} />
           ) : (
-            <Eye size={iconSize} color={iconColor || "#999"} />
+            <Eye size={iconSize} color={iconColor || "#19488A"} />
           )}
         </TouchableOpacity>
       )}

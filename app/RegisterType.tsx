@@ -1,5 +1,4 @@
 import PrimaryButton from "@/components/Buttons/PrimaryButton";
-import SharedLayout from "@/components/Layout/SharedLayout";
 import Colors from "@/constants/Colors";
 import tw from "@/constants/tailwind";
 import { useRouter } from "expo-router";
@@ -22,15 +21,15 @@ const RegisterType = ({}: RegisterTypePropss) => {
 
   const AccountType = [
     {
-      name: "CARRIER",
+      name: "I'm a Carrier",
       image: require("../assets/images/IntroImages/OnboardingIcon.png"),
-      info: "Turn your miles into money. Enjoy competitive daily earnings and exclusive monthly performance bonuses.",
+      info: "Send and receive packages across Nigeria, Ghana & Kenya",
       navigation: "/screens/Rider/Carrier-indemnity",
     },
     {
-      name: "SHIPPER",
+      name: "I'm a Customer",
       image: require("../assets/images/IntroImages/OnboardingIcon2.png"),
-      info: "Move your goods with confidence. Get guaranteed insurance on all deliveries and cashback on wallet transactions.",
+      info: "Deliver packages and earn money with your vehicle",
       navigation: "/screens/Auth/User",
     },
   ];
@@ -44,21 +43,25 @@ const RegisterType = ({}: RegisterTypePropss) => {
   };
 
   return (
-    <SharedLayout>
-      <View style={[tw`pt-8 flex-1 justify-between`]}>
-        <View style={[tw`gap-6`]}>
-          <View style={[tw`gap-3`]}>
-            <Text style={[tw`text-4xl font-semibold text-[#003C7A]`]}>
-              Select Your
-            </Text>
-            <Text style={[tw`text-4xl font-semibold text-[#CC1A21]`]}>
-              Account Type!
-            </Text>
-            <Text>
-              Welcome to LAS Mobile Sub-headline: Choose how you would like to
-              get started today.
-            </Text>
-          </View>
+    <View style={[tw`pt-8 flex-1 justify-end bg-[#19488A]`]}>
+       <Image
+                      source={require("../assets/images/Intro_logo.png")}
+                      style={[tw`self-center h-150 w-150 absolute z-999 -top-15`]}
+                      resizeMode="contain"
+            />
+      <View style={[tw`gap-6 bg-white h-110 justify-center px-5`, {
+        borderTopRightRadius: 20,
+        borderTopLeftRadius: 20
+      }]}>
+        <View style={[tw`items-center gap-2`]}>
+          <Text style={[tw`text-xl font-semibold font-lightt`, {
+            fontFamily: "MontserratBold"
+          }]}>How will you use LAS?</Text>
+          <Text style={[tw`font-light`, {
+            fontFamily: "MontserratLight"
+          }]}>Select your primary role 
+(you can add more later)</Text>
+        </View>
           <View style={[tw`gap-2`]}>
             {AccountType.map((items, index) => {
               const isSelected = selected === index;
@@ -69,40 +72,48 @@ const RegisterType = ({}: RegisterTypePropss) => {
                     setSelected(index);
                   }}
                   style={[
-                    tw`bg-[#003C7A0D] py-7 px-10 gap-3 rounded-lg items-center`,
+                    tw`bg-[#003C7A0D] flex-row p-3  gap-2 rounded-lg items-center`,
                     {
-                      borderWidth: isSelected ? 2 : 0,
+                      borderWidth: isSelected ? 1 : 1,
                       borderColor: isSelected
                         ? themeColors.tint
-                        : "transparent",
-                      backgroundColor: isSelected ? "#003C7A15" : "#003C7A0D",
+                        : "#19488A22",
+                      backgroundColor: isSelected ? "#003C7A15" : "transparent",
                     },
                   ]}
                 >
-                  <Text style={[tw`font-semibold text-[17px]`]}>
+                  <View style={[tw`bg-[#19488A] rounded-md p-1.5`]}>
+                  <Image resizeMode="contain" style={[tw`h-15 w-20`]} source={items.image} />
+                  </View>
+                  <View style={[tw`gap-1.5`]}>
+                    <Text style={[tw`font-semibold text-[17px] text-[#19488A]`, {
+                    fontFamily: "MontserratBold"
+                  }]}>
                     {items.name}
                   </Text>
-                  <Image style={[tw`h-20 w-20`]} source={items.image} />
-                  <Text style={[tw`text-center text-gray-600`]}>
+                  
+                    <Text style={[tw`textext-[14px] text-xs w-[70%] font-light`, {
+                    fontFamily: "MontserratRegular"
+                  }]}>
                     {items.info}
                   </Text>
+                  </View>
                 </TouchableOpacity>
               );
             })}
           </View>
-        </View>
         <PrimaryButton
-          height={60}
+          height={50}
           bgColors={selected === null ? "#003C7A33" : "#003C7A"}
-          text="Next"
+          text="Continue"
           textColor="white"
           disabled={selected === null}
           onpress={() => {
             handleNext();
           }}
         />
+        </View>
       </View>
-    </SharedLayout>
   );
 };
 

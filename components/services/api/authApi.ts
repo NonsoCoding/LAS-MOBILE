@@ -259,3 +259,27 @@ export async function saveIndemnityAcceptance() {
   // Save to API / Firebase / Local Store
   console.log("Indemnity accepted:", payload);
 }
+
+export const checkCarrierExists = async (
+  email: string
+  // phone: string,
+  // plate: string
+) => {
+  const res = await fetch(`${apiUrl}/api/auth/check-user/`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      email,
+      // phoneNumber: phone,
+      // plateNumber: plate,
+    }),
+  });
+
+  const data = await res.json();
+
+  if (!res.ok) {
+    throw new Error(data.message || "Failed to check user");
+  }
+
+  return data.exists as boolean;
+};
