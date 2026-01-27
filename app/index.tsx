@@ -159,7 +159,7 @@ const IntroScreen = ({}: IntroScreenProps) => {
             onpress={() => {
               if (currentSlide === slides.length - 1) {
                 // "choose where to route it too" -> RegisterType (Account Type Selection)
-                router.replace("/RegisterType");
+                router.replace("/screens/Auth/User/PhoneLocation");
               } else {
                 // Skip -> Last Slide
                 setCurrentSlide(slides.length - 1);

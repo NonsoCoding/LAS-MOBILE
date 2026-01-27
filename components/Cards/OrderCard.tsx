@@ -1,118 +1,59 @@
 import Colors from "@/constants/Colors";
+import { FontTheme } from "@/constants/fonts";
 import tw from "@/constants/tailwind";
-import { FontAwesome } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import { Box, Clock } from "lucide-react-native";
 import { Text, TouchableOpacity, useColorScheme, View } from "react-native";
 
 interface OrderCardProps {
-  cardTitle: string;
-  name: string;
-  issuedTo?: string;
-  onPress: () => void;
-  status: string;
-  statusTextColor: string;
-  statusBgColor: string;
-  date: string;
+  
 }
 
 const OrderCard = ({
-  cardTitle,
-  name,
-  issuedTo,
-  onPress,
-  status,
-  statusBgColor,
-  date,
-  statusTextColor,
+  
 }: OrderCardProps) => {
   const router = useRouter();
   const colorScheme = useColorScheme();
   const themeColors = Colors[colorScheme ?? "light"];
 
   return (
-    <TouchableOpacity
-      onPress={() => {
-        onPress();
-      }}
-      style={[
-        tw`p-5 rounded-2xl bg-white gap-5`,
-        {
-          // iOS shadow properties
-          shadowColor: "#000",
-          shadowOffset: {
-            width: 0,
-            height: 2,
-          },
-          shadowOpacity: 0.1,
-          shadowRadius: 8,
-          // Android shadow
-          elevation: 3,
-        },
-      ]}
-    >
-      <View style={[tw`flex-row items-center justify-between`, {}]}>
-        <View style={[tw`flex-row items-center flex-1 justify-between`, {}]}>
-          <View style={[tw`flex-row items-center gap-2`]}>
-            <View
-              style={[
-                tw`h-13 w-13 rounded-full items-center justify-center`,
-                {
-                  backgroundColor: themeColors.secondaryLight,
-                },
-              ]}
-            >
-              <Box color={themeColors.secondaryColor} />
-            </View>
-            <View>
-              <Text
-                style={[
-                  tw` text-2xl font-semibold`,
-                  {
-                    color: "black",
-                  },
-                ]}
-              >
-                {cardTitle}
-              </Text>
-              <Text style={[tw`font-light`]}>{name}</Text>
-            </View>
-          </View>
-          <View
-            style={[
-              tw`py-1 px-3 rounded-full flex-row gap-2 items-center`,
-              {
-                backgroundColor: statusBgColor || themeColors.secondaryColor,
-              },
-            ]}
-          >
-            <Text
-              style={[
-                tw`text-[11px] font-light`,
-                {
-                  color: statusTextColor || "#FFAA00",
-                },
-              ]}
-            >
-              {status}
-            </Text>
-            <FontAwesome
-              name="circle"
-              size={14}
-              color={statusTextColor || "#FFAA00"}
-            />
-          </View>
+    <View style={[tw`bg-[#19488A22] p-5 gap-5 rounded-3`]}>
+      <View style={[tw`flex-row justify-between`]}>
+        <View style={[tw`gap-1.5`]}>
+          <Text style={[tw`text-[10px] uppercase`, {
+            fontFamily: FontTheme.font.MontserratMedium
+          }]}>Current Shipping</Text>
+          <Text style={[tw`uppercase`, {
+            fontFamily: FontTheme.font.MontserratBold
+          }]}>ID jf2008063g4200</Text>
+        </View>
+        <TouchableOpacity style={[tw`bg-white rounded-full w-25  items-center h-6.5 justify-center`, ]}>
+          <Text style={[tw`text-[10px] uppercase text-[#19488A]`, {
+            fontFamily: FontTheme.font.MontserratMedium
+          }]}>See details</Text>
+        </TouchableOpacity>
+      </View>
+      <View style={[tw`bg-white w-full h-10 rounded-full`]}>
+
+      </View>
+      <View style={[tw`flex-row justify-between`]}>
+        <View style={[tw`gap-1.5`]}>
+          <Text style={[tw`text-xs`, {
+            fontFamily: FontTheme.font.MontserratMedium
+          }]}>pick up: 22-01-2025</Text>
+          <Text style={[tw``, {
+            fontFamily: FontTheme.font.MontserratBold
+          }]}>Ikeja, Lagos</Text>
+        </View>
+        <View style={[tw`gap-1.5`]}>
+          <Text style={[tw`text-xs`, {
+            fontFamily: FontTheme.font.MontserratMedium
+          }]}>pick up: 22-01-2025</Text>
+          <Text style={[tw``, {
+            fontFamily: FontTheme.font.MontserratBold
+          }]}>Ikeja, Lagos</Text>
         </View>
       </View>
-      <View style={[tw`flex-row gap-2 items-center`, {}]}>
-        {/* <View style={[tw`bg-[#2f95dc22] p-2 rounded-full`]}> */}
-        <Clock color={"black"} size={16} />
-        {/* </View> */}
-        <Text style={[tw`text-black text-gray-600 font-light text-xs`]}>
-          {date}
-        </Text>
-      </View>
-    </TouchableOpacity>
+    </View>
   );
 };
 

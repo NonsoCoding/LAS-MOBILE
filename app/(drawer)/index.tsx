@@ -1,25 +1,23 @@
+import OrderCard from "@/components/Cards/OrderCard";
 import useAuthStore from "@/components/store/authStore";
 import Colors from "@/constants/Colors";
+import { FontTheme } from "@/constants/fonts";
 import tw from "@/constants/tailwind";
-import { DrawerActions } from "@react-navigation/native";
+import { AntDesign, Feather } from "@expo/vector-icons";
 import { useNavigation, useRouter } from "expo-router";
 import {
-  AlignCenter,
-  Bell,
   Book,
-  Box,
   Car,
-  ChevronRight,
   CreditCard,
-  History,
+  History
 } from "lucide-react-native";
 import { useEffect, useState } from "react";
 import {
-  ScrollView,
+  Image,
   Text,
   TouchableOpacity,
   useColorScheme,
-  View,
+  View
 } from "react-native";
 
 interface UserHomePageProps {}
@@ -49,6 +47,12 @@ const UserHomePage = ({}: UserHomePageProps) => {
     { name: "Order History", icon: <History /> },
   ];
 
+  const orderHistory = [
+    {id: "id jf2008063g4200", name: "Electronics", state: "In-transit"},
+    {id: "id jf2008063g4200", name: "Electronics", state: "In-transit"},
+    {id: "id jf2008063g4200", name: "Electronics", state: "In-transit"},
+  ]
+
   const handleAcceptOrder = () => {
     setOrderAccepted(true);
   };
@@ -58,223 +62,60 @@ const UserHomePage = ({}: UserHomePageProps) => {
   };
 
   return (
-    <View style={[tw`flex-1`]}>
-      <View
-        style={[
-          tw`h-[30%] rounded-b-[30px]`,
-          {
-            backgroundColor: themeColors.primaryColor,
-          },
-        ]}
-      >
-        <View style={[tw`flex-1 px-5 py-15 justify-between`]}>
-          <View style={[tw`flex-row items-center gap-3 justify-between`, {}]}>
-            <TouchableOpacity
-              style={[
-                tw`p-2.5 rounded-full self-start`,
-                {
-                  backgroundColor: themeColors.tintLight,
-                },
-              ]}
-              onPress={() => navigation.dispatch(DrawerActions.openDrawer())}
-            >
-              <AlignCenter color={"white"} />
-            </TouchableOpacity>
-            <TouchableOpacity>
-              <Bell color={"white"} />
-            </TouchableOpacity>
-          </View>
-          <View style={[tw`gap-2`]}>
-            <View style={[tw`flex-row items-center justify-between`, {}]}>
-              <Text style={[tw`text-3xl font-bold text-white`, {}]}>
-                Hey {user?.last_name}!
-              </Text>
-            </View>
-            <View>
-              <Text style={[tw`text-white font-light`]}>Welcome back</Text>
-            </View>
+    <View style={[tw`flex-1 bg-[#19488A] justify-end`, {
+    }]}>
+      <View style={[tw`flex-row items-center p-5 justify-between`]}>
+        <View style={[tw`items-center flex-row gap-3`]}>
+        <Image style={[tw`h-20 w-20`]} source={require("../../assets/images/IntroImages/profile.png")} />
+        <View>
+          <Text style={[tw`uppercase text-[15px] text-white`, {
+            fontFamily: FontTheme.font.MontserratBold
+          }]}>Welcome, Godson</Text>
+          <View style={[tw`flex-row gap-1 items-center`]}>
+            <Feather name="map-pin" color={"white"} size={13} />
+              <Text style={[tw`text-white text-xs`, {
+            fontFamily: FontTheme.font.MontserratMedium
+          }]}>Gwarimpa first avenue</Text>
           </View>
         </View>
+        </View>
+        <TouchableOpacity style={[tw`h-10 w-10 bg-white rounded-full items-center justify-center`]}>
+          <AntDesign name="bell" size={20} color={themeColors.primaryColor} />
+        </TouchableOpacity>
       </View>
-      <View style={[tw`px-5 bottom-8 flex-1`]}>
-        <ScrollView
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={[tw`gap-4`]}
-          style={[tw`flex-1`]}
-        >
-          <View
-            style={[
-              tw`flex-row bg-white p-7 rounded-md justify-between`,
-              {
-                // iOS shadow properties
-                shadowColor: "#000",
-                shadowOffset: {
-                  width: 0,
-                  height: 2,
-                },
-                shadowOpacity: 0.1,
-                shadowRadius: 8,
-                // Android shadow
-                elevation: 3,
-              },
-            ]}
-          >
-            <View>
-              <Text
-                style={[
-                  tw`font-light text-xs`,
-                  {
-                    color: themeColors.primaryTextColor,
-                  },
-                ]}
-              >
-                Active Orders
-              </Text>
-              <Text
-                style={[
-                  tw`text-2xl font-semibold`,
-                  {
-                    color: themeColors.primaryTextColor,
-                  },
-                ]}
-              >
-                2
-              </Text>
-            </View>
-            <View
-              style={[
-                tw`self-start p-2 rounded-full`,
-                {
-                  backgroundColor: themeColors.tintLight,
-                },
-              ]}
-            >
-              <Box color={themeColors.primaryColor} />
-            </View>
-          </View>
-          <View
-            style={[
-              tw`flex-row p-7 bg-white rounded-md justify-between`,
-              {
-                // iOS shadow properties
-                shadowColor: "#000",
-                shadowOffset: {
-                  width: 0,
-                  height: 2,
-                },
-                shadowOpacity: 0.1,
-                shadowRadius: 8,
-                // Android shadow
-                elevation: 3,
-              },
-            ]}
-          >
-            <View>
-              <Text
-                style={[
-                  tw`font-light text-xs`,
-                  {
-                    color: "#4CB050",
-                  },
-                ]}
-              >
-                Completed Orders
-              </Text>
-              <Text
-                style={[
-                  tw`text-2xl font-semibold`,
-                  {
-                    color: "#4CB050",
-                  },
-                ]}
-              >
-                43
-              </Text>
-            </View>
-            <View
-              style={[
-                tw`self-start p-2 rounded-full`,
-                {
-                  backgroundColor: "#4CB05033",
-                },
-              ]}
-            >
-              <Box color={"#4CB050"} />
-            </View>
-          </View>
-          <View
-            style={[
-              tw`flex-row bg-white p-7 rounded-md justify-between`,
-              {
-                // iOS shadow properties
-                shadowColor: "#000",
-                shadowOffset: {
-                  width: 0,
-                  height: 2,
-                },
-                shadowOpacity: 0.1,
-                shadowRadius: 8,
-                // Android shadow
-                elevation: 3,
-              },
-            ]}
-          >
-            <View>
-              <Text
-                style={[
-                  tw`font-light text-xs`,
-                  {
-                    color: "#F2994A",
-                  },
-                ]}
-              >
-                Active Orders
-              </Text>
-              <Text
-                style={[
-                  tw`text-2xl font-semibold`,
-                  {
-                    color: "#F2994A",
-                  },
-                ]}
-              >
-                153K
-              </Text>
-            </View>
-            <View
-              style={[
-                tw`self-start p-2 rounded-full`,
-                {
-                  backgroundColor: "#F2994A33",
-                },
-              ]}
-            >
-              <Box color={"#F2994A"} />
-            </View>
-          </View>
-          <View style={[tw`bg-white px-4 rounded-lg`]}>
-            {buttonList.map((items, index) => {
-              return (
-                <TouchableOpacity
-                  key={index}
-                  style={[
-                    tw`py-7 flex-row items-center gap-4 justify-between`,
-                    {
-                      borderBottomWidth: 0.6,
-                      borderColor: "#D3D3D3",
-                    },
-                  ]}
-                >
-                  <View style={[tw`flex-row items-center gap-3`, {}]}>
-                    <View>{items.icon}</View>
-                    <Text style={[tw`font-light`]}>{items.name}</Text>
-                  </View>
-                  <ChevronRight />
-                </TouchableOpacity>
-              );
-            })}
-          </View>
-        </ScrollView>
+      <View style={[tw`h-[80%] bg-white rounded-t-5 gap-7 p-5`]}>
+        <OrderCard/>
+       <View>
+        <View style={[tw`flex-row justify-between items-center`]}>
+            <Text style={[tw`uppercase`, {
+              fontFamily: FontTheme.font.MontserratBold
+            }]}>Recent Activities</Text>
+               <TouchableOpacity style={[tw`bg-[#19488A22] rounded-full w-20  items-center h-6.5 justify-center`, ]}>
+          <Text style={[tw`text-[10px] uppercase text-[#19488A]`, {
+            fontFamily: FontTheme.font.MontserratMedium
+          }]}>See all</Text>
+        </TouchableOpacity>
+        </View>
+        </View>
+        <View style={[tw`gap-10`]}>
+          {orderHistory.map((item, index) => {
+            return (
+              <View style={[tw`flex-row justify-between`]}>
+                <View style={tw`gap-3`}>
+                  <Text style={[tw`uppercase`, {
+                    fontFamily: FontTheme.font.MontserratBold
+                  }]}>{item.id}</Text>
+                  <Text style={[tw`uppercase text-[10px] text-[#19488A]`, {
+                      fontFamily: FontTheme.font.MontserratMedium
+                  }]}>{item.name}</Text>
+                </View>
+                <Text style={[tw`uppercase text-[10px] text-[#19488A]`, {
+                    fontFamily: FontTheme.font.MontserratMedium
+                }]}>{item.state}</Text>
+              </View>
+            )
+          })}
+        </View>
       </View>
     </View>
   );

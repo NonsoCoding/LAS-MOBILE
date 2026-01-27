@@ -1,17 +1,18 @@
 import PrimaryButton from "@/components/Buttons/PrimaryButton";
-import SharedLayout from "@/components/Layout/SharedLayout";
 import { verifyOtp } from "@/components/services/api/authApi";
 import useAuthStore from "@/components/store/authStore";
 import Colors from "@/constants/Colors";
+import { FontTheme } from "@/constants/fonts";
 import tw from "@/constants/tailwind";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import {
   Alert,
+  Image,
   Text,
   TouchableOpacity,
   useColorScheme,
-  View,
+  View
 } from "react-native";
 import { OtpInput } from "react-native-otp-entry";
 
@@ -65,24 +66,28 @@ const UserOtpScreen = () => {
   };
 
   return (
-    <SharedLayout>
-      <View style={tw`flex-1 pt-10 justify-between`}>
+    <View style={[tw`bg-[#19488A] flex-1 justify-end`]}>
+      <Image
+        source={require("../../../../assets/images/Intro_logo.png")}
+        style={[tw`self-center h-160 w-160 absolute z-999 -top-20`]}
+        resizeMode="contain"
+      />
+      <View style={[tw`py-10 pb-15 justify-between bg-white gap-10 px-5`, {
+        borderTopRightRadius: 20,
+        borderTopLeftRadius: 20
+      }]}>
+         <View style={[tw`items-center gap-3`]}>
+                  <Text style={[tw`text-2xl font-semibold`, {
+                  fontFamily: "MontserratBold"
+                }]}>Verify your number</Text>
+                  <Text style={[tw`w-[80%] text-center font-light`, {
+                  fontFamily: "MontserratLight"
+                }]}>We sent a 6-digit code to</Text>
+                  <Text style={[tw`w-[80%] text-center font-light text-[#CC1A21]`, {
+                  fontFamily:FontTheme.font.MontserratBold
+                }]}>+234 800 000 0000</Text>
+              </View>
         <View style={tw`gap-10`}>
-          <View style={tw`gap-2`}>
-            <Text
-              style={[
-                tw`text-3xl font-semibold`,
-                { color: themeColors.primaryTextColor },
-              ]}
-            >
-              Shipper Verification
-            </Text>
-
-            <Text style={tw`text-gray-400`}>
-              Input the six digit verification code sent to your mail
-            </Text>
-          </View>
-
           <OtpInput
             numberOfDigits={6}
             onTextChange={(text) => setOtp(text)}
@@ -93,17 +98,17 @@ const UserOtpScreen = () => {
                 justifyContent: "center",
               },
               pinCodeContainerStyle: {
-                backgroundColor: colorScheme === "dark" ? "#1F1F1F" : "#FFFFFF",
-                borderWidth: 2,
-                borderColor: colorScheme === "dark" ? "#2A2A2A" : "#E5E5E5",
+                backgroundColor: colorScheme === "dark" ? "#1F1F1F" : "#19488A22",
+                borderWidth: 1,
+                borderColor: colorScheme === "dark" ? "#2A2A2A" : "transparent",
                 borderRadius: 10,
                 width: 50,
-                height: 65,
+                height: 40,
                 elevation: 5,
               },
               focusedPinCodeContainerStyle: {
                 borderColor: themeColors.tint,
-                borderWidth: 2.5,
+                borderWidth: 1,
               },
               pinCodeTextStyle: {
                 color: themeColors.primaryTextColor,
@@ -121,31 +126,52 @@ const UserOtpScreen = () => {
             }}
             focusColor={themeColors.tint}
           />
-
-          {/* LOGIN LINK */}
-          <View style={tw`flex-row gap-1 items-center justify-center`}>
-            <Text>Already have an account?</Text>
-            <TouchableOpacity onPress={() => router.push("/screens")}>
-              <Text
-                style={[tw`underline`, { color: themeColors.primaryColor }]}
-              >
-                Login
-              </Text>
-            </TouchableOpacity>
-          </View>
         </View>
-
+        <View style={[tw`gap-5`]}>
         {/* CONTINUE BUTTON */}
         <PrimaryButton
           bgColors={themeColors.primaryColor}
           height={50}
-          onpress={handleContinue}
+            onpress={() => {
+            router.replace("/RegisterType")
+          }}
           textColor={themeColors.text}
           text={loading ? "Verifying..." : "Continue"}
           disabled={otp.length !== 6 || loading}
-        />
+          />
+           <View style={[tw`flex-row items-center justify-center gap-1`]}>
+                <Text
+                  style={[
+                    tw`font-light`,
+                    {
+                      fontFamily: "MontserratRegular",
+                    },
+                  ]}
+                >
+                  Already have an account?
+                </Text>
+                <TouchableOpacity
+                  onPress={() => {
+                    router.replace("/screens/Auth/User/SignIn");
+                  }}
+                >
+                  <Text
+                    style={[
+                      tw`text-center font-semibold`,
+                      {
+                        color: themeColors.primaryTextColor,
+                        fontFamily: "MontserratBold",
+                      },
+                    ]}
+                  >
+                    Sign In
+                  </Text>
+                </TouchableOpacity>
+              </View>
+        </View>
+        
       </View>
-    </SharedLayout>
+    </View>
   );
 };
 

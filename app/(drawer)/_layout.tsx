@@ -12,6 +12,7 @@ import { StyleSheet, TouchableOpacity, View } from "react-native";
 function CustomDrawerContent(props: any) {
   const colorScheme = useColorScheme();
   const themeColors = Colors[colorScheme ?? "light"];
+  
   return (
     <DrawerContentScrollView
       contentContainerStyle={{

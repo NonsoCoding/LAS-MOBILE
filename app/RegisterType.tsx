@@ -49,7 +49,7 @@ const RegisterType = ({}: RegisterTypePropss) => {
                       style={[tw`self-center h-150 w-150 absolute z-999 -top-15`]}
                       resizeMode="contain"
             />
-      <View style={[tw`gap-6 bg-white h-110 justify-center px-5`, {
+      <View style={[tw`gap-6 bg-white py-10 pb-15 justify-center px-5`, {
         borderTopRightRadius: 20,
         borderTopLeftRadius: 20
       }]}>

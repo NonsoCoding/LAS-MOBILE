@@ -1,4 +1,4 @@
-const apiUrl = "https://web-production-afa76.up.railway.app";
+const apiUrl = "https://web-production-4a8a5.up.railway.app";
 
 export const loginUser = async (email: string, password: string) => {
   try {

@@ -8,11 +8,12 @@ import * as DocumentPicker from "expo-document-picker";
 import * as ImagePicker from "expo-image-picker";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Formik } from "formik";
-import { Phone, Upload, User } from "lucide-react-native";
+import { Upload, User } from "lucide-react-native";
 import React, { useState } from "react";
 import {
   ActivityIndicator,
   Alert,
+  Image,
   Text,
   TouchableOpacity,
   useColorScheme,
@@ -196,7 +197,8 @@ export default function UserPersonalDetailsIndex() {
           <ActivityIndicator size="large" color={themeColors.tint} />
         </View>
       ) : (
-        <View>
+        <View style={[tw`flex-1`]}
+        >
           <Formik
             initialValues={{
               firstName: "",
@@ -214,24 +216,39 @@ export default function UserPersonalDetailsIndex() {
               errors,
               touched,
             }) => (
-              <View style={[tw`flex-1 justify-between gap-8 pt-10`]}>
+                <View style={[tw`flex-1 justify-end gap-8 pt-10 bg-[#19488A]`]}>
+                   <Image
+                                        source={require("../../../../assets/images/Intro_logo.png")}
+                                        style={[tw`self-center h-140 w-140 absolute -top-15`]}
+                                        resizeMode="contain"
+                  />
+                  <View style={[tw`px-5 bg-white py-10 pb-15 gap-10 justify-center`, {
+                    borderTopRightRadius: 20,
+                    borderTopLeftRadius: 20,
+                  }]}>
+                     <View style={[tw`items-center gap-2`]}>
+              <Text
+                style={[
+                  tw`text-xl font-semibold`,
+                  {
+                    fontFamily: "MontserratBold",
+                  },
+                ]}
+              >
+                Complete Your Profile
+              </Text>
+              <Text
+                style={[
+                  tw`font-light`,
+                  {
+                    fontFamily: "MontserratLight",
+                  },
+                ]}
+              >
+                Complete your profile to start your journey!
+              </Text>
+            </View>
                 <View style={[tw`gap-10`]}>
-                  <View style={[tw`gap-3`]}>
-                    <Text
-                      style={[
-                        tw`text-4xl font-semibold`,
-                        {
-                          color: themeColors.primaryColor,
-                        },
-                      ]}
-                    >
-                      Personal Details
-                    </Text>
-                    <Text style={[tw`font-light`]}>
-                      Fill in your personal details to proceed be sure to fill
-                      it in correctly thank you.
-                    </Text>
-                  </View>
                   <View style={[tw`gap-4`]}>
                     <View>
                       <TextInputFields
@@ -265,7 +282,7 @@ export default function UserPersonalDetailsIndex() {
                         </Text>
                       )}
                     </View>
-                    <View>
+                    {/* <View>
                       <TextInputFields
                         icon={Phone}
                         iconColor={themeColors.primaryColor}
@@ -281,7 +298,7 @@ export default function UserPersonalDetailsIndex() {
                           {errors.phoneNumber}
                         </Text>
                       )}
-                    </View>
+                    </View> */}
                     <View style={[tw`gap-4`]}>
                       {documentFields.map((field) => (
                         <TouchableOpacity
@@ -345,12 +362,15 @@ export default function UserPersonalDetailsIndex() {
                   <PrimaryButton
                     bgColors={themeColors.primaryColor}
                     height={50}
-                    onpress={handleSubmit}
+                        onpress={() => {
+                      router.replace("/(tabs)")
+                    }}
                     textColor={themeColors.text}
                     text={loading ? "Creating Account..." : "Create Account"}
                     disabled={loading}
                   />
                 </View>
+                  </View>
               </View>
             )}
           </Formik>

@@ -141,7 +141,7 @@ export default function UserSignInIndex() {
                       style={[tw`self-center h-140 w-140 absolute z-999 -top-15`]}
                       resizeMode="contain"
             />
-            <View style={[tw`bg-white px-5 h-120 justify-center gap-15`, {
+            <View style={[tw`bg-white px-5 py-10 pb-15 justify-center gap-15`, {
               borderTopRightRadius: 20,
               borderTopLeftRadius: 20
             }]}>
@@ -262,7 +262,7 @@ export default function UserSignInIndex() {
                 }]}>Don't have an account?</Text>
               <TouchableOpacity
                 onPress={() => {
-                   router.replace("/screens/Auth/User/SignIn"); // Update to your signup route
+                   router.replace("/screens/Auth/User"); // Update to your signup route
                 }}
               >
                 <Text

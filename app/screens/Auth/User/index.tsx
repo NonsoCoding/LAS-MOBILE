@@ -13,7 +13,7 @@ import {
   Text,
   TouchableOpacity,
   useColorScheme,
-  View
+  View,
 } from "react-native";
 import * as Yup from "yup";
 
@@ -46,7 +46,7 @@ export default function UserAuthIndex() {
       if (exists) {
         Alert.alert(
           "Account Already Exists",
-          "An account with this email already exists. Please sign in instead"
+          "An account with this email already exists. Please sign in instead",
         );
         return;
       }
@@ -57,7 +57,7 @@ export default function UserAuthIndex() {
     } catch (error: any) {
       Alert.alert(
         "Error",
-        error.message || "Unable to validate account. Please try again."
+        error.message || "Unable to validate account. Please try again.",
       );
     } finally {
       setLoading(false);
@@ -74,11 +74,11 @@ export default function UserAuthIndex() {
 
   return (
     <View style={[tw`flex-1 bg-[#19488A] justify-end`]}>
-        <Image
-                            source={require("../../../../assets/images/Intro_logo.png")}
-                            style={[tw`self-center h-160 w-160 absolute z-999 -top-20`]}
-                            resizeMode="contain"
-                  />
+      <Image
+        source={require("../../../../assets/images/Intro_logo.png")}
+        style={[tw`self-center h-160 w-160 absolute z-999 -top-20`]}
+        resizeMode="contain"
+      />
       <Formik
         initialValues={{ email: "", password: "" }}
         validationSchema={validationSchema}
@@ -92,18 +92,37 @@ export default function UserAuthIndex() {
           errors,
           touched,
         }) => (
-          <View style={[tw`gap-10 h-110 px-5 justify-center bg-white`, {
-            borderTopRightRadius: 20,
-            borderTopLeftRadius: 20
-          }]}>
-              <View style={[tw`items-center gap-2`]}>
-              <Text style={[tw`text-xl font-semibold`, {
-                  fontFamily: "MontserratBold"
-                }]}>Complete Your Profile</Text>
-              <Text style={[tw`font-light`, {
-                  fontFamily: "MontserratLight"
-                }]}>Complete your profile to start your journey!</Text>
-              </View>
+          <View
+            style={[
+              tw`gap-10 py-10 pb-15 px-5 justify-center bg-white`,
+              {
+                borderTopRightRadius: 20,
+                borderTopLeftRadius: 20,
+              },
+            ]}
+          >
+            <View style={[tw`items-center gap-2`]}>
+              <Text
+                style={[
+                  tw`text-xl font-semibold`,
+                  {
+                    fontFamily: "MontserratBold",
+                  },
+                ]}
+              >
+                Complete Your Profile
+              </Text>
+              <Text
+                style={[
+                  tw`font-light`,
+                  {
+                    fontFamily: "MontserratLight",
+                  },
+                ]}
+              >
+                Complete your profile to start your journey!
+              </Text>
+            </View>
             <View style={[tw`gap-2`]}>
               <View style={[tw`gap-3`]}>
                 <View>
@@ -138,7 +157,7 @@ export default function UserAuthIndex() {
                   )}
                 </View>
               </View>
-               
+
               {/* <View style={[tw`flex-row items-center gap-3`]}>
                 <View style={[tw`flex-1 h-px bg-gray-300`]} />
                 <Text style={[tw`text-gray-500 text-sm`]}>or</Text>
@@ -184,26 +203,33 @@ export default function UserAuthIndex() {
                 disabled={loading}
               />
               <View style={[tw`flex-row items-center justify-center gap-1`]}>
-                <Text style={[tw`font-light`, {
-                  fontFamily: "MontserratRegular"
-                }]}>Already have an account?</Text>
-              <TouchableOpacity
-                onPress={() => {
-                  router.replace("/screens/Auth/User/SignIn");
-                }}
-              >
                 <Text
                   style={[
-                    tw`text-center font-semibold`,
+                    tw`font-light`,
                     {
-                      color: themeColors.primaryTextColor,
-                      fontFamily: "MontserratBold"
+                      fontFamily: "MontserratRegular",
                     },
                   ]}
                 >
-                  Sign In
+                  Already have an account?
                 </Text>
-              </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => {
+                    router.replace("/screens/Auth/User/SignIn");
+                  }}
+                >
+                  <Text
+                    style={[
+                      tw`text-center font-semibold`,
+                      {
+                        color: themeColors.primaryTextColor,
+                        fontFamily: "MontserratBold",
+                      },
+                    ]}
+                  >
+                    Sign In
+                  </Text>
+                </TouchableOpacity>
               </View>
             </View>
           </View>
