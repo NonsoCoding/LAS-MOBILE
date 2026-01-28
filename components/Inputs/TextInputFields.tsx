@@ -50,8 +50,8 @@ const TextInputFields = ({
         placeholderTextColor={placeholderTextColor}
         onBlur={onBlur}
         secureTextEntry={secureTextEntry}
-        style={[tw`w-full font-light text-black`, {
-          fontFamily: "MontserratRegular"
+        style={[tw`w-full text-black`, {
+          fontFamily: "MontserratLight"
         }]}
       />
     </View>

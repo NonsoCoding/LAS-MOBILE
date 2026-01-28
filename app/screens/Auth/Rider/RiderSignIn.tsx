@@ -1,11 +1,11 @@
 import PrimaryButton from "@/components/Buttons/PrimaryButton";
 import PasswordTextInputFields from "@/components/Inputs/PasswordTextInputField";
 import TextInputFields from "@/components/Inputs/TextInputFields";
-import SharedLayout from "@/components/Layout/SharedLayout";
 import { loginCarrier, resendOtp } from "@/components/services/api/authApi";
 import useAuthStore from "@/components/store/authStore";
 import yup from "@/components/utils/formik";
 import Colors from "@/constants/Colors";
+import { fontFamily } from "@/constants/fonts";
 import tw from "@/constants/tailwind";
 import { useRouter } from "expo-router";
 import { Formik } from "formik";
@@ -102,7 +102,12 @@ export default function UserSignInIndex() {
   };
 
   return (
-    <SharedLayout>
+    <View style={[tw`flex-1 bg-[#19488A] justify-end`]}>
+       <Image
+              source={require("../../../../assets/images/Intro_logo.png")}
+              style={[tw`self-center h-150 w-150 absolute -top-20`]}
+              resizeMode="contain"
+            />
       <Formik
         initialValues={{ email: "", password: "" }}
         validationSchema={validationSchema}
@@ -116,21 +121,16 @@ export default function UserSignInIndex() {
           errors,
           touched,
         }) => (
-          <View style={[tw`flex-1 pt-10 gap-10 justify-between`]}>
-            <View style={[tw`gap-10`]}>
-              <View style={[tw`gap-3`]}>
-                <Text style={[tw`text-3xl font-bold text-[#003C7A]`]}>
-                  Sign into your Carrier
-                </Text>
-                <Text style={[tw`text-3xl font-bold text-[#CC1A21]`]}>
-                  account
-                </Text>
-                <Text style={[tw`font-light`]}>
-                  Kindly provide your valid email/phone number and password to
-                  proceed
-                </Text>
+          <View style={[tw`pt-10 pb-15 px-5 bg-white rounded-t-2xl gap-5 justify-between`]}>
+            <View style={[tw`gap-5`]}>
+              <View style={[tw`items-center gap-2`]}>
+                <Text style={[tw`text-xl`, {
+                  fontFamily: fontFamily.Bold
+                }]}>Login</Text>
+                <Text style={[tw`text-center`, {
+                  fontFamily: fontFamily.Light,
+                }]}>Welcome back to Africa's Trusted Delivery Network</Text>
               </View>
-
               <View style={[tw`gap-3`]}>
                 <View style={[tw`gap-3`]}>
                   <View>
@@ -139,7 +139,7 @@ export default function UserSignInIndex() {
                       iconColor={themeColors.primaryColor}
                       placeholderText="Email"
                       iconSize={18}
-                      placeholderTextColor="black"
+                             placeholderTextColor={"#19488A"}
                       value={values.email}
                       onChangeText={handleChange("email")}
                       onBlur={handleBlur("email")}
@@ -158,7 +158,7 @@ export default function UserSignInIndex() {
                       iconColor={themeColors.primaryColor}
                       placeholderText="Password"
                       iconSize={18}
-                      placeholderTextColor="black"
+                      placeholderTextColor={"#19488A"}
                       value={values.password}
                       onChangeText={handleChange("password")}
                       onBlur={handleBlur("password")}
@@ -172,19 +172,21 @@ export default function UserSignInIndex() {
                   </View>
                 </View>
                 <TouchableOpacity
+                  style={[tw`self-end`]}
                   onPress={() => {
                     router.push("/screens/forgottenPassword");
                   }}
                 >
                   <Text
                     style={[
-                      tw`font-light`,
+                      tw``,
                       {
                         color: themeColors.primaryTextColor,
+                        fontFamily: fontFamily.Light
                       },
                     ]}
                   >
-                    Forgotten Password
+                    Forgotten Password?
                   </Text>
                 </TouchableOpacity>
               </View>
@@ -193,36 +195,35 @@ export default function UserSignInIndex() {
                 <Text style={[tw`text-gray-500 text-sm`]}>or</Text>
                 <View style={[tw`flex-1 h-px bg-gray-300`]} />
               </View>
-              <View style={[tw`gap-3`]}>
-                <TouchableOpacity
-                  onPress={handleGoogleSignIn}
-                  style={[
-                    tw`flex-row items-center justify-center gap-4 py-3 px-4 rounded-lg border border-gray-300`,
-                  ]}
-                >
-                  <Image
-                    style={[tw`h-6 w-6`]}
-                    source={require("../../../../assets/images/IntroImages/icon/google.png")}
-                  />
-                  <Text style={[tw`font-light`]}>Continue with Google</Text>
-                </TouchableOpacity>
-
-                {Platform.OS === "ios" && (
+                <View style={[tw`gap-2 flex-row`]}>
                   <TouchableOpacity
-                    onPress={handleAppleSignIn}
+                    onPress={handleGoogleSignIn}
                     style={[
-                      tw`flex-row items-center gap-4 justify-center py-3 px-4 rounded-lg border border-gray-300`,
+                      tw`flex-row items-center justify-center gap-1.5 py-2.5 flex-1 rounded-lg border border-gray-300`,
                     ]}
                   >
                     <Image
-                      style={[tw`h-6 w-6`]}
-                      source={require("../../../../assets/images/IntroImages/icon/apple.png")}
+                      style={[tw`h-5 w-5`]}
+                      source={require("../../../../assets/images/IntroImages/icon/google.png")}
                     />
-                    <Text style={[tw`font-light`]}>Continue with Apple</Text>
+                    <Text style={[tw`text-sm`, { fontFamily: fontFamily.Light }]}>Google</Text>
                   </TouchableOpacity>
-                )}
-              </View>
-            </View>
+
+                  {Platform.OS === "ios" && (
+                    <TouchableOpacity
+                      onPress={handleAppleSignIn}
+                      style={[
+                        tw`flex-row items-center gap-1.5 justify-center py-2.5 flex-1 rounded-lg border border-gray-300`,
+                      ]}
+                    >
+                      <Image
+                        style={[tw`h-5 w-5`]}
+                        source={require("../../../../assets/images/IntroImages/icon/apple.png")}
+                      />
+                      <Text style={[tw`text-sm`, { fontFamily: fontFamily.Light }]}>Apple</Text>
+                    </TouchableOpacity>
+                  )}
+                </View>
             <View style={[tw`gap-2`]}>
               <View style={[tw`gap-2`]}>
                 <PrimaryButton
@@ -234,26 +235,33 @@ export default function UserSignInIndex() {
                   disabled={loading}
                 />
               </View>
+               <View style={[tw`flex-row items-center justify-center gap-1`]}>
+                    <Text style={[tw``, {
+                  fontFamily: fontFamily.Light
+                }]}>Don't have an account?</Text>
               <TouchableOpacity
                 onPress={() => {
-                  router.push("/screens/Rider/Carrier-indemnity"); // Update to your signup route
+                   router.replace("/screens/Rider/Carrier-indemnity"); // Update to your signup route
                 }}
               >
                 <Text
                   style={[
-                    tw`text-center font-light underline`,
+                    tw`text-center font-semibold`,
                     {
                       color: themeColors.primaryTextColor,
+                      fontFamily: fontFamily.Bold
                     },
                   ]}
                 >
-                  Don't have an account?
+                  Sign Up
                 </Text>
               </TouchableOpacity>
+              </View>
+            </View>
             </View>
           </View>
         )}
       </Formik>
-    </SharedLayout>
+    </View>
   );
 }

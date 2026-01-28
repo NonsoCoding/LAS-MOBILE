@@ -1,7 +1,7 @@
 import PrimaryButton from "@/components/Buttons/PrimaryButton";
 import TextInputFields from "@/components/Inputs/TextInputFields";
 import Colors from "@/constants/Colors";
-import { FontTheme } from "@/constants/fonts";
+import { fontFamily } from "@/constants/fonts";
 import tw from "@/constants/tailwind";
 import { useRouter } from "expo-router";
 import { useState } from "react";
@@ -37,21 +37,21 @@ const PhoneLocation = ({ }: PhoneLoactionProps) => {
                       style={[tw`self-center h-140 w-140 absolute -top-15`]}
                       resizeMode="contain"
             />
-            <View style={[tw`bg-white px-5 py-10 pb-15 gap-10 justify-center`, {
+            <View style={[tw`bg-white px-5 py-10 pb-15 gap-7 justify-center`, {
                 borderTopRightRadius: 20,
                 borderTopLeftRadius: 20
             }]}>
                  <View style={[tw`items-center gap-3 `]}>
-                  <Text style={[tw`text-2xl font-semibold`, {
-                  fontFamily: FontTheme.font.MontserratBold
+                  <Text style={[tw`text-2xl`, {
+                  fontFamily: fontFamily.Bold
                 }]}>Welcome to LAS Mobile</Text>
-                  <Text style={[tw`w-[80%] text-center font-light`, {
-                  fontFamily: FontTheme.font.MontserratLight
+                  <Text style={[tw`w-[80%] text-center`, {
+                  fontFamily: fontFamily.Light
                 }]}>Enter your phone number to continue</Text>
                 </View>
                 <View style={[tw`gap-5`]}>
                     <Text style={[tw``, {
-                        fontFamily: FontTheme.font.MontserratMedium
+                        fontFamily: fontFamily.Medium
                     }]}>Select your country</Text>
                 <View style={[tw`flex-row gap-2`]}>
                     {country.map((items, index) => {
@@ -74,8 +74,8 @@ const PhoneLocation = ({ }: PhoneLoactionProps) => {
                                 ]}
                             >
                                 <Image source={items.name} style={[tw`h-10 w-10`]} />
-                                <Text style={[tw`font-light`, {
-                                    fontFamily: "MontserratLight"
+                                <Text style={[tw``, {
+                                    fontFamily: fontFamily.Light
                                 }]}>{items.country}</Text>
                             </TouchableOpacity>
                         )
@@ -99,9 +99,9 @@ const PhoneLocation = ({ }: PhoneLoactionProps) => {
                      <View style={[tw`flex-row items-center justify-center gap-1`]}>
                 <Text
                   style={[
-                    tw`font-light`,
+                    tw``,
                     {
-                      fontFamily: "MontserratRegular",
+                      fontFamily: fontFamily.Light,
                     },
                   ]}
                 >
@@ -114,10 +114,10 @@ const PhoneLocation = ({ }: PhoneLoactionProps) => {
                 >
                   <Text
                     style={[
-                      tw`text-center font-semibold`,
+                      tw`text-center`,
                       {
                         color: themeColors.primaryTextColor,
-                        fontFamily: "MontserratBold",
+                        fontFamily: fontFamily.Bold,
                       },
                     ]}
                   >

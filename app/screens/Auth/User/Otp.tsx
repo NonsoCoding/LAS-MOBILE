@@ -2,7 +2,7 @@ import PrimaryButton from "@/components/Buttons/PrimaryButton";
 import { verifyOtp } from "@/components/services/api/authApi";
 import useAuthStore from "@/components/store/authStore";
 import Colors from "@/constants/Colors";
-import { FontTheme } from "@/constants/fonts";
+import { fontFamily } from "@/constants/fonts";
 import tw from "@/constants/tailwind";
 import { useRouter } from "expo-router";
 import { useState } from "react";
@@ -77,14 +77,14 @@ const UserOtpScreen = () => {
         borderTopLeftRadius: 20
       }]}>
          <View style={[tw`items-center gap-3`]}>
-                  <Text style={[tw`text-2xl font-semibold`, {
-                  fontFamily: "MontserratBold"
+                  <Text style={[tw`text-2xl`, {
+                  fontFamily: fontFamily.Bold
                 }]}>Verify your number</Text>
-                  <Text style={[tw`w-[80%] text-center font-light`, {
-                  fontFamily: "MontserratLight"
+                  <Text style={[tw`w-[80%] text-center`, {
+                  fontFamily: fontFamily.Light
                 }]}>We sent a 6-digit code to</Text>
-                  <Text style={[tw`w-[80%] text-center font-light text-[#CC1A21]`, {
-                  fontFamily:FontTheme.font.MontserratBold
+                  <Text style={[tw`w-[80%] text-center text-[#CC1A21]`, {
+                  fontFamily:fontFamily.Bold
                 }]}>+234 800 000 0000</Text>
               </View>
         <View style={tw`gap-10`}>
@@ -142,9 +142,9 @@ const UserOtpScreen = () => {
            <View style={[tw`flex-row items-center justify-center gap-1`]}>
                 <Text
                   style={[
-                    tw`font-light`,
+                    tw``,
                     {
-                      fontFamily: "MontserratRegular",
+                      fontFamily: fontFamily.Light,
                     },
                   ]}
                 >
@@ -157,10 +157,10 @@ const UserOtpScreen = () => {
                 >
                   <Text
                     style={[
-                      tw`text-center font-semibold`,
+                      tw`text-center`,
                       {
                         color: themeColors.primaryTextColor,
-                        fontFamily: "MontserratBold",
+                        fontFamily: fontFamily.Bold,
                       },
                     ]}
                   >

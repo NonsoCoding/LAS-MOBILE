@@ -4,12 +4,12 @@ import PrimaryButton from '@/components/Buttons/PrimaryButton';
 import SearchTextInput from '@/components/Inputs/SearchTextInput';
 import TextInputFields from '@/components/Inputs/TextInputFields';
 import Colors from '@/constants/Colors';
-import { FontTheme } from '@/constants/fonts';
+import { fontFamily } from '@/constants/fonts';
 import tw from '@/constants/tailwind';
 import { AntDesign, Feather } from '@expo/vector-icons';
 import { useState } from 'react';
 import { Image, ScrollView, Text, TouchableOpacity, useColorScheme, View } from 'react-native';
-
+import MapView from 'react-native-maps';
 export default function ShippingScreen() {
 
   const [selected, setSelected] = useState<number | null>(null);
@@ -34,7 +34,7 @@ export default function ShippingScreen() {
           }}
         />
         <Text style={[tw`text-white text-2xl uppercase`, {
-          fontFamily: FontTheme.font.MontserratBold
+          fontFamily: fontFamily.Bold
         }]}>Package Details</Text>
       </View>
       )}
@@ -47,7 +47,7 @@ export default function ShippingScreen() {
           }}
         />
         <Text style={[tw`text-white text-2xl uppercase`, {
-          fontFamily: FontTheme.font.MontserratBold
+          fontFamily: fontFamily.Bold
         }]}>Delivery Address</Text>
       </View>
       )}
@@ -60,7 +60,7 @@ export default function ShippingScreen() {
           }}
         />
         <Text style={[tw`text-white text-2xl uppercase`, {
-          fontFamily: FontTheme.font.MontserratBold
+          fontFamily: fontFamily.Bold
         }]}>Recipient’s Info</Text>
       </View>
       )}
@@ -72,7 +72,7 @@ export default function ShippingScreen() {
           }}
         />
         <Text style={[tw`text-white text-2xl uppercase`, {
-          fontFamily: FontTheme.font.MontserratBold
+          fontFamily: fontFamily.Bold
         }]}>Vehicle Type</Text>
       </View>
       )}
@@ -84,7 +84,7 @@ export default function ShippingScreen() {
           }}
         />
         <Text style={[tw`text-white text-2xl uppercase`, {
-          fontFamily: FontTheme.font.MontserratBold
+          fontFamily: fontFamily.Bold
         }]}>Choose Carrier</Text>
       </View>
       )}
@@ -95,10 +95,10 @@ export default function ShippingScreen() {
               <View style={[tw`gap-7`]}>
               <View style={[tw`gap-2`]}>
                 <Text style={[tw`uppercase`, {
-                  fontFamily: FontTheme.font.MontserratBold
+                  fontFamily: fontFamily.Bold
                 }]}>Package Details</Text>
                 <Text style={[tw`text-[10px] uppercase`, {
-                  fontFamily: FontTheme.font.MontserratMedium
+                  fontFamily: fontFamily.Medium
                 }]}>Tell us about your package</Text>
                 </View>
                <View style={[tw`flex-row gap-1`]}>
@@ -134,7 +134,7 @@ export default function ShippingScreen() {
                                   >
                                       <Image source={items.icon} style={[tw`h-7 w-7`]} />
                                       <Text style={[tw`font-light text-xs`, {
-                                          fontFamily: FontTheme.font.MontserratMedium
+                                          fontFamily: fontFamily.Medium
                                       }]}>{items.name}</Text>
                                   </TouchableOpacity>
                               )
@@ -142,28 +142,28 @@ export default function ShippingScreen() {
               </View>
               <View style={[tw`gap-3`]}>
                 <Text style={[tw`uppercase text-[10px]`, {
-                fontFamily: FontTheme.font.MontserratRegular
+                fontFamily: fontFamily.Regular
               }]}>Item Description</Text>
                 <TextInputFields
                   
                 />
                 <Text style={[tw`uppercase text-[10px]`, {
-                fontFamily: FontTheme.font.MontserratRegular
+                fontFamily: fontFamily.Regular
               }]}>Estimated Weight (kg)</Text>
                 <TextInputFields
                   
                 />
                 <Text style={[tw`uppercase text-[10px]`, {
-                fontFamily: FontTheme.font.MontserratRegular
+                fontFamily: fontFamily.Regular
               }]}>Item Value (₦)</Text>
                 <TextInputFields
                   
                 />
                 <Text style={[tw`uppercase text-[10px] self-end`, {
-                fontFamily: FontTheme.font.MontserratRegular
+                fontFamily: fontFamily.Regular
               }]}>For insurance purposes</Text>
                 <Text style={[tw`uppercase text-[10px]`, {
-                fontFamily: FontTheme.font.MontserratRegular
+                fontFamily: fontFamily.Regular
               }]}>Special Instructions (Optional)</Text>
                 <TextInputFields
                   
@@ -190,10 +190,10 @@ export default function ShippingScreen() {
               <View style={[tw`gap-7`]}>
                  <View style={[tw`gap-2`]}>
                 <Text style={[tw`uppercase`, {
-                  fontFamily: FontTheme.font.MontserratBold
+                  fontFamily: fontFamily.Bold
                 }]}>Delivery Address</Text>
                 <Text style={[tw`text-[10px] uppercase`, {
-                  fontFamily: FontTheme.font.MontserratMedium
+                  fontFamily: fontFamily.Medium
                 }]}>Where should we deliver your package?</Text>
                 </View>
                 <View style={[tw`flex-row gap-1`]}>
@@ -217,19 +217,29 @@ export default function ShippingScreen() {
                   
                 </View>
                 <View>
-                 
+                  <MapView
+                    style={[tw`h-[200px] rounded-md`]}
+                    region={{
+                      latitude: 6.5244,
+                      longitude: 3.3792,
+                      latitudeDelta: 0.0922,
+                      longitudeDelta: 0.0421,
+                    }}
+                  >
+                    
+                 </MapView>
                 </View>
                 <View style={[tw`gap-10`]}>
                 <View style={[tw`flex-row gap-5 items-center`]}>
                   <AntDesign name="clock-circle" size={20} />
                   <View style={[tw`gap-2`]}>
                     <Text style={[tw`uppercase`, {
-                      fontFamily: FontTheme.font.MontserratBold
+                      fontFamily: fontFamily.Bold
                     }]}>Stanzel grand resort</Text>
                     <View style={[tw`flex-row items-center gap-1`]}>
                       <Feather name="map-pin"  size={15} />
                       <Text style={[tw`text-[10px] uppercase`, {
-                      fontFamily: FontTheme.font.MontserratMedium
+                      fontFamily: fontFamily.Medium
                     }]}>Gwarimpa first avenue</Text>
                     </View>
                   </View>
@@ -238,12 +248,12 @@ export default function ShippingScreen() {
                   <AntDesign name="clock-circle" size={20} />
                   <View style={[tw`gap-2`]}>
                     <Text style={[tw`uppercase`, {
-                      fontFamily: FontTheme.font.MontserratBold
+                      fontFamily: fontFamily.Bold
                     }]}>Stanzel grand resort</Text>
                     <View style={[tw`flex-row items-center gap-1`]}>
                       <Feather name="map-pin"  size={15} />
                       <Text style={[tw`text-[10px] uppercase`, {
-                      fontFamily: FontTheme.font.MontserratMedium
+                      fontFamily: fontFamily.Medium
                     }]}>Gwarimpa first avenue</Text>
                     </View>
                   </View>
@@ -252,12 +262,12 @@ export default function ShippingScreen() {
                   <AntDesign name="clock-circle" size={20} />
                   <View style={[tw`gap-2`]}>
                     <Text style={[tw`uppercase`, {
-                      fontFamily: FontTheme.font.MontserratBold
+                      fontFamily: fontFamily.Bold
                     }]}>Stanzel grand resort</Text>
                     <View style={[tw`flex-row items-center gap-1`]}>
                       <Feather name="map-pin"  size={15} />
                       <Text style={[tw`text-[10px] uppercase`, {
-                      fontFamily: FontTheme.font.MontserratMedium
+                      fontFamily: fontFamily.Medium
                     }]}>Gwarimpa first avenue</Text>
                     </View>
                   </View>
@@ -283,10 +293,10 @@ export default function ShippingScreen() {
               <View style={[tw`gap-7`]}>
                 <View style={[tw`gap-2`]}>
                 <Text style={[tw`uppercase`, {
-                  fontFamily: FontTheme.font.MontserratBold
+                  fontFamily: fontFamily.Bold
                 }]}>recipient’s information</Text>
                 <Text style={[tw`text-[10px] uppercase`, {
-                  fontFamily: FontTheme.font.MontserratMedium
+                  fontFamily: fontFamily.Medium
                 }]}>Tell us about who will be receiving the package</Text>
                 </View>
                 <View style={[tw`flex-row gap-1`]}>
@@ -302,18 +312,18 @@ export default function ShippingScreen() {
                 </View>
                 <View style={[tw`gap-3`]}>
                   <Text style={[tw`text-[10px] uppercase`, {
-                    fontFamily: FontTheme.font.MontserratRegular
+                    fontFamily: fontFamily.Regular
                   }]}>Full Legal Name</Text>
                 <TextInputFields
 
                   />
                   <Text style={[tw`text-[10px] uppercase`, {
-                    fontFamily: FontTheme.font.MontserratRegular
+                    fontFamily: fontFamily.Regular
                   }]}>Phone No.</Text>
                 <TextInputFields
                   />
                   <Text style={[tw`text-[10px] uppercase`, {
-                    fontFamily: FontTheme.font.MontserratRegular
+                    fontFamily: fontFamily.Regular
                   }]}>pecial Instructions (Optional)</Text>
                 <TextInputFields
                   />
@@ -338,10 +348,10 @@ export default function ShippingScreen() {
               <View style={[tw`gap-7`]}>
                 <View style={[tw`gap-2`]}>
                 <Text style={[tw`uppercase`, {
-                  fontFamily: FontTheme.font.MontserratBold
+                  fontFamily: fontFamily.Bold
                 }]}>recipient’s information</Text>
                 <Text style={[tw`text-[10px] uppercase`, {
-                  fontFamily: FontTheme.font.MontserratMedium
+                  fontFamily: fontFamily.Medium
                 }]}>Tell us about who will be receiving the package</Text>
                 </View>
                 <View style={[tw`flex-row gap-1`]}>
@@ -359,40 +369,40 @@ export default function ShippingScreen() {
                 <View style={[tw`flex-row justify-between`]}>
                   <View>
                     <Text style={[tw`uppercase text-[#19488A]`, {
-                      fontFamily: FontTheme.font.MontserratBold
+                      fontFamily: fontFamily.Bold
                     }]}>Light Parcel Rider</Text>
                     <Text style={[tw`text-[12px]`, {
-                      fontFamily: FontTheme.font.MontserratMedium
+                      fontFamily: fontFamily.Medium
                     }]}>Up to 10kg</Text>
                   </View>
                   <Text style={[tw`text-xl text-[#CC1A21]`, {
-                    fontFamily: FontTheme.font.MontserratBold
+                    fontFamily: fontFamily.Bold
                   }]}>₦2,500</Text>
                </View>
                 <View style={[tw`flex-row justify-between`]}>
                   <View>
                     <Text style={[tw`uppercase text-[#19488A]`, {
-                      fontFamily: FontTheme.font.MontserratBold
+                      fontFamily: fontFamily.Bold
                     }]}>Light Parcel Rider</Text>
                     <Text style={[tw`text-[12px]`, {
-                      fontFamily: FontTheme.font.MontserratMedium
+                      fontFamily: fontFamily.Medium
                     }]}>Up to 10kg</Text>
                   </View>
                   <Text style={[tw`text-xl text-[#CC1A21]`, {
-                    fontFamily: FontTheme.font.MontserratBold
+                    fontFamily: fontFamily.Bold
                   }]}>₦2,500</Text>
                </View>
                 <View style={[tw`flex-row justify-between`]}>
                   <View>
                     <Text style={[tw`uppercase text-[#19488A]`, {
-                      fontFamily: FontTheme.font.MontserratBold
+                      fontFamily: fontFamily.Bold
                     }]}>Light Parcel Rider</Text>
                     <Text style={[tw`text-[12px]`, {
-                      fontFamily: FontTheme.font.MontserratMedium
+                      fontFamily: fontFamily.Medium
                     }]}>Up to 10kg</Text>
                   </View>
                   <Text style={[tw`text-xl text-[#CC1A21]`, {
-                    fontFamily: FontTheme.font.MontserratBold
+                    fontFamily: fontFamily.Bold
                   }]}>₦2,500</Text>
                </View>
                 </View>

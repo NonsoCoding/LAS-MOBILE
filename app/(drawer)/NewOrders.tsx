@@ -1,6 +1,7 @@
 import PrimaryButton from "@/components/Buttons/PrimaryButton";
 import TextInputFields from "@/components/Inputs/TextInputFields";
 import Colors from "@/constants/Colors";
+import { fontFamily } from "@/constants/fonts";
 import tw from "@/constants/tailwind";
 import { DrawerActions } from "@react-navigation/native";
 import { useNavigation, useRouter } from "expo-router";
@@ -53,7 +54,7 @@ const NewOrders = ({}: NewOrdersProps) => {
               <TouchableOpacity>
                 <ArrowLeft color={themeColors.text} />
               </TouchableOpacity>
-              <Text style={[tw`text-3xl font-bold text-white`, {}]}>
+              <Text style={[tw`text-3xl text-white`, { fontFamily: fontFamily.Bold }]}>
                 New Order
               </Text>
             </View>
@@ -64,7 +65,7 @@ const NewOrders = ({}: NewOrdersProps) => {
         <View style={[tw`bg-white gap-6 rounded- p-5`]}>
           <View style={[tw`gap-4`]}>
             <View style={[tw`flex-row justify-between items-center`]}>
-              <Text style={[tw`text-xl`]}>Order details</Text>
+              <Text style={[tw`text-xl`, { fontFamily: fontFamily.Bold }]}>Order details</Text>
               <Phone color={themeColors.primaryColor} />
             </View>
             <View style={[tw`border-b`]} />
@@ -78,8 +79,8 @@ const NewOrders = ({}: NewOrdersProps) => {
           ]}
         >
           <View style={[tw`gap-2 w-[80%]`]}>
-            <Text style={[tw`text-xl`]}>Pick Location</Text>
-            <Text style={[tw`font-light`]}>
+            <Text style={[tw`text-xl`, { fontFamily: fontFamily.Bold }]}>Pick Location</Text>
+            <Text style={[tw``, { fontFamily: fontFamily.Light }]}>
               Danziyal Plaza, Olusegun Obasanjo Way, Central Business District
             </Text>
           </View>
@@ -100,8 +101,8 @@ const NewOrders = ({}: NewOrdersProps) => {
           ]}
         >
           <View style={[tw`gap-2 w-[80%]`]}>
-            <Text style={[tw`text-xl`]}>Pick Location</Text>
-            <Text style={[tw`font-light`]}>
+            <Text style={[tw`text-xl`, { fontFamily: fontFamily.Bold }]}>Pick Location</Text>
+            <Text style={[tw``, { fontFamily: fontFamily.Light }]}>
               Danziyal Plaza, Olusegun Obasanjo Way, Central Business District
             </Text>
           </View>

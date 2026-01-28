@@ -1,6 +1,7 @@
 import OrderCard from "@/components/Cards/OrderCard";
 import useAuthStore from "@/components/store/authStore";
 import Colors from "@/constants/Colors";
+import { fontFamily } from "@/constants/fonts";
 import tw from "@/constants/tailwind";
 import { FontAwesome } from "@expo/vector-icons";
 import { DrawerActions } from "@react-navigation/native";
@@ -97,6 +98,7 @@ const RiderHomePage = ({}: UserHomePageProps) => {
                   tw`text-white text-xs`,
                   {
                     color: isOnline ? themeColors.secondaryColor : "white",
+                    fontFamily: fontFamily.Bold
                   },
                 ]}
               >
@@ -112,7 +114,7 @@ const RiderHomePage = ({}: UserHomePageProps) => {
           </View>
           <View style={[tw`gap-2`]}>
             <View style={[tw`flex-row items-center justify-between`, {}]}>
-              <Text style={[tw`text-3xl font-bold text-white`, {}]}>
+              <Text style={[tw`text-3xl text-white`, { fontFamily: fontFamily.Bold }]}>
                 {user?.full_name}
               </Text>
               <View
@@ -130,9 +132,10 @@ const RiderHomePage = ({}: UserHomePageProps) => {
                   onPress={() => setIsOnline(false)}
                 >
                   <Text
-                    style={tw`text-sm font-light text-xs ${
-                      !isOnline ? "text-[#CC1A21]" : "text-white"
-                    }`}
+                    style={[tw`text-xs`, {
+                      color: !isOnline ? "#CC1A21" : "white",
+                      fontFamily: fontFamily.Bold
+                    }]}
                   >
                     OFF
                   </Text>
@@ -144,9 +147,10 @@ const RiderHomePage = ({}: UserHomePageProps) => {
                   onPress={() => setIsOnline(true)}
                 >
                   <Text
-                    style={tw`text-xs font-light ${
-                      isOnline ? "text-green-700" : "text-white"
-                    }`}
+                    style={[tw`text-xs`, {
+                      color: isOnline ? "text-green-700" : "white",
+                      fontFamily: fontFamily.Bold
+                    }]}
                   >
                     ON
                   </Text>
@@ -154,7 +158,7 @@ const RiderHomePage = ({}: UserHomePageProps) => {
               </View>
             </View>
             <View>
-              <Text style={[tw`text-white font-light`]}>
+              <Text style={[tw`text-white`, { fontFamily: fontFamily.Light }]}>
                 Toggle switch to go online
               </Text>
             </View>

@@ -1,24 +1,22 @@
-import PrimaryButton from "@/components/Buttons/PrimaryButton";
 import PasswordTextInputFields from "@/components/Inputs/PasswordTextInputField";
 import TextInputFields from "@/components/Inputs/TextInputFields";
-import SharedLayout from "@/components/Layout/SharedLayout";
 import { checkCarrierExists } from "@/components/services/api/authApi";
 import Colors from "@/constants/Colors";
+import { fontFamily } from "@/constants/fonts";
 import tw from "@/constants/tailwind";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Formik } from "formik";
-import { AtSign, Car, Lock, Phone, User } from "lucide-react-native";
+import { AtSign, Lock } from "lucide-react-native";
 import React, { useEffect, useState } from "react";
 import {
   Alert,
   Image,
   KeyboardAvoidingView,
   Platform,
-  ScrollView,
   Text,
   TouchableOpacity,
   useColorScheme,
-  View,
+  View
 } from "react-native";
 import * as Yup from "yup";
 
@@ -118,17 +116,18 @@ export default function RiderAuthIndex() {
   };
 
   return (
-    <SharedLayout>
+    <View style={[tw`flex-1 bg-[#19488A]`]}>
+      <Image
+              source={require("../../../../assets/images/Intro_logo.png")}
+              style={[tw`self-center h-150 w-150 absolute -top-20`]}
+              resizeMode="contain"
+            />
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
-        style={[tw`flex-1`]}
+        style={[tw`flex-1 justify-end`]}
         keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
       >
-        <ScrollView
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={[tw`flex-grow`]}
-          keyboardShouldPersistTaps="handled"
-        >
+     
           <Formik
             initialValues={{
               email: "",
@@ -149,37 +148,34 @@ export default function RiderAuthIndex() {
               errors,
               touched,
             }) => (
-              <View style={[tw`flex-1 pt-6 pb-6 gap-6`]}>
-                {/* Header Section */}
-                <View style={[tw`gap-2`]}>
-                  <Text style={[tw`text-3xl font-bold text-[#003C7A]`]}>
-                    Sign Up as a Carrier
-                  </Text>
-                  <Text style={[tw`text-3xl font-bold text-[#CC1A21]`]}>
-                    Create account
-                  </Text>
-                  <Text style={[tw`font-light text-sm`]}>
-                    Fill in your details to create your account
-                  </Text>
-                </View>
-
+              <View style={[tw`pt-10 pb-15 gap-6 bg-white px-5 rounded-t-2xl`]}>
+              
                 {/* Form Fields */}
+                <View style={[tw`gap-6`]}>
+                  <View style={[tw`items-center gap-2`]}>
+                    <Text style={[tw`text-2xl`, {
+                      fontFamily: fontFamily.Bold
+                    }]}>Create an account</Text>
+                    <Text style={[tw`text-center`, {
+                      fontFamily: fontFamily.Light
+                    }]}>Welcome back to Africa's Trusted Delivery Network.</Text>
+                </View>
                 <View style={[tw`gap-3`]}>
                   <View>
                     <TextInputFields
                       icon={AtSign}
                       iconColor={themeColors.primaryColor}
-                      placeholderText="Email"
+                      placeholderText="email"
                       iconSize={18}
                       value={values.email}
-                      placeholderTextColor="black"
+                      placeholderTextColor={"#19488A"}
                       onChangeText={handleChange("email")}
                       onBlur={handleBlur("email")}
                       keyboardType="email-address"
                       autoCapitalize="none"
                     />
                     {touched.email && errors.email && (
-                      <Text style={[tw`text-red-500 text-xs mt-1`]}>
+                      <Text style={[tw`text-red-500 text-xs mt-1`, { fontFamily: fontFamily.Regular }]}>
                         {errors.email}
                       </Text>
                     )}
@@ -189,22 +185,23 @@ export default function RiderAuthIndex() {
                     <PasswordTextInputFields
                       icon={Lock}
                       iconColor={themeColors.primaryColor}
-                      placeholderText="Password"
+                      placeholderText="password"
                       iconSize={18}
-                      placeholderTextColor="black"
+                       placeholderTextColor={"#19488A"}
                       value={values.password}
                       onChangeText={handleChange("password")}
                       onBlur={handleBlur("password")}
                       secureTextEntry={true}
                     />
                     {touched.password && errors.password && (
-                      <Text style={[tw`text-red-500 text-xs mt-1`]}>
+                      <Text style={[tw`text-red-500 text-xs mt-1`, { fontFamily: fontFamily.Regular }]}>
                         {errors.password}
                       </Text>
                     )}
                   </View>
+                </View>
 
-                  <View style={[tw`flex-row gap-2`]}>
+                  {/* <View style={[tw`flex-row gap-2`]}>
                     <View style={[tw`flex-1`]}>
                       <TextInputFields
                         icon={User}
@@ -241,26 +238,6 @@ export default function RiderAuthIndex() {
                       )}
                     </View>
                   </View>
-
-                  <View>
-                    <TextInputFields
-                      icon={Phone}
-                      iconColor={themeColors.primaryColor}
-                      iconSize={18}
-                      value={values.phoneNumber}
-                      placeholderTextColor="black"
-                      onChangeText={handleChange("phoneNumber")}
-                      onBlur={handleBlur("phoneNumber")}
-                      placeholderText="+234 9163440787"
-                      keyboardType="phone-pad"
-                    />
-                    {touched.phoneNumber && errors.phoneNumber && (
-                      <Text style={[tw`text-red-500 text-xs mt-1`]}>
-                        {errors.phoneNumber}
-                      </Text>
-                    )}
-                  </View>
-
                   <View>
                     <TextInputFields
                       icon={Car}
@@ -278,12 +255,12 @@ export default function RiderAuthIndex() {
                         {errors.plateNumber}
                       </Text>
                     )}
-                  </View>
+                  </View> */}
                 </View>
 
                 <View style={[tw`flex-row items-center gap-3`]}>
                   <View style={[tw`flex-1 h-px bg-gray-300`]} />
-                  <Text style={[tw`text-gray-500 text-xs`]}>or</Text>
+                  <Text style={[tw`text-gray-500 text-xs`, { fontFamily: fontFamily.Regular }]}>or</Text>
                   <View style={[tw`flex-1 h-px bg-gray-300`]} />
                 </View>
 
@@ -299,7 +276,7 @@ export default function RiderAuthIndex() {
                       style={[tw`h-5 w-5`]}
                       source={require("../../../../assets/images/IntroImages/icon/google.png")}
                     />
-                    <Text style={[tw`font-light text-sm`]}>Google</Text>
+                    <Text style={[tw`text-sm`, { fontFamily: fontFamily.Light }]}>Google</Text>
                   </TouchableOpacity>
 
                   {Platform.OS === "ios" && (
@@ -313,43 +290,38 @@ export default function RiderAuthIndex() {
                         style={[tw`h-5 w-5`]}
                         source={require("../../../../assets/images/IntroImages/icon/apple.png")}
                       />
-                      <Text style={[tw`font-light text-sm`]}>Apple</Text>
+                      <Text style={[tw`text-sm`, { fontFamily: fontFamily.Light }]}>Apple</Text>
                     </TouchableOpacity>
                   )}
                 </View>
 
-                {/* Bottom Section */}
-                <View style={[tw`gap-3 mt-4`]}>
-                  <PrimaryButton
-                    bgColors={themeColors.primaryColor}
-                    height={50}
-                    textColor="white"
-                    text={loading ? "Loading..." : "Continue to verification"}
-                    onpress={handleSubmit}
-                    disabled={loading}
-                  />
-                  <TouchableOpacity
-                    onPress={() => {
-                      router.push("/screens/Auth/Rider/RiderSignIn");
-                    }}
-                  >
-                    <Text
-                      style={[
-                        tw`text-center font-light underline text-sm`,
-                        {
-                          color: themeColors.primaryTextColor,
-                        },
-                      ]}
-                    >
-                      Already have an account?
-                    </Text>
-                  </TouchableOpacity>
-                </View>
+               <View style={[tw`flex-row items-center justify-center gap-1`]}>
+                    <Text style={[tw``, {
+                  fontFamily: fontFamily.Light
+                }]}>Already have an account?</Text>
+              <TouchableOpacity
+                onPress={() => {
+                   router.replace("/screens/Auth/Rider/RiderSignIn"); // Update to your signup route
+                }}
+              >
+                <Text
+                  style={[
+                    tw`text-center`,
+                    {
+                      color: themeColors.primaryTextColor,
+                      fontFamily: fontFamily.Bold
+                    },
+                  ]}
+                >
+                  Sign In
+                </Text>
+              </TouchableOpacity>
+              </View>
               </View>
             )}
           </Formik>
-        </ScrollView>
+       
       </KeyboardAvoidingView>
-    </SharedLayout>
+    </View>
   );
 }

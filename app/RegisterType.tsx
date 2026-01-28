@@ -1,5 +1,6 @@
 import PrimaryButton from "@/components/Buttons/PrimaryButton";
 import Colors from "@/constants/Colors";
+import { fontFamily } from "@/constants/fonts";
 import tw from "@/constants/tailwind";
 import { useRouter } from "expo-router";
 import { useState } from "react";
@@ -54,11 +55,11 @@ const RegisterType = ({}: RegisterTypePropss) => {
         borderTopLeftRadius: 20
       }]}>
         <View style={[tw`items-center gap-2`]}>
-          <Text style={[tw`text-xl font-semibold font-lightt`, {
-            fontFamily: "MontserratBold"
+          <Text style={[tw`text-xl`, {
+            fontFamily: fontFamily.Bold
           }]}>How will you use LAS?</Text>
-          <Text style={[tw`font-light`, {
-            fontFamily: "MontserratLight"
+          <Text style={[tw``, {
+            fontFamily: fontFamily.Light
           }]}>Select your primary role 
 (you can add more later)</Text>
         </View>
@@ -86,14 +87,14 @@ const RegisterType = ({}: RegisterTypePropss) => {
                   <Image resizeMode="contain" style={[tw`h-15 w-20`]} source={items.image} />
                   </View>
                   <View style={[tw`gap-1.5`]}>
-                    <Text style={[tw`font-semibold text-[17px] text-[#19488A]`, {
-                    fontFamily: "MontserratBold"
+                    <Text style={[tw`text-[17px] text-[#19488A]`, {
+                    fontFamily: fontFamily.Bold
                   }]}>
                     {items.name}
                   </Text>
                   
-                    <Text style={[tw`textext-[14px] text-xs w-[70%] font-light`, {
-                    fontFamily: "MontserratRegular"
+                    <Text style={[tw`text-xs w-[70%]`, {
+                    fontFamily: fontFamily.Regular
                   }]}>
                     {items.info}
                   </Text>

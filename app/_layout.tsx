@@ -9,6 +9,7 @@ import "react-native-reanimated";
 import { AppModeProvider, useAppMode } from "../context/AppModeContext";
 
 import { useColorScheme } from "@/components/useColorScheme";
+import { fontFamily } from "@/constants/fonts";
 import { useFonts } from "expo-font";
 import { useEffect } from "react";
 
@@ -26,11 +27,10 @@ function RootLayoutNav() {
   const colorScheme = useColorScheme();
   const { mode } = useAppMode();
   const [loaded, error] = useFonts({
-    // SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
-    MontserratBold: require("../assets/fonts/Montserrat-Bold.ttf"),
-    MontserratMedium: require("../assets/fonts/Montserrat-Medium.ttf"),
-    MontserratRegular: require("../assets/fonts/Montserrat-Regular.ttf"),
-    MontserratLight: require("../assets/fonts/Montserrat-Light.ttf"),
+    [fontFamily.Bold]: require("../assets/fonts/MontserratAlternates-Bold.ttf"),
+    [fontFamily.Medium]: require("../assets/fonts/MontserratAlternates-Medium.ttf"),
+    [fontFamily.Regular]: require("../assets/fonts/MontserratAlternates-Regular.ttf"),
+    [fontFamily.Light]: require("../assets/fonts/MontserratAlternates-Light.ttf"),
   });
   
   useEffect(() => {

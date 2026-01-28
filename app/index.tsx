@@ -1,4 +1,5 @@
 import PrimaryButton from "@/components/Buttons/PrimaryButton";
+import { fontFamily } from "@/constants/fonts";
 import tw from "@/constants/tailwind";
 import { useRouter } from "expo-router";
 import { useState } from "react";
@@ -93,8 +94,8 @@ const IntroScreen = ({}: IntroScreenProps) => {
                 ]}
               >
                 <Animated.Text
-                  style={[tw`text-2xl font-bold text-center mb-3`, {
-                    fontFamily: "MontserratBold"
+                  style={[tw`text-2xl text-center mb-3`, {
+                    fontFamily: fontFamily.Bold
                   }]}
                   entering={FadeIn.delay(200)}
                   key={`title-${index}`}
@@ -103,7 +104,7 @@ const IntroScreen = ({}: IntroScreenProps) => {
                 </Animated.Text>
                 <Animated.Text
                   style={[tw`text-center text-gray-600`, {
-                    fontFamily: "MontserratLight"
+                    fontFamily: fontFamily.Light
                   }]}
                   entering={FadeIn.delay(300)}
                   key={`info-${index}`}

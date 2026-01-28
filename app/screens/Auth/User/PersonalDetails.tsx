@@ -3,6 +3,7 @@ import TextInputFields from "@/components/Inputs/TextInputFields";
 import { registeredUser } from "@/components/services/api/authApi";
 import useAuthStore from "@/components/store/authStore";
 import Colors from "@/constants/Colors";
+import { fontFamily } from "@/constants/fonts";
 import tw from "@/constants/tailwind";
 import * as DocumentPicker from "expo-document-picker";
 import * as ImagePicker from "expo-image-picker";
@@ -229,9 +230,9 @@ export default function UserPersonalDetailsIndex() {
                      <View style={[tw`items-center gap-2`]}>
               <Text
                 style={[
-                  tw`text-xl font-semibold`,
+                  tw`text-xl`,
                   {
-                    fontFamily: "MontserratBold",
+                    fontFamily: fontFamily.Bold,
                   },
                 ]}
               >
@@ -239,9 +240,9 @@ export default function UserPersonalDetailsIndex() {
               </Text>
               <Text
                 style={[
-                  tw`font-light`,
+                  tw``,
                   {
-                    fontFamily: "MontserratLight",
+                    fontFamily: fontFamily.Light,
                   },
                 ]}
               >
@@ -261,7 +262,7 @@ export default function UserPersonalDetailsIndex() {
                         placeholderText="FirstName"
                       />
                       {touched.firstName && errors.firstName && (
-                        <Text style={[tw`text-red-500 text-xs mt-1`]}>
+                        <Text style={[tw`text-red-500 text-xs mt-1`, { fontFamily: fontFamily.Regular }]}>
                           {errors.firstName}
                         </Text>
                       )}
@@ -277,7 +278,7 @@ export default function UserPersonalDetailsIndex() {
                         placeholderText="LastName"
                       />
                       {touched.lastName && errors.lastName && (
-                        <Text style={[tw`text-red-500 text-xs mt-1`]}>
+                        <Text style={[tw`text-red-500 text-xs mt-1`, { fontFamily: fontFamily.Regular }]}>
                           {errors.lastName}
                         </Text>
                       )}
@@ -318,8 +319,9 @@ export default function UserPersonalDetailsIndex() {
                               style={[
                                 tw`text-base`,
                                 documents[field.key]
-                                  ? tw`text-green-700 font-medium`
+                                  ? tw`text-green-700`
                                   : tw`text-gray-700`,
+                                { fontFamily: documents[field.key] ? fontFamily.Bold : fontFamily.Regular }
                               ]}
                             >
                               {field.label}
@@ -347,7 +349,7 @@ export default function UserPersonalDetailsIndex() {
                                 key={key}
                                 style={[tw`flex-row items-center`]}
                               >
-                                <Text style={[tw`text-sm text-green-700`]}>
+                                <Text style={[tw`text-sm text-green-700`, { fontFamily: fontFamily.Regular }]}>
                                   {doc.name || `${key}.jpg`}
                                 </Text>
                               </View>

@@ -1,4 +1,5 @@
 import Colors from "@/constants/Colors";
+import { fontFamily } from "@/constants/fonts";
 import { Entypo, FontAwesome, Ionicons } from "@expo/vector-icons";
 import { DrawerActions } from "@react-navigation/native";
 import { useNavigation } from "expo-router";
@@ -35,17 +36,18 @@ const WalletScreen = () => {
           </Text>
         </View>
         <View style={tw`flex-1`}>
-          <Text style={tw`text-sm font-semibold text-gray-900 mb-0.5`}>
+          <Text style={[tw`text-sm text-gray-900 mb-0.5`, { fontFamily: fontFamily.Bold }]}>
             {title}
           </Text>
-          <Text style={tw`text-xs text-gray-600 mb-0.5`}>{subtitle}</Text>
-          <Text style={tw`text-xs text-gray-400`}>{date}</Text>
+          <Text style={[tw`text-xs text-gray-600 mb-0.5`, { fontFamily: fontFamily.Medium }]}>{subtitle}</Text>
+          <Text style={[tw`text-xs text-gray-400`, { fontFamily: fontFamily.Regular }]}>{date}</Text>
         </View>
       </View>
       <Text
-        style={tw`text-base font-bold ml-3 ${
-          type === "credit" ? "text-green-600" : "text-red-500"
-        }`}
+        style={[tw`text-base ml-3`, {
+          color: type === "credit" ? "#16a34a" : "#ef4444",
+          fontFamily: fontFamily.Bold
+        }]}
       >
         {amount}
       </Text>
@@ -90,7 +92,7 @@ const WalletScreen = () => {
             },
           ]}
         >
-          <Text style={[tw`text-white text-xs`]}>
+          <Text style={[tw`text-white text-xs`, { fontFamily: fontFamily.Bold }]}>
             {" "}
             {isOnline ? "ONLINE" : "OFFLINE"}
           </Text>
@@ -100,8 +102,8 @@ const WalletScreen = () => {
 
       {/* Wallet Header */}
       <View style={tw`px-6 pb-6`}>
-        <Text style={tw`text-3xl font-bold text-white mb-1`}>My Wallet</Text>
-        <Text style={tw`text-base text-white/80`}>Track your earnings</Text>
+        <Text style={[tw`text-3xl text-white mb-1`, { fontFamily: fontFamily.Bold }]}>My Wallet</Text>
+        <Text style={[tw`text-base text-white/80`, { fontFamily: fontFamily.Medium }]}>Track your earnings</Text>
       </View>
 
       {/* Content */}
@@ -112,8 +114,8 @@ const WalletScreen = () => {
       >
         {/* Balance Card */}
         <View style={tw`bg-white rounded-2xl p-6 mb-4 shadow-sm`}>
-          <Text style={tw`text-sm text-gray-600 mb-2`}>Available Balance</Text>
-          <Text style={tw`text-4xl font-bold text-gray-900 mb-6`}>
+          <Text style={[tw`text-sm text-gray-600 mb-2`, { fontFamily: fontFamily.Medium }]}>Available Balance</Text>
+          <Text style={[tw`text-4xl text-gray-900 mb-6`, { fontFamily: fontFamily.Bold }]}>
             ₦45,280.00
           </Text>
 
@@ -127,7 +129,7 @@ const WalletScreen = () => {
               ]}
             >
               <Text style={tw`text-lg text-white mr-2`}>↗</Text>
-              <Text style={tw`text-md font-semibold text-white`}>Withdraw</Text>
+              <Text style={[tw`text-md text-white`, { fontFamily: fontFamily.Bold }]}>Withdraw</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={[
@@ -149,9 +151,10 @@ const WalletScreen = () => {
               </Text>
               <Text
                 style={[
-                  tw`text-md font-semibold `,
+                  tw`text-md`,
                   {
                     color: themeColors.primaryColor,
+                    fontFamily: fontFamily.Bold
                   },
                 ]}
               >
@@ -180,10 +183,10 @@ const WalletScreen = () => {
               />
             </View>
             <View style={tw`flex-1`}>
-              <Text style={tw`text-lg font-bold text-gray-900 mb-0.5`}>
+              <Text style={[tw`text-lg text-gray-900 mb-0.5`, { fontFamily: fontFamily.Bold }]}>
                 +₦12,450
               </Text>
-              <Text style={tw`text-xs text-gray-600`}>This Week</Text>
+              <Text style={[tw`text-xs text-gray-600`, { fontFamily: fontFamily.Medium }]}>This Week</Text>
             </View>
           </View>
 
@@ -205,21 +208,21 @@ const WalletScreen = () => {
               </View>
             </View>
             <View style={tw`flex-1`}>
-              <Text style={tw`text-lg font-bold text-gray-900 mb-0.5`}>
+              <Text style={[tw`text-lg text-gray-900 mb-0.5`, { fontFamily: fontFamily.Bold }]}>
                 ₦89,200
               </Text>
-              <Text style={tw`text-xs text-gray-600`}>This Month</Text>
+              <Text style={[tw`text-xs text-gray-600`, { fontFamily: fontFamily.Medium }]}>This Month</Text>
             </View>
           </View>
         </View>
         {/* Transactions */}
         <View style={tw`bg-white rounded-2xl p-5 mb-4 shadow-sm`}>
           <View style={tw`flex-row justify-between items-center mb-5`}>
-            <Text style={tw`text-lg font-bold text-gray-900`}>
+            <Text style={[tw`text-lg text-gray-900`, { fontFamily: fontFamily.Bold }]}>
               Recent Transactions
             </Text>
             <TouchableOpacity>
-              <Text style={tw`text-sm font-semibold text-blue-500`}>
+              <Text style={[tw`text-sm text-blue-500`, { fontFamily: fontFamily.Bold }]}>
                 View All
               </Text>
             </TouchableOpacity>

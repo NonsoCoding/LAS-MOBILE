@@ -262,7 +262,7 @@ export default function UserSignInIndex() {
                 }]}>Don't have an account?</Text>
               <TouchableOpacity
                 onPress={() => {
-                   router.replace("/screens/Auth/User"); // Update to your signup route
+                   router.replace("/screens/Auth/User/PersonalDetails"); // Update to your signup route
                 }}
               >
                 <Text

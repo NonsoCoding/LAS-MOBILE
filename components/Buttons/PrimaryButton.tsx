@@ -30,7 +30,7 @@ const PrimaryButton = ({
         { backgroundColor: bgColors, height: height, width: width },
       ]}
     >
-      <Text style={[tw`font-semibold`, { color: textColor, fontFamily: "MontserratRegular" }]}>{text}</Text>
+      <Text style={[tw`text-center`, { color: textColor, fontFamily: "MontserratBold" }]}>{text}</Text>
     </TouchableOpacity>
   );
 };

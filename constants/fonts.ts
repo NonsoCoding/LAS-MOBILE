@@ -1,8 +1,6 @@
-export const FontTheme = {
-  font: {
-    MontserratLight: "MontserratLight",
-    MontserratRegular: "MontserratRegular",
-    MontserratMedium: "MontserratMedium",
-    MontserratBold: "MontserratBold",
-  },
+export const fontFamily = {
+    Light: "MontserratLight",
+    Regular: "MontserratRegular",
+    Medium: "MontserratMedium",
+    Bold: "MontserratBold",
 };

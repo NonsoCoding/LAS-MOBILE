@@ -1,4 +1,5 @@
 import Colors from "@/constants/Colors";
+import { fontFamily } from "@/constants/fonts";
 import tw from "@/constants/tailwind";
 import { DrawerActions } from "@react-navigation/native";
 import { useNavigation, useRouter } from "expo-router";
@@ -63,7 +64,7 @@ const TrackOrders = ({}: NewOrdersProps) => {
               >
                 <ArrowLeft color={themeColors.text} />
               </TouchableOpacity>
-              <Text style={[tw`text-3xl font-bold text-white`, {}]}>
+              <Text style={[tw`text-3xl text-white`, { fontFamily: fontFamily.Bold }]}>
                 Track Order
               </Text>
             </View>
@@ -76,7 +77,7 @@ const TrackOrders = ({}: NewOrdersProps) => {
             <View
               style={[tw`flex-row border-b pb-2 items-center justify-between`]}
             >
-              <Text>ORDER #ORD-1248</Text>
+              <Text style={{ fontFamily: fontFamily.Medium }}>ORDER #ORD-1248</Text>
               <Phone color={themeColors.primaryColor} />
             </View>
             <View style={[tw`flex-row items-center gap-4`]}>
@@ -88,8 +89,8 @@ const TrackOrders = ({}: NewOrdersProps) => {
                 <Car color={"#4CB050"} />
               </View>
               <View>
-                <Text style={[tw`text-xl`]}>In Transit</Text>
-                <Text style={[tw`font-light`]}>Driver on the way</Text>
+                <Text style={[tw`text-xl`, { fontFamily: fontFamily.Bold }]}>In Transit</Text>
+                <Text style={[tw``, { fontFamily: fontFamily.Light }]}>Driver on the way</Text>
               </View>
             </View>
           </View>
@@ -120,7 +121,7 @@ const TrackOrders = ({}: NewOrdersProps) => {
                 >
                   <ArrowRight color={"white"} />
                 </TouchableOpacity>
-                <Text style={[tw`font-light text-xl`]}>Live Tracking</Text>
+                <Text style={[tw`text-xl`, { fontFamily: fontFamily.Bold }]}>Live Tracking</Text>
               </View>
             </ImageBackground>
           </View>
@@ -138,10 +139,10 @@ const TrackOrders = ({}: NewOrdersProps) => {
                 <Car color={"#4CB050"} />
               </View>
               <View>
-                <Text style={[tw`text-xl`]}>Michael Johnson</Text>
+                <Text style={[tw`text-xl`, { fontFamily: fontFamily.Bold }]}>Michael Johnson</Text>
                 <View style={[tw`flex-row items-center gap-1`]}>
                   <Star color={"black"} size={16} />
-                  <Text style={[tw`font-light text-xs`]}>
+                  <Text style={[tw`text-xs`, { fontFamily: fontFamily.Light }]}>
                     4.9 (324 deliveries)
                   </Text>
                 </View>

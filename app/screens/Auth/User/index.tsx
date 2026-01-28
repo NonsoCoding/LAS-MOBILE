@@ -3,6 +3,7 @@ import PasswordTextInputFields from "@/components/Inputs/PasswordTextInputField"
 import TextInputFields from "@/components/Inputs/TextInputFields";
 import { checkCarrierExists } from "@/components/services/api/authApi";
 import Colors from "@/constants/Colors";
+import { fontFamily } from "@/constants/fonts";
 import tw from "@/constants/tailwind";
 import { useRouter } from "expo-router";
 import { Formik } from "formik";
@@ -104,9 +105,9 @@ export default function UserAuthIndex() {
             <View style={[tw`items-center gap-2`]}>
               <Text
                 style={[
-                  tw`text-xl font-semibold`,
+                  tw`text-xl`,
                   {
-                    fontFamily: "MontserratBold",
+                    fontFamily: fontFamily.Bold,
                   },
                 ]}
               >
@@ -114,9 +115,9 @@ export default function UserAuthIndex() {
               </Text>
               <Text
                 style={[
-                  tw`font-light`,
+                  tw``,
                   {
-                    fontFamily: "MontserratLight",
+                    fontFamily: fontFamily.Light,
                   },
                 ]}
               >
@@ -205,9 +206,9 @@ export default function UserAuthIndex() {
               <View style={[tw`flex-row items-center justify-center gap-1`]}>
                 <Text
                   style={[
-                    tw`font-light`,
+                    tw``,
                     {
-                      fontFamily: "MontserratRegular",
+                      fontFamily: fontFamily.Light,
                     },
                   ]}
                 >
@@ -220,10 +221,10 @@ export default function UserAuthIndex() {
                 >
                   <Text
                     style={[
-                      tw`text-center font-semibold`,
+                      tw`text-center`,
                       {
                         color: themeColors.primaryTextColor,
-                        fontFamily: "MontserratBold",
+                        fontFamily: fontFamily.Bold,
                       },
                     ]}
                   >

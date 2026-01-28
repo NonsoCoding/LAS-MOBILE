@@ -1,7 +1,7 @@
 import OrderCard from "@/components/Cards/OrderCard";
 import useAuthStore from "@/components/store/authStore";
 import Colors from "@/constants/Colors";
-import { FontTheme } from "@/constants/fonts";
+import { fontFamily } from "@/constants/fonts";
 import tw from "@/constants/tailwind";
 import { AntDesign, Feather } from "@expo/vector-icons";
 import { useNavigation, useRouter } from "expo-router";
@@ -69,12 +69,12 @@ const UserHomePage = ({}: UserHomePageProps) => {
         <Image style={[tw`h-20 w-20`]} source={require("../../assets/images/IntroImages/profile.png")} />
         <View>
           <Text style={[tw`uppercase text-[15px] text-white`, {
-            fontFamily: FontTheme.font.MontserratBold
+            fontFamily: fontFamily.Bold
           }]}>Welcome, Godson</Text>
           <View style={[tw`flex-row gap-1 items-center`]}>
             <Feather name="map-pin" color={"white"} size={13} />
               <Text style={[tw`text-white text-xs`, {
-            fontFamily: FontTheme.font.MontserratMedium
+            fontFamily: fontFamily.Medium
           }]}>Gwarimpa first avenue</Text>
           </View>
         </View>
@@ -88,11 +88,11 @@ const UserHomePage = ({}: UserHomePageProps) => {
        <View>
         <View style={[tw`flex-row justify-between items-center`]}>
             <Text style={[tw`uppercase`, {
-              fontFamily: FontTheme.font.MontserratBold
+              fontFamily: fontFamily.Bold
             }]}>Recent Activities</Text>
                <TouchableOpacity style={[tw`bg-[#19488A22] rounded-full w-20  items-center h-6.5 justify-center`, ]}>
           <Text style={[tw`text-[10px] uppercase text-[#19488A]`, {
-            fontFamily: FontTheme.font.MontserratMedium
+            fontFamily: fontFamily.Medium
           }]}>See all</Text>
         </TouchableOpacity>
         </View>
@@ -103,14 +103,14 @@ const UserHomePage = ({}: UserHomePageProps) => {
               <View key={index} style={[tw`flex-row justify-between`]}>
                 <View style={tw`gap-3`}>
                   <Text style={[tw`uppercase`, {
-                    fontFamily: FontTheme.font.MontserratBold
+                    fontFamily: fontFamily.Bold
                   }]}>{item.id}</Text>
                   <Text style={[tw`uppercase text-[10px] text-[#19488A]`, {
-                      fontFamily: FontTheme.font.MontserratMedium
+                      fontFamily: fontFamily.Medium
                   }]}>{item.name}</Text>
                 </View>
                 <Text style={[tw`uppercase text-[10px] text-[#19488A]`, {
-                    fontFamily: FontTheme.font.MontserratMedium
+                    fontFamily: fontFamily.Medium
                 }]}>{item.state}</Text>
               </View>
             )

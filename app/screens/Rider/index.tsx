@@ -1,5 +1,4 @@
 import PrimaryButton from "@/components/Buttons/PrimaryButton";
-import OrderCard from "@/components/Cards/OrderCard";
 import SharedLayout from "@/components/Layout/SharedLayout";
 import Colors from "@/constants/Colors";
 import tw from "@/constants/tailwind";
@@ -21,18 +20,7 @@ const RiderHomePage = ({}: UserHomePageProps) => {
           <Text style={[tw`text-xl font-semibold`, {}]}>Hey Karim,</Text>
           <Switch />
         </View>
-        <OrderCard
-          statusTextColor=""
-          onPress={() => {
-            
-          }}
-          issuedTo="Customer"
-          name="Johnson Chike"
-          cardTitle="New Order"
-          status="Single trip"
-          statusBgColor=""
-          date="02 Sept, 2022"
-        />
+       
         <View style={[tw`gap-7`]}>
           <View style={[tw`gap-4`, {}]}>
             <Text
