@@ -27,7 +27,7 @@ import {
 } from "react-native";
 import { TextInput } from "react-native-gesture-handler";
 import { GooglePlaceDetail } from "react-native-google-places-autocomplete";
-import MapView, { LatLng, Marker } from "react-native-maps";
+import MapView, { LatLng, Marker, PROVIDER_GOOGLE } from "react-native-maps";
 import MapViewDirections from "react-native-maps-directions";
 
 interface UserHomePageProps {}
@@ -194,7 +194,7 @@ const UserHomePage = ({}: UserHomePageProps) => {
       backgroundColor: themeColors.background 
     }]}>
       <MapView  
-        
+        provider={PROVIDER_GOOGLE}
         ref={mapRef}
         style={[tw`flex-1`]}
         region={{
