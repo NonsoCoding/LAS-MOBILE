@@ -1,15 +1,16 @@
 import PrimaryButton from "@/components/Buttons/PrimaryButton";
-import SharedLayout from "@/components/Layout/SharedLayout";
 import CompleteModal from "@/components/Modals/CompleteModal";
 import { verifyOtp } from "@/components/services/api/authApi";
 import useAuthStore from "@/components/store/authStore";
 import useRiderAuthStore from "@/components/store/RiderAuthStore";
 import Colors from "@/constants/Colors";
+import { fontFamily } from "@/constants/fonts";
 import tw from "@/constants/tailwind";
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { useState } from "react";
 import {
   Alert,
+  Image,
   Text,
   TouchableOpacity,
   useColorScheme,
@@ -21,9 +22,13 @@ const OtpScreen = () => {
   const router = useRouter();
   const colorScheme = useColorScheme();
   const themeColors = Colors[colorScheme ?? "light"];
+  const { phone } = useLocalSearchParams<{ phone: string }>();
 
   // Get login function from Zustand store
   const { login } = useRiderAuthStore();
+  const { phoneNumber } = useAuthStore();
+
+  const displayPhone = phone || phoneNumber;
 
   const [otp, setOtp] = useState<string>("");
   const [loading, setLoading] = useState(false);
@@ -52,7 +57,7 @@ const OtpScreen = () => {
         }
 
         console.log("Navigating to rider drawer");
-        router.replace("/(Rider-Drawer)");
+        router.replace("/RegisterType");
 
         setCompleteModalVisible(true);
       } else {
@@ -69,24 +74,25 @@ const OtpScreen = () => {
   };
 
   return (
-    <SharedLayout>
-      <View style={tw`flex-1 pt-10 justify-between`}>
+    <View style={[tw`flex-1 bg-[#19488A] justify-end`]}>
+      <Image
+              source={require("../../assets/images/Intro_logo.png")}
+              style={[tw`self-center h-150 w-150 absolute -top-20`]}
+              resizeMode="contain"
+            />
+      <View style={tw`bg-white py-10 pb-15 px-5 gap-5 rounded-t-2xl`}>
+        <View style={[tw`items-center gap-1`]}>
+          <Text style={[tw`text-2xl`, {
+            fontFamily: fontFamily.MontserratEasyBold,
+          }]}>Verify your Number</Text>
+          <Text style={[tw`text-sm`, {
+            fontFamily: fontFamily.Regular,
+          }]}>Enter the 6-digit code sent to your phone number</Text>
+          <Text style={[tw`text-sm text-[#CC1A21]`, {
+            fontFamily: fontFamily.Regular,
+          }]}>{displayPhone}</Text>
+        </View>
         <View style={tw`gap-10`}>
-          <View style={tw`gap-2`}>
-            <Text
-              style={[
-                tw`text-3xl font-semibold`,
-                { color: themeColors.primaryTextColor },
-              ]}
-            >
-              Rider Verification
-            </Text>
-
-            <Text style={tw`text-gray-400`}>
-              Input the six digit verification code sent to your mail
-            </Text>
-          </View>
-
           <OtpInput
             numberOfDigits={6}
             onTextChange={(text) => setOtp(text)}
@@ -97,55 +103,77 @@ const OtpScreen = () => {
                 justifyContent: "center",
               },
               pinCodeContainerStyle: {
-                backgroundColor: colorScheme === "dark" ? "#1F1F1F" : "#FFFFFF",
-                borderWidth: 2,
-                borderColor: colorScheme === "dark" ? "#2A2A2A" : "#E5E5E5",
+                backgroundColor: colorScheme === "dark" ? "#1F1F1F" : "#19488A22",
+                borderWidth: 1,
+                borderColor: colorScheme === "dark" ? "#2A2A2A" : "transparent",
                 borderRadius: 10,
                 width: 50,
-                height: 65,
+                height: 40,
                 elevation: 5,
               },
               focusedPinCodeContainerStyle: {
                 borderColor: themeColors.tint,
-                borderWidth: 2.5,
+                borderWidth: 1,
               },
               pinCodeTextStyle: {
                 color: themeColors.primaryTextColor,
                 fontSize: 26,
                 fontWeight: "700",
               },
+              // Add this to ensure the text is visible
               filledPinCodeContainerStyle: {
                 borderColor: themeColors.tint,
               },
             }}
             textInputProps={{
+              // Add these props to ensure text input works properly
               accessibilityLabel: "One-Time Password",
             }}
             focusColor={themeColors.tint}
           />
-
-          {/* LOGIN LINK */}
-          <View style={tw`flex-row gap-1 items-center justify-center`}>
-            <Text>Already have an account?</Text>
-            <TouchableOpacity onPress={() => router.push("/screens")}>
-              <Text
-                style={[tw`underline`, { color: themeColors.primaryColor }]}
-              >
-                Login
-              </Text>
-            </TouchableOpacity>
-          </View>
         </View>
 
         {/* CONTINUE BUTTON */}
         <PrimaryButton
-          bgColors={themeColors.primaryColor}
+          bgColors={otp.length !== 6 ? "#19488A44" : themeColors.primaryColor}
           height={50}
-          onpress={handleContinue}
+          onpress={() => {
+            router.push("/RegisterType")
+          }}
           textColor={themeColors.text}
           text={loading ? "Verifying..." : "Continue"}
           disabled={otp.length !== 6 || loading}
         />
+           {/* LOGIN LINK */}
+         <View style={[tw`flex-row items-center justify-center gap-1`]}>
+                <Text
+                  style={[
+                    tw``,
+                    {
+                      fontFamily: fontFamily.Light,
+                    },
+                  ]}
+                >
+                  Already have an account?
+                </Text>
+                <TouchableOpacity
+                  onPress={() => {
+                    router.replace("/screens");
+                  }}
+                >
+                  <Text
+                    style={[
+                      tw`text-center`,
+                      {
+                        color: themeColors.primaryTextColor,
+                        fontFamily: fontFamily.Bold,
+                      },
+                    ]}
+                  >
+                    Sign In
+                  </Text>
+                </TouchableOpacity>
+              </View>
         <CompleteModal
           visible={completeModalVisible}
           onClose={() => {
@@ -156,7 +184,7 @@ const OtpScreen = () => {
           titleSubInfo2="After documents approval you can start your Workorders."
         />
       </View>
-    </SharedLayout>
+    </View>
   );
 };
 

@@ -44,7 +44,7 @@ const PasswordTextInputFields = ({
   return (
     <View
       style={[
-        tw`py-4.5 bg-[#19488A22] text-[17px] gap-2 flex-row items-center rounded border border-gray-200 px-3`,
+        tw`bg-[#19488A11] text-[17px] gap-2 flex-row items-center rounded-full border border-gray-200 px-3`,
         {},
       ]}
     >
@@ -62,7 +62,7 @@ const PasswordTextInputFields = ({
         placeholderTextColor={placeholderTextColor}
         onBlur={onBlur}
         secureTextEntry={secureTextEntry && !isPasswordVisible}
-        style={[tw`flex-1 font-light text-black`, {
+        style={[tw`flex-1 font-light text-black py-3.5`, {
           fontFamily: "MontserratRegular"
         }]}
       />

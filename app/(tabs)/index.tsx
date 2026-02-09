@@ -1,4 +1,5 @@
 import OrderCard from "@/components/Cards/OrderCard";
+import SearchTextInput from "@/components/Inputs/SearchTextInput";
 import useAuthStore from "@/components/store/authStore";
 import Colors from "@/constants/Colors";
 import { fontFamily } from "@/constants/fonts";
@@ -66,7 +67,7 @@ const UserHomePage = ({}: UserHomePageProps) => {
     }]}>
       <View style={[tw`flex-row items-center p-5 justify-between`]}>
         <View style={[tw`items-center flex-row gap-3`]}>
-        <Image style={[tw`h-20 w-20`]} source={require("../../assets/images/IntroImages/profile.png")} />
+        <Image style={[tw`h-13 w-13`]} source={require("../../assets/images/IntroImages/profile.png")} />
         <View>
           <Text style={[tw`uppercase text-[15px] text-white`, {
             fontFamily: fontFamily.Bold
@@ -84,6 +85,9 @@ const UserHomePage = ({}: UserHomePageProps) => {
         </TouchableOpacity>
       </View>
       <View style={[tw`h-[80%] bg-white rounded-t-5 gap-7 p-5`]}>
+        <SearchTextInput
+                    placeholderText='TRACK YOUR SHIPMENT'
+                  />
         <OrderCard/>
        <View>
         <View style={[tw`flex-row justify-between items-center`]}>

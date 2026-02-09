@@ -6,21 +6,45 @@ import TextInputFields from '@/components/Inputs/TextInputFields';
 import Colors from '@/constants/Colors';
 import { fontFamily } from '@/constants/fonts';
 import tw from '@/constants/tailwind';
-import { AntDesign, Feather } from '@expo/vector-icons';
+import { AntDesign, Feather, FontAwesome } from '@expo/vector-icons';
 import { useState } from 'react';
 import { Image, ScrollView, Text, TouchableOpacity, useColorScheme, View } from 'react-native';
 import MapView from 'react-native-maps';
 export default function ShippingScreen() {
 
   const [selected, setSelected] = useState<number | null>(null);
-  const colorSheme = useColorScheme();
-  const themeColors = Colors[colorSheme ?? "light"];
+  const colorScheme = useColorScheme();
+  const themeColors = Colors[colorScheme ?? "light"];
   const [step, setStep] = useState<1 | 2 | 3 | 4 | 5>(1);
 
+  const ProgressBar = () => (
+    <View style={[tw`flex-row gap-1`]}>
+      {[...Array(5)].map((_, i) => (
+        <View
+          key={i}
+          style={[
+            tw`flex-1 h-1 rounded-full`,
+            { 
+              backgroundColor: i < step 
+                ? themeColors.primaryColor 
+                : `${themeColors.primaryColor}33` 
+            }
+          ]}
+        />
+      ))}
+    </View>
+  );
+
   const packagelist = [
-    {icon: require("../../assets/images/IntroImages/Gift.png"), name: "Gift"},
-    {icon: require("../../assets/images/IntroImages/Gift.png"), name: "GROCERIES"},
-    {icon: require("../../assets/images/IntroImages/Gift.png"), name: "Gift"},
+    { icon: require("../../assets/images/IntroImages/Gift.png"), name: "Gift" },
+    { icon: require("../../assets/images/IntroImages/Gift.png"), name: "GROCERIES" },
+    { icon: require("../../assets/images/IntroImages/Gift.png"), name: "Gift" },
+  ];
+
+  const ParceList = [
+    { name: "Light Parcel Rider", price: "₦2,500", weight: "Up to 10kg", icon: <FontAwesome name="bicycle" size={24} color={themeColors.primaryColor} /> },
+    { name: "2-Tonne Truck", price: "₦4,500", weight: "Up to 25kg", icon: <Feather name="truck" size={24} color={themeColors.primaryColor} /> },
+    { name: "5-Tonne Truck", price: "₦8,500", weight: "Up to 50kg", icon: <Feather name="truck" size={24} color={themeColors.primaryColor} /> },
   ]
 
   return (
@@ -80,7 +104,7 @@ export default function ShippingScreen() {
       <View style={[tw`p-5 flex-row items-center gap-2`]}>
         <BackButton
           onPress={() => {
-            setStep(3);
+            setStep(4);
           }}
         />
         <Text style={[tw`text-white text-2xl uppercase`, {
@@ -88,7 +112,7 @@ export default function ShippingScreen() {
         }]}>Choose Carrier</Text>
       </View>
       )}
-      <View style={[tw`h-[80%] bg-white rounded-t-5 p-5`]}>
+      <View style={[tw`h-[80%] bg-white rounded-t-5 p-5 pb-10`]}>
           {step === 1 && (
             <>
         <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={[tw``]}>
@@ -101,17 +125,7 @@ export default function ShippingScreen() {
                   fontFamily: fontFamily.Medium
                 }]}>Tell us about your package</Text>
                 </View>
-               <View style={[tw`flex-row gap-1`]}>
-              {[...Array(5)].map((_, i) => (
-                <View
-                  key={i}
-                  style={[
-                    tw`flex-1 h-1 rounded-full`,
-                    { backgroundColor: themeColors.primaryColor }
-                  ]}
-                />
-              ))}
-            </View>
+               <ProgressBar />
               <View style={[tw`flex-row gap-2`]}>
                           {packagelist.map((items, index) => {
                               const isSelected = selected === index;
@@ -159,7 +173,7 @@ export default function ShippingScreen() {
                 <TextInputFields
                   
                 />
-                <Text style={[tw`uppercase text-[10px] self-end`, {
+                <Text style={[tw`uppercase text-[10px] text-[#CC1A21] self-end`, {
                 fontFamily: fontFamily.Regular
               }]}>For insurance purposes</Text>
                 <Text style={[tw`uppercase text-[10px]`, {
@@ -196,17 +210,7 @@ export default function ShippingScreen() {
                   fontFamily: fontFamily.Medium
                 }]}>Where should we deliver your package?</Text>
                 </View>
-                <View style={[tw`flex-row gap-1`]}>
-              {[...Array(5)].map((_, i) => (
-                <View
-                  key={i}
-                  style={[
-                    tw`flex-1 h-1 rounded-full`,
-                    { backgroundColor: themeColors.primaryColor }
-                  ]}
-                />
-              ))}
-                </View>
+                <ProgressBar />
                 <View style={[tw`gap-2`]}>
                   <SearchTextInput
                     placeholderText='SEARCH FOR DELIVERY ADDRESS'
@@ -231,43 +235,15 @@ export default function ShippingScreen() {
                 </View>
                 <View style={[tw`gap-10`]}>
                 <View style={[tw`flex-row gap-5 items-center`]}>
-                  <AntDesign name="clock-circle" size={20} />
+                  <AntDesign name="clock-circle" size={20} color={themeColors.primaryColor} />
                   <View style={[tw`gap-2`]}>
                     <Text style={[tw`uppercase`, {
-                      fontFamily: fontFamily.Bold
+                      fontFamily: fontFamily.Medium
                     }]}>Stanzel grand resort</Text>
                     <View style={[tw`flex-row items-center gap-1`]}>
-                      <Feather name="map-pin"  size={15} />
+                      <Feather name="map-pin"  size={10} />
                       <Text style={[tw`text-[10px] uppercase`, {
-                      fontFamily: fontFamily.Medium
-                    }]}>Gwarimpa first avenue</Text>
-                    </View>
-                  </View>
-                </View>
-                <View style={[tw`flex-row gap-5 items-center`]}>
-                  <AntDesign name="clock-circle" size={20} />
-                  <View style={[tw`gap-2`]}>
-                    <Text style={[tw`uppercase`, {
-                      fontFamily: fontFamily.Bold
-                    }]}>Stanzel grand resort</Text>
-                    <View style={[tw`flex-row items-center gap-1`]}>
-                      <Feather name="map-pin"  size={15} />
-                      <Text style={[tw`text-[10px] uppercase`, {
-                      fontFamily: fontFamily.Medium
-                    }]}>Gwarimpa first avenue</Text>
-                    </View>
-                  </View>
-                </View>
-                <View style={[tw`flex-row gap-5 items-center`]}>
-                  <AntDesign name="clock-circle" size={20} />
-                  <View style={[tw`gap-2`]}>
-                    <Text style={[tw`uppercase`, {
-                      fontFamily: fontFamily.Bold
-                    }]}>Stanzel grand resort</Text>
-                    <View style={[tw`flex-row items-center gap-1`]}>
-                      <Feather name="map-pin"  size={15} />
-                      <Text style={[tw`text-[10px] uppercase`, {
-                      fontFamily: fontFamily.Medium
+                      fontFamily: fontFamily.Regular
                     }]}>Gwarimpa first avenue</Text>
                     </View>
                   </View>
@@ -299,17 +275,7 @@ export default function ShippingScreen() {
                   fontFamily: fontFamily.Medium
                 }]}>Tell us about who will be receiving the package</Text>
                 </View>
-                <View style={[tw`flex-row gap-1`]}>
-              {[...Array(5)].map((_, i) => (
-                <View
-                  key={i}
-                  style={[
-                    tw`flex-1 h-1 rounded-full`,
-                    { backgroundColor: themeColors.primaryColor }
-                  ]}
-                />
-              ))}
-                </View>
+                <ProgressBar />
                 <View style={[tw`gap-3`]}>
                   <Text style={[tw`text-[10px] uppercase`, {
                     fontFamily: fontFamily.Regular
@@ -324,7 +290,7 @@ export default function ShippingScreen() {
                   />
                   <Text style={[tw`text-[10px] uppercase`, {
                     fontFamily: fontFamily.Regular
-                  }]}>pecial Instructions (Optional)</Text>
+                  }]}>Special Instructions (Optional)</Text>
                 <TextInputFields
                   />
                 </View>
@@ -354,57 +320,28 @@ export default function ShippingScreen() {
                   fontFamily: fontFamily.Medium
                 }]}>Tell us about who will be receiving the package</Text>
                 </View>
-                <View style={[tw`flex-row gap-1`]}>
-              {[...Array(5)].map((_, i) => (
-                <View
-                  key={i}
-                  style={[
-                    tw`flex-1 h-1 rounded-full`,
-                    { backgroundColor: themeColors.primaryColor }
-                  ]}
-                />
-              ))}
-                </View>
+                <ProgressBar />
                 <View style={[tw`gap-10`]}>
-                <View style={[tw`flex-row justify-between`]}>
+                    {ParceList.map((items, index) => {
+                      return (
+                        <View key={index} style={[tw`flex-row justify-between`]}>
+                          <View style={[tw`flex-row gap-4 items-center`]}>
+                            {items.icon}
                   <View>
                     <Text style={[tw`uppercase text-[#19488A]`, {
-                      fontFamily: fontFamily.Bold
-                    }]}>Light Parcel Rider</Text>
-                    <Text style={[tw`text-[12px]`, {
                       fontFamily: fontFamily.Medium
-                    }]}>Up to 10kg</Text>
-                  </View>
-                  <Text style={[tw`text-xl text-[#CC1A21]`, {
-                    fontFamily: fontFamily.Bold
-                  }]}>₦2,500</Text>
-               </View>
-                <View style={[tw`flex-row justify-between`]}>
-                  <View>
-                    <Text style={[tw`uppercase text-[#19488A]`, {
-                      fontFamily: fontFamily.Bold
-                    }]}>Light Parcel Rider</Text>
+                            }]}>{items.name}</Text>
                     <Text style={[tw`text-[12px]`, {
-                      fontFamily: fontFamily.Medium
-                    }]}>Up to 10kg</Text>
+                      fontFamily: fontFamily.Light
+                            }]}>{items.weight}</Text>
                   </View>
-                  <Text style={[tw`text-xl text-[#CC1A21]`, {
-                    fontFamily: fontFamily.Bold
-                  }]}>₦2,500</Text>
+                          </View>
+                  <Text style={[tw`text-[17px] text-[#CC1A21]`, {
+                    fontFamily: fontFamily.Medium
+                          }]}>{items.price}</Text>
                </View>
-                <View style={[tw`flex-row justify-between`]}>
-                  <View>
-                    <Text style={[tw`uppercase text-[#19488A]`, {
-                      fontFamily: fontFamily.Bold
-                    }]}>Light Parcel Rider</Text>
-                    <Text style={[tw`text-[12px]`, {
-                      fontFamily: fontFamily.Medium
-                    }]}>Up to 10kg</Text>
-                  </View>
-                  <Text style={[tw`text-xl text-[#CC1A21]`, {
-                    fontFamily: fontFamily.Bold
-                  }]}>₦2,500</Text>
-               </View>
+                      )
+                    })}
                 </View>
                 <PrimaryButton
                 height={50}

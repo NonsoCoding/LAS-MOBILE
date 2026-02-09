@@ -1,4 +1,6 @@
+import BackButton from "@/components/Buttons/BackButton";
 import Colors from "@/constants/Colors";
+import { fontFamily } from "@/constants/fonts";
 import tw from "@/constants/tailwind";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
@@ -53,28 +55,31 @@ export default function CarrierIndemnityScreen() {
   };
 
   return (
-    <View style={[tw`pb-10`, styles.container, {}]}>
-      {/* Header */}
-      <View
-        style={[
-          styles.header,
-          {
-            backgroundColor: themeColors.primaryColor,
-          },
-        ]}
-      >
-        <View style={styles.headerIcon}>
-          <Ionicons name="shield-checkmark" size={32} color="#fff" />
-        </View>
-        <Text style={styles.headerTitle}>Carrier Indemnity Agreement</Text>
-        <Text style={styles.headerSubtitle}>LAS Mobile Logistics Platform</Text>
+    <View style={[tw`flex-1 justify-end`, {
+      backgroundColor: themeColors.primaryColor
+    }]}>
+      <View style={[tw`pb-10 px-5 pt-20 flex-row items-center gap-4`]}>
+         <BackButton
+          onPress={() => {
+            router.back();
+          }}
+        />
+        <Text style={[tw`uppercase  text-xl text-white`, {
+          fontFamily: fontFamily.Bold
+        }]}>Carrier Indemnity Agreement</Text>
       </View>
+      <View style={tw`flex-1 bg-white rounded-t-3xl pb-10`}>
+        
       {/* Important Notice */}
       <View style={styles.notice}>
-        <Ionicons name="warning" size={24} color="#D97706" />
+        <Ionicons name="warning" size={24} color="#D37A0F" />
         <View style={styles.noticeTextContainer}>
-          <Text style={styles.noticeTitle}>Important Legal Document</Text>
-          <Text style={styles.noticeText}>
+            <Text style={[styles.noticeTitle, {
+            fontFamily: fontFamily.Bold
+          }]}>Important Legal Document</Text>
+            <Text style={[styles.noticeText, {
+            fontFamily: fontFamily.Regular
+          }]}>
             Please read carefully before proceeding. By accepting, you
             acknowledge understanding all terms.
           </Text>
@@ -119,12 +124,12 @@ export default function CarrierIndemnityScreen() {
               features, including in-app calls and live chat functionality. This
               ensures proper documentation and dispute resolution capabilities.
             </Text>
-            <View style={styles.warningBox}>
+            {/* <View style={styles.warningBox}>
               <Text style={styles.warningText}>
                 Violation may result in account suspension and loss of insurance
                 coverage.
               </Text>
-            </View>
+            </View> */}
           </View>
 
           {/* Section 2 */}
@@ -146,13 +151,13 @@ export default function CarrierIndemnityScreen() {
               outside the LAS Mobile platform is strictly prohibited and
               constitutes a material breach of this agreement.
             </Text>
-            <View style={styles.errorBox}>
+            {/* <View style={styles.errorBox}>
               <Text style={styles.errorText}>
                 <Text style={styles.bold}>Consequences:</Text> Immediate account
                 termination, forfeiture of pending earnings, and potential legal
                 action.
               </Text>
-            </View>
+            </View> */}
           </View>
 
           {/* Section 3 */}
@@ -588,8 +593,9 @@ export default function CarrierIndemnityScreen() {
           <ActivityIndicator color="#fff" />
         ) : (
           <>
-            <Text style={styles.buttonText}>Accept & Continue</Text>
-            <Ionicons name="arrow-forward" size={20} color="#fff" />
+              <Text style={[tw`text-white`, {
+              fontFamily: fontFamily.Medium
+            }]}>Accept & Continue</Text>
           </>
         )}
       </TouchableOpacity>
@@ -600,6 +606,7 @@ export default function CarrierIndemnityScreen() {
           Need help understanding this agreement?
         </Text>
       </TouchableOpacity> */}
+      </View>
     </View>
   );
 }
@@ -636,8 +643,8 @@ const styles = StyleSheet.create({
   },
   notice: {
     flexDirection: "row",
-    backgroundColor: "#FEF3C7",
-    borderLeftWidth: 4,
+    backgroundColor: "#D37A0F11",
+    borderLeftWidth: 2,
     borderLeftColor: "#D97706",
     padding: 16,
     marginHorizontal: 16,
@@ -682,26 +689,28 @@ const styles = StyleSheet.create({
   },
   mainTitle: {
     fontSize: 18,
-    fontWeight: "700",
-    color: "#1F2937",
+    fontWeight: "600",
+    color: "#19488A",
     marginBottom: 20,
     textAlign: "center",
     borderBottomWidth: 2,
     paddingBottom: 12,
+    borderBottomColor: "#19488A11",
   },
   section: {
     marginBottom: 24,
   },
   sectionTitle: {
     fontSize: 16,
-    fontWeight: "700",
-    color: "#0A84FF",
+    fontFamily: fontFamily.Bold,
+    color: "#19488A",
     marginBottom: 8,
   },
   sectionContent: {
-    fontSize: 14,
+    fontSize: 12,
     lineHeight: 22,
-    color: "#374151",
+    fontFamily: fontFamily.Regular,
+    color: "#19488A",
     marginBottom: 8,
   },
   bold: {
@@ -709,9 +718,9 @@ const styles = StyleSheet.create({
     color: "#1F2937",
   },
   bulletPoint: {
-    fontSize: 14,
+    fontSize: 12,
     lineHeight: 22,
-    color: "#4B5563",
+    fontFamily: fontFamily.Regular,
     marginLeft: 8,
     marginBottom: 4,
   },
@@ -800,7 +809,7 @@ const styles = StyleSheet.create({
   },
   checkboxRow: {
     flexDirection: "row",
-    alignItems: "center",
+    alignItems: "flex-start",
     paddingHorizontal: 20,
     marginBottom: 16,
     marginTop: 8,
@@ -808,10 +817,11 @@ const styles = StyleSheet.create({
   checkbox: {
     width: 24,
     height: 24,
-    borderWidth: 2,
+    borderWidth: 1,
     borderColor: "#003C7A",
-    borderRadius: 6,
+    borderRadius: 12,
     marginRight: 12,
+    marginTop: 3,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -819,24 +829,18 @@ const styles = StyleSheet.create({
     backgroundColor: "#003C7A",
   },
   checkboxText: {
-    fontSize: 13,
-    color: "#374151",
+    fontSize: 12,
+    fontFamily: fontFamily.Regular,
     flex: 1,
     lineHeight: 20,
   },
   button: {
     flexDirection: "row",
-    backgroundColor: "#0A84FF",
     marginHorizontal: 20,
     paddingVertical: 16,
     borderRadius: 12,
     alignItems: "center",
     justifyContent: "center",
-    shadowColor: "#0A84FF",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 6,
   },
   buttonDisabled: {
     backgroundColor: "#D1D5DB",

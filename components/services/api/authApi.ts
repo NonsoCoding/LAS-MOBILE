@@ -3,7 +3,7 @@ const apiUrl = "https://web-production-4a8a5.up.railway.app";
 export const loginUser = async (email: string, password: string) => {
   try {
     // Try with /api/ prefix to match your other endpoints
-    const res = await fetch(`${apiUrl}/api/auth/login/`, {
+    const res = await fetch(`${apiUrl}/api/auth/shipper/login/`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password }),
@@ -41,7 +41,7 @@ export const registeredUser = async (data: FormData) => {
   try {
     console.log("Registration data being sent:", data); // Debug log
 
-    const res = await fetch(`${apiUrl}/api/auth/register/`, {
+    const res = await fetch(`${apiUrl}/api/auth/shipper/register/`, {
       method: "POST",
       body: data,
     });
@@ -79,7 +79,7 @@ export const registeredRider = async (data: FormData | any) => {
 
     const body = isFormData ? data : JSON.stringify(data);
 
-    const res = await fetch(`${apiUrl}/api/auth/carrier/register/`, {
+    const res = await fetch(`${apiUrl}/api/auth/shipper/register/`, {
       method: "POST",
       headers: headers,
       body: body,
@@ -100,6 +100,47 @@ export const registeredRider = async (data: FormData | any) => {
     throw error;
   }
 };
+
+export const createShippment = async (data: FormData | any, token: string) => {
+  try {
+    
+    console.log("Data being sentL: ", data);
+    // Determine if we're sending FormData or JSON
+    const isFormData = data instanceof FormData;
+
+    const headers: HeadersInit = isFormData
+      ? {
+          // Don't set Content-Type for FormData - let the browser set it with boundar
+          Authorization: `Bearer ${token}`,
+        }
+      : {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        };
+
+    const body = isFormData ? data : JSON.stringify(data);
+
+    const res = await fetch(`${apiUrl}/api/shipments/create-full/`, {
+      method: "POST",
+      headers: headers,
+      body: body,
+    });
+
+    const responseData = await res.json();
+    console.log("Create shipment response:", responseData); // Debug log
+
+    if (!res.ok) {
+      throw new Error(
+        responseData.message || `HTTP error! status: ${res.status}`
+      );
+    }
+
+    return responseData;
+  } catch (error: any) {
+    console.log("Error creating shipment:", error);
+    throw error;
+  }
+}
 
 export const forgottenPassword = async (email: string) => {
   try {
@@ -174,9 +215,12 @@ export const verifyOtp = async (otp: string) => {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ otp }),
     });
-    return res.json();
+    const responseData = await res.json();
+    console.log("Verify OTP response:", responseData);
+    return responseData;
   } catch (error: any) {
-    throw new Error(error.message);
+    console.log("Error verifying OTP:", error);
+    throw error;
   }
 };
 

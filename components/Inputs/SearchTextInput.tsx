@@ -17,8 +17,9 @@ const SearchTextInput = ({
     onBlur
 }: SearchTextInputProps) => {
     return (
-        <View style={tw`border-1 border rounded-full items-center-center flex-row px-4 py-4 gap-2 border-[#19488A]`}>
+        <View style={tw`border-1 border rounded-full items-center flex-row px-4 py-4 gap-3 border-[#19488A]`}>
             <Fontisto name="search" size={16} color="#19488A" />
+            <View style={[tw`h-5 border border-[1px] border-[#19488A22]`]} />
             <TextInput
                 placeholder={placeholderText}
                 placeholderTextColor={"black"}

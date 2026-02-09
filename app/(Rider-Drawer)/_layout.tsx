@@ -1,38 +1,59 @@
+import useAuthStore from "@/components/store/authStore";
 import { useColorScheme } from "@/components/useColorScheme";
 import Colors from "@/constants/Colors";
-import { Ionicons } from "@expo/vector-icons";
-import {
-  DrawerContentScrollView,
-  DrawerItemList,
-} from "@react-navigation/drawer";
+import { fontFamily } from "@/constants/fonts";
+import tw from "@/constants/tailwind";
+import { MaterialIcons } from "@expo/vector-icons";
+import { DrawerContentScrollView, DrawerItemList } from "@react-navigation/drawer";
 import { Drawer } from "expo-router/drawer";
+import { Bell, CarFront, ChevronRight, Gift, Info, MessageCircle, SettingsIcon, Shield, Wallet } from "lucide-react-native";
 import React from "react";
-import { StyleSheet, TouchableOpacity, View } from "react-native";
+import { Image, Text, TouchableOpacity, View } from "react-native";
 
 function CustomDrawerContent(props: any) {
+  const { user } = useAuthStore();
   const colorScheme = useColorScheme();
   const themeColors = Colors[colorScheme ?? "light"];
+
   return (
-    <DrawerContentScrollView
-      contentContainerStyle={{
-        flex: 1,
-      }}
-      {...props}
-    >
-      <View style={styles.closeButtonContainer}>
-        <TouchableOpacity
-          style={styles.closeButton}
-          onPress={() => props.navigation.closeDrawer()}
-        >
-          <Ionicons name="close" size={28} color={themeColors.tint} />
-        </TouchableOpacity>
-      </View>
-      <View style={styles.drawerItemsContainer}>
+    <DrawerContentScrollView {...props} contentContainerStyle={{ paddingTop: 0 }}>
+      {/* Custom Profile Header */}
+      <TouchableOpacity onPress={() => props.navigation.navigate("profile")} style={[tw`pt-15 pb-5 bg-[${themeColors.background}]`]}>
+        <View style={[tw`flex-row items-center justify-between pr-10`]}>
+          <View style={[tw`flex-row items-center gap-4`]}>
+            <Image 
+                source={require("../../assets/images/pfp.png")}
+                style={[tw`h-14 w-14 rounded-full bg-gray-200`]}
+            />
+            <View>
+                <Text style={[tw`text-lg uppercase`, { fontFamily: fontFamily.MontserratEasyBold }]}>
+                    {user?.full_name || "Rider Name"}
+              </Text>
+              <View style={[tw`flex-row items-center gap-1`]}>
+                <MaterialIcons name="star" size={
+                  17
+                } color={"#F9C806"}/>
+                <Text style={[tw`text-xs`, {
+                  fontFamily: fontFamily.MontserratEasyRegular
+                }]}>4.97(270)</Text>
+              </View>
+            </View>
+          </View>
+                <TouchableOpacity >
+                    <ChevronRight/>
+                </TouchableOpacity>
+        </View>
+      </TouchableOpacity>
+
+      {/* Drawer Items */}
+      <View style={[tw`flex-1 pt-5`]}>
         <DrawerItemList {...props} />
       </View>
     </DrawerContentScrollView>
   );
 }
+
+
 
 export default function DrawerLayout() {
   const colorScheme = useColorScheme();
@@ -43,17 +64,18 @@ export default function DrawerLayout() {
       drawerContent={(props) => <CustomDrawerContent {...props} />}
       screenOptions={{
         headerShown: false,
+        drawerType: "front",
         drawerStyle: {
-          backgroundColor: themeColors.primaryColor,
-          width: "100%",
+          backgroundColor: themeColors.background,
         },
         drawerLabelStyle: {
-          textAlign: "center",
-          color: "white",
-          fontWeight: "600",
-          marginLeft: 20,
+          fontFamily: fontFamily.MontserratEasyRegular,
+          fontSize: 13
         },
-        drawerActiveTintColor: "white",
+        drawerActiveTintColor: "black",
+        drawerItemStyle: {
+          borderRadius: 0,
+        },
       }}
     >
       <Drawer.Screen
@@ -61,48 +83,73 @@ export default function DrawerLayout() {
         options={{
           drawerLabel: "Home",
           title: "Rider Home",
+          drawerIcon: ({ color, size }) => <CarFront color={color} size={18} />,
         }}
       />
-      <Drawer.Screen
-        name="orders"
-        options={{
-          drawerLabel: "Order History",
-          title: "Order History",
-        }}
-      />
+        <Drawer.Screen
+          name="wallet"
+         options={{
+            drawerLabel: "My Wallet",
+            title: "Wallet",
+            drawerIcon: ({ color }) => <Wallet color={color} size={18} />,
+          }}
+        />
+        <Drawer.Screen
+          name="notification"
+         options={{
+            drawerLabel: "Notification",
+            title: "Notification",
+            drawerIcon: ({ color }) => <Bell color={color} size={18} />,
+          }}
+        />
+        <Drawer.Screen
+          name="safety"
+         options={{
+            drawerLabel: "Safety",
+            title: "Safety",
+            drawerIcon: ({ color }) => <Shield color={color} size={18} />,
+          }}
+        />
+        <Drawer.Screen
+          name="settings"
+         options={{
+            drawerLabel: "Settings",
+            title: "Settings",
+            drawerIcon: ({ color }) => <SettingsIcon color={color} size={18} />,
+          }}
+        />
+        <Drawer.Screen
+          name="help"
+         options={{
+            drawerLabel: "Help",
+            title: "Help",
+            drawerIcon: ({ color }) => <Info color={color} size={18} />,
+          }}
+        />
+        <Drawer.Screen
+          name="support"
+         options={{
+            drawerLabel: "Support",
+            title: "Support",
+            drawerIcon: ({ color }) => <MessageCircle color={color} size={18} />,
+          }}
+        />
+        <Drawer.Screen
+          name="invite"
+         options={{
+            drawerLabel: "Invite",
+            title: "Invite",
+            drawerIcon: ({ color }) => <Gift color={color} size={18} />,
+          }}
+        />
       <Drawer.Screen
         name="profile"
         options={{
-          drawerLabel: "My Profile",
-          title: "Profile",
-        }}
-      />
-      <Drawer.Screen
-        name="orderInfo"
-        options={{
           drawerItemStyle: {
-            display: "none",
-          },
+            display: "none"
+          }
         }}
       />
     </Drawer>
   );
 }
-
-const styles = StyleSheet.create({
-  closeButtonContainer: {
-    alignItems: "flex-start",
-    padding: 16,
-    paddingTop: 5,
-  },
-  closeButton: {
-    padding: 8,
-    backgroundColor: "white",
-    borderRadius: 30,
-  },
-  drawerItemsContainer: {
-    marginTop: 100,
-    width: 200,
-    alignSelf: "center",
-  },
-});

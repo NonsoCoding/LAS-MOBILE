@@ -9,16 +9,16 @@ import * as DocumentPicker from "expo-document-picker";
 import * as ImagePicker from "expo-image-picker";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Formik } from "formik";
-import { Upload, User } from "lucide-react-native";
+import { CheckCircle2, Eye, FileText, Trash2, Upload, User, X } from "lucide-react-native";
 import React, { useState } from "react";
 import {
-  ActivityIndicator,
   Alert,
   Image,
+  Modal,
   Text,
   TouchableOpacity,
   useColorScheme,
-  View,
+  View
 } from "react-native";
 import * as Yup from "yup";
 
@@ -29,9 +29,6 @@ const validationSchema = Yup.object().shape({
   lastName: Yup.string()
     .min(2, "Last name must be at least 2 characters")
     .required("Last name is required"),
-  phoneNumber: Yup.string()
-    .matches(/^[0-9]{10,15}$/, "Please enter a valid phone number")
-    .required("Phone number is required"),
 });
 
 interface DocumentState {
@@ -45,10 +42,13 @@ export default function UserPersonalDetailsIndex() {
   const [documents, setDocuments] = useState<DocumentState>({
     government_id: null,
   });
+  const {phoneNumber} = useAuthStore();
 
   // Get email and password from previous screen
   const params = useLocalSearchParams();
   const { email, password } = params;
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
+
 
   const [loading, setLoading] = useState(false);
 
@@ -115,7 +115,6 @@ export default function UserPersonalDetailsIndex() {
   const handleContinue = async (values: {
     firstName: string;
     lastName: string;
-    phoneNumber: string;
   }) => {
     // Validate that government ID is uploaded
     if (!documents.government_id) {
@@ -129,9 +128,9 @@ export default function UserPersonalDetailsIndex() {
     formData.append("email", email as string);
     formData.append("password", password as string);
     formData.append("password_confirm", password as string);
-    formData.append("first_name", values.firstName);
-    formData.append("last_name", values.lastName);
-    formData.append("phone_number", values.phoneNumber);
+    formData.append("first_name", values.firstName as string);
+    formData.append("last_name", values.lastName as string);
+    formData.append("phone_number", phoneNumber as string);
 
     // Append document file
     if (documents.government_id) {
@@ -192,19 +191,12 @@ export default function UserPersonalDetailsIndex() {
   ];
 
   return (
-    <>
-      {loading ? (
-        <View style={[tw`flex-1 items-center justify-center`]}>
-          <ActivityIndicator size="large" color={themeColors.tint} />
-        </View>
-      ) : (
         <View style={[tw`flex-1`]}
         >
           <Formik
             initialValues={{
               firstName: "",
               lastName: "",
-              phoneNumber: "",
             }}
             validationSchema={validationSchema}
             onSubmit={handleContinue}
@@ -301,63 +293,104 @@ export default function UserPersonalDetailsIndex() {
                       )}
                     </View> */}
                     <View style={[tw`gap-4`]}>
-                      {documentFields.map((field) => (
-                        <TouchableOpacity
-                          key={field.key}
-                          style={[
-                            tw` py-3 px-4 bg-gray-50 rounded-sm border border-gray-200`,
-                            documents[field.key] &&
-                              tw`bg-green-50 border-green-300`,
-                          ]}
-                          onPress={() => pickDocument(field.key)}
-                          activeOpacity={0.7}
-                        >
-                          <View
-                            style={[tw`flex-row items-center justify-between`]}
-                          >
-                            <Text
-                              style={[
-                                tw`text-base`,
-                                documents[field.key]
-                                  ? tw`text-green-700`
-                                  : tw`text-gray-700`,
-                                { fontFamily: documents[field.key] ? fontFamily.Bold : fontFamily.Regular }
-                              ]}
-                            >
-                              {field.label}
-                            </Text>
+                {documentFields.map((field) => {
+                  const isSelected = !!documents[field.key];
+                  const doc = documents[field.key];
+                  const isImage = doc?.type?.startsWith("image") || doc?.mimeType?.startsWith("image") || (doc?.uri && !doc.uri.toLowerCase().endsWith(".pdf"));
 
+                  return (
+                    <View key={field.key} style={[tw`mb-0`]}>
+                      <TouchableOpacity
+                        style={[
+                          tw`p-4 bg-white rounded-xl border border-gray-100`,
+                          isSelected ? tw`border-blue-500 bg-blue-50/10` : tw`border-gray-200`,
+                        ]}
+                        onPress={() => {
+                          if (!isSelected) {
+                            pickDocument(field.key);
+                          } else if (isImage) {
+                            setPreviewImage(doc.uri);
+                          }
+                        }}
+                        activeOpacity={0.7}
+                      >
+                        <View style={[tw`flex-row items-center justify-between`]}>
+                          <View style={[tw`flex-row items-center flex-1`]}>
                             <View
                               style={[
-                                tw`p-2 rounded-full`,
-                                documents[field.key]
-                                  ? tw`bg-green-100`
-                                  : tw`bg-blue-100`,
+                                tw`w-12 h-12 rounded-full items-center justify-center mr-4`,
+                                isSelected ? tw`bg-blue-100` : tw`bg-gray-50`,
                               ]}
                             >
-                              <Upload
-                                size={20}
-                                color={
-                                  documents[field.key] ? "#15803d" : "#003C7A"
-                                }
-                              />
+                              {isSelected ? (
+                                isImage ? (
+                                  <Image 
+                                    source={{ uri: doc.uri }} 
+                                    style={[tw`w-12 h-12 rounded-full`]} 
+                                  />
+                                ) : (
+                                  <CheckCircle2 size={24} color="#3b82f6" />
+                                )
+                              ) : (
+                                <FileText size={24} color="#64748b" />
+                              )}
+                            </View>
+
+                            <View style={[tw`flex-1`]}>
+                              <Text
+                                style={[
+                                  tw`text-base text-gray-900`,
+                                  { fontFamily: fontFamily.Bold },
+                                ]}
+                              >
+                                {field.label}
+                              </Text>
+                              <Text
+                                style={[
+                                  tw`text-xs text-gray-500 mt-0.5`,
+                                  { fontFamily: fontFamily.Regular },
+                                ]}
+                                numberOfLines={1}
+                              >
+                                {isSelected
+                                  ? doc.name || `${field.label} uploaded`
+                                  : `Upload your ${field.label.toLowerCase()}`}
+                              </Text>
                             </View>
                           </View>
-                          {Object.entries(documents).map(([key, doc]) =>
-                            doc ? (
-                              <View
-                                key={key}
-                                style={[tw`flex-row items-center`]}
+
+                          <View style={[tw`flex-row items-center gap-3`]}>
+                            {isSelected && isImage && (
+                              <TouchableOpacity 
+                                onPress={() => setPreviewImage(doc.uri)}
+                                style={[tw`p-2 bg-blue-100 rounded-full`]}
                               >
-                                <Text style={[tw`text-sm text-green-700`, { fontFamily: fontFamily.Regular }]}>
-                                  {doc.name || `${key}.jpg`}
-                                </Text>
-                              </View>
-                            ) : null
-                          )}
-                        </TouchableOpacity>
-                      ))}
+                                <Eye size={18} color="#3b82f6" />
+                              </TouchableOpacity>
+                            )}
+                            
+                            {!isSelected ? (
+                              <Upload size={20} color="#94a3b8" />
+                            ) : (
+                              <TouchableOpacity
+                                onPress={() =>
+                                  setDocuments((prev) => ({
+                                    ...prev,
+                                    [field.key]: null,
+                                  }))
+                                }
+                                style={[tw`p-2 bg-red-50 rounded-full`]}
+                              >
+                                <Trash2 size={18} color="#ef4444" />
+                              </TouchableOpacity>
+                            )}
+                          </View>
+                        </View>
+                      </TouchableOpacity>
                     </View>
+                  );
+                })}
+              </View>
                   </View>
                 </View>
                 <View>
@@ -365,19 +398,39 @@ export default function UserPersonalDetailsIndex() {
                     bgColors={themeColors.primaryColor}
                     height={50}
                         onpress={() => {
-                      router.replace("/(tabs)")
+                          handleSubmit();
                     }}
                     textColor={themeColors.text}
                     text={loading ? "Creating Account..." : "Create Account"}
                     disabled={loading}
                   />
-                </View>
+                    </View>
+                    <Modal
+              visible={!!previewImage}
+              transparent={true}
+              animationType="fade"
+              onRequestClose={() => setPreviewImage(null)}
+            >
+              <View style={[tw`flex-1 bg-black/90 justify-center items-center`]}>
+                <TouchableOpacity
+                  style={[tw`absolute top-12 right-6 z-10 p-2 bg-white/20 rounded-full`]}
+                  onPress={() => setPreviewImage(null)}
+                >
+                  <X size={24} color="white" />
+                </TouchableOpacity>
+                {previewImage && (
+                  <Image
+                    source={{ uri: previewImage }}
+                    style={[tw`w-full h-3/4`]}
+                    resizeMode="contain"
+                  />
+                )}
+              </View>
+            </Modal>
                   </View>
               </View>
             )}
           </Formik>
         </View>
-      )}
-    </>
   );
 }

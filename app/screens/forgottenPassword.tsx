@@ -1,15 +1,15 @@
 import PrimaryButton from "@/components/Buttons/PrimaryButton";
 import TextInputFields from "@/components/Inputs/TextInputFields";
-import SharedLayout from "@/components/Layout/SharedLayout";
 import { forgottenPassword } from "@/components/services/api/authApi";
 import yup from "@/components/utils/formik";
 import Colors from "@/constants/Colors";
+import { fontFamily } from "@/constants/fonts";
 import tw from "@/constants/tailwind";
 import { useRouter } from "expo-router";
 import { Formik } from "formik";
 import { AtSign } from "lucide-react-native";
 import React, { useState } from "react";
-import { Alert, Text, useColorScheme, View } from "react-native";
+import { Alert, Image, Text, useColorScheme, View } from "react-native";
 
 const validationShema = yup.object().shape({
   email: yup
@@ -59,7 +59,12 @@ export default function ForgottenPassword() {
   };
 
   return (
-    <SharedLayout>
+    <View style={[tw`flex-1 bg-[#19488A] justify-end`]}>
+       <Image
+              source={require("../../assets/images/Intro_logo.png")}
+              style={[tw`self-center h-150 w-150 absolute -top-10`]}
+              resizeMode="contain"
+            />
       <Formik
         initialValues={{ email: "" }}
         validationSchema={validationShema}
@@ -73,17 +78,16 @@ export default function ForgottenPassword() {
           errors,
           touched,
         }) => (
-          <View style={[tw`flex-1 pt-10 gap-10 justify-between`]}>
+          <View style={[tw`bg-white py-10 pb-15 rounded-t-2xl px-5 gap-5`]}>
+             <View style={[tw`items-center gap-2`]}>
+                    <Text style={[tw`text-2xl`, {
+                      fontFamily: fontFamily.Bold
+                    }]}>Forgotten Password</Text>
+                    <Text style={[tw`text-center`, {
+                      fontFamily: fontFamily.Light
+                    }]}>A reset code will be sent to your email to reset your password.</Text>
+                    </View>
             <View style={[tw`gap-10`]}>
-              <View style={[tw`gap-3`]}>
-                <Text style={[tw`text-4xl font-semibold text-[#003C7A]`]}>
-                  Forgotten Password
-                </Text>
-                <Text style={[tw`font-light`]}>
-                  Kindly provide your valid email address to receive a
-                  verification code in your mail
-                </Text>
-              </View>
               <View style={[tw`gap-3`]}>
                 <TextInputFields
                   icon={AtSign}
@@ -117,6 +121,6 @@ export default function ForgottenPassword() {
           </View>
         )}
       </Formik>
-    </SharedLayout>
+    </View>
   );
 }

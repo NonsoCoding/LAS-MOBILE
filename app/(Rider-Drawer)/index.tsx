@@ -1,44 +1,38 @@
-import OrderCard from "@/components/Cards/OrderCard";
+import TertiaryButton from "@/components/Buttons/TertiaryButtons";
+import RiderStatsCard from "@/components/Cards/RiderStatsCard";
 import useAuthStore from "@/components/store/authStore";
 import Colors from "@/constants/Colors";
 import { fontFamily } from "@/constants/fonts";
 import tw from "@/constants/tailwind";
-import { FontAwesome } from "@expo/vector-icons";
+import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
 import { DrawerActions } from "@react-navigation/native";
 import { useNavigation, useRouter } from "expo-router";
-import { AlignCenter, Bell } from "lucide-react-native";
-import { useEffect, useState } from "react";
+import { AlignCenter, ChevronRight, GiftIcon, InfoIcon } from "lucide-react-native";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
-  ScrollView,
   Text,
   TouchableOpacity,
   useColorScheme,
-  View,
+  View
 } from "react-native";
+import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
 
 interface UserHomePageProps {}
 
 const RiderHomePage = ({}: UserHomePageProps) => {
   const router = useRouter();
   const colorScheme = useColorScheme();
+  const snapPoints = useMemo(() => ["10%", "45%"], []);
   const themeColors = Colors[colorScheme ?? "light"];
+    const [step, setStep] = useState<1 | 2 | 3 | 4 | 5>(1);
   const [isEnabled, setIsEnabled] = useState(false);
   const [orderAccepted, setOrderAccepted] = useState(false);
   const navigation = useNavigation();
   const [isOnline, setIsOnline] = useState(false);
+  const bottomSheetRef = useRef<BottomSheet>(null);
 
   const { user, fetchUserProfile, isAuthenticated } = useAuthStore();
 
-  const OrderList = [
-    { cardTitle: "Order #123", name: "Godson Ogundare", status: "Delivered" },
-    { cardTitle: "Order #123", name: "Godson Ogundare", status: "Delivered" },
-    { cardTitle: "Order #123", name: "Godson Ogundare", status: "Delivered" },
-    { cardTitle: "Order #123", name: "Godson Ogundare", status: "Delivered" },
-    { cardTitle: "Order #123", name: "Godson Ogundare", status: "Delivered" },
-    { cardTitle: "Order #123", name: "Godson Ogundare", status: "Delivered" },
-    { cardTitle: "Order #123", name: "Godson Ogundare", status: "Delivered" },
-    { cardTitle: "Order #123", name: "Godson Ogundare", status: "Delivered" },
-  ];
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -56,138 +50,114 @@ const RiderHomePage = ({}: UserHomePageProps) => {
   };
 
   return (
-    <View style={[tw`flex-1`]}>
-      <View
-        style={[
-          tw`h-[30%] rounded-b-[30px]`,
-          {
-            backgroundColor: themeColors.primaryColor,
-          },
-        ]}
+    <View style={[tw`flex-1 justify-end`, {
+      backgroundColor: themeColors.background
+    }]}>
+      <MapView
+        provider={PROVIDER_GOOGLE}
+        style={[tw`flex-1`]}
+        region={{
+          latitude: 37.78825,
+          longitude: -122.4324,
+          latitudeDelta: 0.0922,
+          longitudeDelta: 0.0421,
+        }}
       >
-        <View style={[tw`flex-1 px-5 py-15 justify-between`]}>
-          <View style={[tw`flex-row items-center gap-3 justify-between`, {}]}>
-            <View style={[tw`flex-row  gap-3 items-center`]}>
-              <TouchableOpacity
+        <Marker
+        coordinate={{
+          latitude: 37.78825,
+          longitude: -122.4324
+        }}
+        />
+        <TouchableOpacity
                 style={[
-                  tw`p-2.5 rounded-full self-start`,
+                  tw`p-2.5 rounded-full self-start ml-5 mt-15`,
                   {
-                    backgroundColor: themeColors.tintLight,
+                    backgroundColor: themeColors.background,
                   },
                 ]}
                 onPress={() => navigation.dispatch(DrawerActions.openDrawer())}
               >
-                <AlignCenter color={"white"} />
+                <AlignCenter color={"black"} />
               </TouchableOpacity>
-              <TouchableOpacity>
-                <Bell color={"white"} />
-              </TouchableOpacity>
-            </View>
-            <View
-              style={[
-                tw`px-3.5 flex-row items-center gap-2 py-1 rounded-full`,
-                {
-                  backgroundColor: isOnline
-                    ? themeColors.secondaryLight
-                    : themeColors.tintLight,
-                },
-              ]}
-            >
-              <Text
-                style={[
-                  tw`text-white text-xs`,
-                  {
-                    color: isOnline ? themeColors.secondaryColor : "white",
-                    fontFamily: fontFamily.Bold
-                  },
-                ]}
-              >
-                {" "}
-                {isOnline ? "ONLINE" : "OFFLINE"}
-              </Text>
-              <FontAwesome
-                name="circle"
-                size={14}
-                color={isOnline ? themeColors.secondaryColor : "white"}
-              />
-            </View>
-          </View>
-          <View style={[tw`gap-2`]}>
-            <View style={[tw`flex-row items-center justify-between`, {}]}>
-              <Text style={[tw`text-3xl text-white`, { fontFamily: fontFamily.Bold }]}>
-                {user?.full_name}
-              </Text>
-              <View
-                style={[
-                  tw`flex-row rounded-2xl p-1.5`,
-                  {
-                    backgroundColor: themeColors.tintLight,
-                  },
-                ]}
-              >
-                <TouchableOpacity
-                  style={tw`px-2 py-1 rounded-2xl ${
-                    !isOnline ? "bg-white" : ""
-                  }`}
-                  onPress={() => setIsOnline(false)}
-                >
-                  <Text
-                    style={[tw`text-xs`, {
-                      color: !isOnline ? "#CC1A21" : "white",
-                      fontFamily: fontFamily.Bold
-                    }]}
-                  >
-                    OFF
-                  </Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={tw`px-2.5 py-1 rounded-2xl ${
-                    isOnline ? "bg-white" : ""
-                  }`}
-                  onPress={() => setIsOnline(true)}
-                >
-                  <Text
-                    style={[tw`text-xs`, {
-                      color: isOnline ? "text-green-700" : "white",
-                      fontFamily: fontFamily.Bold
-                    }]}
-                  >
-                    ON
-                  </Text>
+      </MapView>
+      <BottomSheet
+        snapPoints={snapPoints}
+        ref={bottomSheetRef}
+        enablePanDownToClose={false}
+      >
+          <BottomSheetView style={[tw`px-5 justify-center pb-10`]}
+        >
+          {step === 1 && (
+            <View style={[tw`gap-4`]}> 
+               <View style={[tw`flex-row rounded-lg gap-3 p-4 py-6 justify-between items-center bg-[#D37A0F22]`, {
+                borderLeftWidth: 3,
+                borderColor: "#D37A0F"
+              }]}>
+                <View style={[tw`flex-row items-center w-[70%] gap-2`]}>
+                <InfoIcon color={"#D37A0F"} />
+                <Text style={[tw`text-[#D37A0F] uppercase text-[11px]`, {
+                  fontFamily: fontFamily.MontserratEasyMedium
+                }]}>Visit your profile to complete your registration</Text>
+                </View>
+                <TouchableOpacity style={[tw`bg-[#D37A0F99] h-9 w-9 rounded-full flex-row items-center justify-center`]}>
+                  <ChevronRight size={16} color={"white"}/>
                 </TouchableOpacity>
               </View>
-            </View>
-            <View>
-              <Text style={[tw`text-white`, { fontFamily: fontFamily.Light }]}>
-                Toggle switch to go online
-              </Text>
-            </View>
-          </View>
-        </View>
-      </View>
-      <View style={[tw`px-5 bottom-8 flex-1`]}>
-        <ScrollView showsVerticalScrollIndicator={false} style={[tw`flex-1`]}>
-          <View style={[tw`gap-4`, {}]}>
-            {OrderList.map((items, index) => {
-              return (
-                <OrderCard
+              <View style={[tw`flex-row items-center justify-between`]}>
+                <View style={[tw`flex-row gap-4 items-center`]}>
+                <View style={[tw`h-12 w-12 rounded-full bg-[#19488A] flex-row items-center justify-center`]}>
+                  <GiftIcon color={"white"}/>
+                </View>
+                  <View>
+                    <View style={[tw`flex-row items-end`]}>
+                    <Text style={[tw`uppercase text-[12px]`, {
+                    fontFamily: fontFamily.MontserratEasyBold
+                  }]}>Earn N</Text>
+                    <Text style={[tw`uppercase`, {
+                    fontFamily: fontFamily.MontserratEasyBold
+                  }]}>20,000</Text>
+                    </View>
+                    <Text style={[tw`text-[11px]`, {
+                    fontFamily: fontFamily.MontserratEasyRegular
+                  }]}>Invite your friends (the more the merrier)</Text>
+                </View>
+                </View>
+                <TouchableOpacity>
+                  <ChevronRight/>
+                </TouchableOpacity>
+              </View>
+              <View style={[tw`flex-row gap-3`]}>
+                <RiderStatsCard
+                  statsTitle="Total Earnings"
+                  amount={4000}
                   onPress={() => {
-                    router.push("/(Rider-Drawer)/orderInfo");
+                    
                   }}
-                  key={index}
-                  cardTitle={items.cardTitle}
-                  name={items.name}
-                  issuedTo=""
-                  status={items.status}
-                  statusBgColor={themeColors.secondaryLight}
-                  statusTextColor={themeColors.secondaryColor}
-                  date="02 Sept, 2022"
                 />
-              );
-            })}
-          </View>
-        </ScrollView>
-      </View>
+                <RiderStatsCard
+                  statsTitle="Total Request"
+                  amount={254}
+                  onPress={() => {
+
+                  }}
+                />
+              </View>
+              <TertiaryButton
+                text="You are offline"
+
+                onpress={() => {
+
+                }}
+                height={50}
+                disabled={false}
+                bgColors="#D37A0F22"
+                textColor="#D37A0F"
+              />
+            </View>
+          )}
+        </BottomSheetView>
+        </BottomSheet>
     </View>
   );
 };

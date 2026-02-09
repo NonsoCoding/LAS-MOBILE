@@ -1,27 +1,34 @@
-import LogoutModal from "@/components/Modals/CenterModal";
+import DeliveryButton from "@/components/Buttons/DeliveryButton";
+import TertiaryButton from "@/components/Buttons/TertiaryButtons";
+import RiderStatsCard from "@/components/Cards/RiderStatsCard";
 import useAuthStore from "@/components/store/authStore";
 import Colors from "@/constants/Colors";
-import { FontAwesome } from "@expo/vector-icons";
-import { DrawerActions, useNavigation } from "@react-navigation/native";
-import { AlignCenter } from "lucide-react-native";
-import React, { useEffect, useState } from "react";
+import { fontFamily } from "@/constants/fonts";
+import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
+import { useNavigation } from "@react-navigation/native";
+import { BellIcon, ChevronRight, InfoIcon, MapPin } from "lucide-react-native";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
-  ScrollView,
-  StatusBar,
+  Image,
   Text,
   TouchableOpacity,
   useColorScheme,
-  View,
+  View
 } from "react-native";
+import MapView, { Marker } from "react-native-maps";
 import tw from "twrnc";
 
 const ProfileScreen = () => {
   const [isOnline, setIsOnline] = useState(false);
   const colorScheme = useColorScheme();
+  const snapPoints = useMemo(() => ["10%", "45%"], []);
   const themeColors = Colors[colorScheme ?? "light"];
+      const [step, setStep] = useState<1 | 2 | 3 | 4 | 5>(1);
   const navigation = useNavigation();
   const { user, fetchUserProfile, isAuthenticated } = useAuthStore();
   const [logoutModalVisible, setLogoutModalVisible] = useState(false);
+  const bottomSheetRef = useRef<BottomSheet>(null);
+
   useEffect(() => {
     if (isAuthenticated) {
       fetchUserProfile().catch(console.error);
@@ -44,175 +51,136 @@ const ProfileScreen = () => {
     <View
       style={[
         tw`flex-1 bg-blue-500`,
-        {
-          backgroundColor: themeColors.primaryColor,
-        },
       ]}
     >
-      <StatusBar barStyle="light-content" />
-
-      {/* Header */}
-      <View style={tw`flex-row justify-between items-center px-6 pt-15 pb-10`}>
-        <TouchableOpacity
-          style={[
-            tw`p-2.5 rounded-full self-start`,
-            {
-              backgroundColor: themeColors.tintLight,
-            },
-          ]}
-          onPress={() => navigation.dispatch(DrawerActions.openDrawer())}
-        >
-          <AlignCenter color={"white"} />
-        </TouchableOpacity>
-
-        <View
-          style={[
-            tw`px-3.5 flex-row items-center gap-2 py-1 rounded-full`,
-            {
-              backgroundColor: themeColors.tintLight,
-            },
-          ]}
-        >
-          <Text style={[tw`text-white text-xs`]}>
-            {" "}
-            {isOnline ? "ONLINE" : "OFFLINE"}
-          </Text>
-          <FontAwesome name="circle" size={14} color={"white"} />
-        </View>
-      </View>
-
-      {/* Profile Info */}
-      <View style={[tw`px-6 pb-0 flex-row items-center justify-between`, {}]}>
-        <View>
-          <Text style={tw`text-4xl font-bold text-white mb-1`}>
-            {user?.full_name}
-          </Text>
-          <Text style={tw`text-base text-white/80 mb-5`}>
-            Manage your profile
-          </Text>
-        </View>
-
-        <View
-          style={[
-            tw`flex-row rounded-2xl p-1.5`,
-            {
-              backgroundColor: themeColors.tintLight,
-            },
-          ]}
-        >
-          <TouchableOpacity
-            style={tw`px-2 py-1 rounded-2xl ${!isOnline ? "bg-white" : ""}`}
-            onPress={() => setIsOnline(false)}
-          >
-            <Text
-              style={tw`text-sm font-light text-xs ${
-                !isOnline ? "text-[#CC1A21]" : "text-white"
-              }`}
-            >
-              OFF
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={tw`px-2.5 py-1 rounded-2xl ${isOnline ? "bg-white" : ""}`}
-            onPress={() => setIsOnline(true)}
-          >
-            <Text
-              style={tw`text-xs font-light ${
-                isOnline ? "text-[#CC1A21]" : "text-white"
-              }`}
-            >
-              ON
-            </Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-
-      {/* Content */}
-      <ScrollView
-        style={tw`flex-1 bg-gray-100 rounded-t-3xl`}
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={tw`p-6`}
-      >
-        {/* Profile Card */}
-        <View style={tw`bg-white rounded-2xl p-6 mb-4 shadow-sm`}>
-          <View style={tw`items-center mb-4`}>
-            <View
-              style={tw`w-20 h-20 rounded-full bg-blue-100 justify-center items-center`}
-            >
-              <Text style={tw`text-3xl font-bold text-blue-500`}>K</Text>
-            </View>
-          </View>
-
-          <View style={tw`items-center mb-5`}>
-            <Text style={tw`text-2xl font-bold text-gray-900 mb-1`}>
-              {user?.full_name}
-            </Text>
-            <Text style={tw`text-sm text-gray-600 mb-0.5`}>{user?.email}</Text>
-            <Text style={tw`text-sm text-gray-600`}>
-              +234 {user?.phone_number}
-            </Text>
-          </View>
-
-          <TouchableOpacity
-            style={tw`bg-blue-100 py-3 rounded-xl items-center`}
-          >
-            <Text style={tw`text-sm font-semibold text-blue-500`}>
-              Edit Profile
-            </Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* Stats Card */}
-        <View
-          style={tw`bg-white rounded-2xl p-6 mb-4 flex-row justify-between shadow-sm`}
-        >
-          <View style={tw`flex-1 items-center`}>
-            <Text style={tw`text-3xl font-bold text-gray-900 mb-1`}>247</Text>
-            <Text style={tw`text-xs text-gray-600`}>Deliveries</Text>
-          </View>
-          <View style={tw`w-px bg-gray-200 mx-2`} />
-          <View style={tw`flex-1 items-center`}>
-            <Text style={tw`text-3xl font-bold text-gray-900 mb-1`}>4.9</Text>
-            <Text style={tw`text-xs text-gray-600`}>Rating</Text>
-          </View>
-          <View style={tw`w-px bg-gray-200 mx-2`} />
-          <View style={tw`flex-1 items-center`}>
-            <Text style={tw`text-3xl font-bold text-gray-900 mb-1`}>98%</Text>
-            <Text style={tw`text-xs text-gray-600`}>Success Rate</Text>
-          </View>
-        </View>
-
-        {/* Menu Items */}
-        <View style={tw`bg-white rounded-2xl overflow-hidden shadow-sm`}>
-          <MenuItem icon="" title="Settings" />
-          <MenuItem icon="" title="Notifications" />
-          <MenuItem icon="" title="Privacy & Security" />
-          <MenuItem icon="" title="Help & Support" />
-          <MenuItem icon="" title="Earnings Report" />
-          <TouchableOpacity
-            onPress={() => {
-              setLogoutModalVisible(true);
-            }}
-            style={tw`flex-row items-center justify-between py-4 px-5`}
-          >
-            <View style={tw`flex-row items-center`}>
-              <Text style={tw`text-xl mr-3`}></Text>
-              <Text style={tw`text-base font-medium text-red-500`}>Logout</Text>
-            </View>
-            <Text style={tw`text-2xl text-gray-300`}>›</Text>
-          </TouchableOpacity>
-        </View>
-
-        <View style={tw`h-5`} />
-      </ScrollView>
-      <LogoutModal
-        title="Logout"
-        titleSubInfo="Are you sure you want to logout from your account"
-        onClose={() => {
-          setLogoutModalVisible(false);
+      <MapView style={[tw`flex-1`]}
+         region={{
+          latitude: 37.78825,
+          longitude: -122.4324,
+          latitudeDelta: 0.0922,
+          longitudeDelta: 0.0421,
         }}
-        visible={logoutModalVisible}
-      />
+      >
+        <Marker
+           coordinate={{
+          latitude: 37.78825,
+          longitude: -122.4324
+        }}
+          title="Current Location"
+          description="You are here"
+        />
+
+      </MapView>
+      <BottomSheet
+        snapPoints={snapPoints}
+        ref={bottomSheetRef}
+        enablePanDownToClose={false}
+      >
+          <BottomSheetView style={[tw`justify-center pb-10`]}
+        >
+          {step === 1 && (
+            <View style={[tw`gap-5`]}>
+              <View style={[tw`py-5 px-4 justify-center`, {
+                backgroundColor: themeColors.primaryColor,
+                borderTopLeftRadius: 20,
+                borderTopRightRadius: 20
+              }]}>
+                <View style={[tw`flex-row justify-between items-center`]}>
+                  <View style={[tw`flex-row items-center gap-3`]}>
+                <Image source={require("../../assets/images/pfp.png")} style={[tw`h-16 w-16 rounded-full`]}/>
+                <View style={[tw``]}>
+                      <Text style={[tw`uppercase text-white`, {
+                      fontFamily: fontFamily.MontserratEasyBold
+                    }]}>Welcome, Godson</Text>
+                    <View style={[tw`flex-row items-center gap-1`]}>
+                      <MapPin size={12} color={"white"}/>
+                  <Text style={[tw`text-white uppercase text-[10px]`]}>Gwarimpa first avenu</Text>
+                    </View>
+                  </View>
+                  </View>
+                  <TouchableOpacity style={[tw`h-12 w-12 rounded-full flex-row items-center justify-center bg-white`]}>
+                    <BellIcon/>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            <View style={[tw`gap-4 px-4`]}> 
+               <View style={[tw`flex-row rounded-lg gap-3 p-4 py-6 justify-between items-center bg-[#D37A0F22]`, {
+                borderLeftWidth: 3,
+                borderColor: "#D37A0F"
+              }]}>
+                <View style={[tw`flex-row items-center w-[70%] gap-2`]}>
+                <InfoIcon color={"#D37A0F"} />
+                <Text style={[tw`text-[#D37A0F] uppercase text-[11px]`, {
+                  fontFamily: fontFamily.MontserratEasyMedium
+                }]}>Visit your profile to complete your registration</Text>
+                </View>
+                <TouchableOpacity style={[tw`bg-[#D37A0F99] h-9 w-9 rounded-full flex-row items-center justify-center`]}>
+                  <ChevronRight size={16} color={"white"}/>
+                </TouchableOpacity>
+              </View>
+             
+              <View style={[tw`flex-row gap-3`]}>
+                <RiderStatsCard
+                  statsTitle="Total Earnings"
+                  amount={4000}
+                  onPress={() => {
+                    
+                  }}
+                />
+                <RiderStatsCard
+                  statsTitle="Total Request"
+                  amount={254}
+                  onPress={() => {
+
+                  }}
+                />
+              </View>
+              
+                <View style={[tw`gap-3`]}>
+                <DeliveryButton
+                      icon={require("../../assets/images/IntroImages/icon/Details.png")}
+                      text="View Wallet"
+                  onPress={() => {
+                    
+                      }}
+                    />
+                <DeliveryButton
+                      icon={require("../../assets/images/IntroImages/icon/Details.png")}
+                      text="Basic Information"
+                  onPress={() => {
+                    
+                      }}
+                    />
+                <DeliveryButton
+                      icon={require("../../assets/images/IntroImages/icon/Details.png")}
+                      text="Vehicle Information"
+                  onPress={() => {
+                    
+                      }}
+                    />
+                <DeliveryButton
+                      icon={require("../../assets/images/IntroImages/icon/Details.png")}
+                      text="Support"
+                  onPress={() => {
+                    
+                      }}
+                    />
+                </View>
+                <TertiaryButton
+                text="Logout"
+                onpress={() => {
+
+                }}
+                height={50}
+                disabled={false}
+                bgColors="#CC1A2122"
+                textColor="#CC1A21"
+              />
+              </View>
+            </View>
+          )}
+        </BottomSheetView>
+        </BottomSheet>
     </View>
   );
 };

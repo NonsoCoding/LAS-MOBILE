@@ -137,7 +137,7 @@ export default function UserAuthIndex() {
                     autoCapitalize="none"
                   />
                   {touched.email && errors.email && (
-                    <Text style={[tw`text-red-500 text-xs mt-1`]}>
+                    <Text style={[tw`text-red-500 text-xs mt-1 ml-4`]}>
                       {errors.email}
                     </Text>
                   )}
@@ -152,7 +152,7 @@ export default function UserAuthIndex() {
                     secureTextEntry={true}
                   />
                   {touched.password && errors.password && (
-                    <Text style={[tw`text-red-500 text-xs mt-1`]}>
+                    <Text style={[tw`text-red-500 text-xs mt-1 ml-4`]}>
                       {errors.password}
                     </Text>
                   )}
@@ -200,7 +200,11 @@ export default function UserAuthIndex() {
                 height={50}
                 textColor="white"
                 text={loading ? "Loading..." : "Continue"}
-                onpress={handleSubmit}
+                onpress={() => {
+                  handleSubmit();
+                }
+
+                }
                 disabled={loading}
               />
               <View style={[tw`flex-row items-center justify-center gap-1`]}>

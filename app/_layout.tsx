@@ -31,6 +31,10 @@ function RootLayoutNav() {
     [fontFamily.Medium]: require("../assets/fonts/MontserratAlternates-Medium.ttf"),
     [fontFamily.Regular]: require("../assets/fonts/MontserratAlternates-Regular.ttf"),
     [fontFamily.Light]: require("../assets/fonts/MontserratAlternates-Light.ttf"),
+    [fontFamily.MontserratEasyBold]: require("../assets/fonts/Montserrat-Bold.ttf"),
+    [fontFamily.MontserratEasyMedium]: require("../assets/fonts/Montserrat-Medium.ttf"),
+    [fontFamily.MontserratEasyRegular]: require("../assets/fonts/Montserrat-Regular.ttf"),
+    [fontFamily.MontserratEasyLight]: require("../assets/fonts/Montserrat-Light.ttf"),
   });
   
   useEffect(() => {

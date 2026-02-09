@@ -1,10 +1,12 @@
 import PrimaryButton from "@/components/Buttons/PrimaryButton";
+import CompleteModal from "@/components/Modals/CompleteModal";
 import { verifyOtp } from "@/components/services/api/authApi";
 import useAuthStore from "@/components/store/authStore";
+import useRiderAuthStore from "@/components/store/RiderAuthStore";
 import Colors from "@/constants/Colors";
 import { fontFamily } from "@/constants/fonts";
 import tw from "@/constants/tailwind";
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { useState } from "react";
 import {
   Alert,
@@ -12,7 +14,7 @@ import {
   Text,
   TouchableOpacity,
   useColorScheme,
-  View
+  View,
 } from "react-native";
 import { OtpInput } from "react-native-otp-entry";
 
@@ -20,9 +22,15 @@ const UserOtpScreen = () => {
   const router = useRouter();
   const colorScheme = useColorScheme();
   const themeColors = Colors[colorScheme ?? "light"];
+  const params = useLocalSearchParams();
+
+  // Get login function from Zustand store
+  const { login } = useRiderAuthStore();
 
   const [otp, setOtp] = useState<string>("");
   const [loading, setLoading] = useState(false);
+  const [completeModalVisible, setCompleteModalVisible] = useState(false);
+  const {phoneNumber} = useAuthStore();
 
   const handleContinue = async () => {
     if (otp.length !== 6) {
@@ -49,9 +57,7 @@ const UserOtpScreen = () => {
         console.log("Navigating to rider drawer");
         router.replace("/(drawer)");
 
-        setTimeout(() => {
-          Alert.alert("Success", "Email verified successfully!");
-        }, 100);
+        setCompleteModalVisible(true);
       } else {
         Alert.alert(
           "Verification Failed",
@@ -66,27 +72,24 @@ const UserOtpScreen = () => {
   };
 
   return (
-    <View style={[tw`bg-[#19488A] flex-1 justify-end`]}>
+    <View style={[tw`flex-1 bg-[#19488A] justify-end`]}>
       <Image
-        source={require("../../../../assets/images/Intro_logo.png")}
-        style={[tw`self-center h-160 w-160 absolute z-999 -top-20`]}
-        resizeMode="contain"
-      />
-      <View style={[tw`py-10 pb-15 justify-between bg-white gap-10 px-5`, {
-        borderTopRightRadius: 20,
-        borderTopLeftRadius: 20
-      }]}>
-         <View style={[tw`items-center gap-3`]}>
-                  <Text style={[tw`text-2xl`, {
-                  fontFamily: fontFamily.Bold
-                }]}>Verify your number</Text>
-                  <Text style={[tw`w-[80%] text-center`, {
-                  fontFamily: fontFamily.Light
-                }]}>We sent a 6-digit code to</Text>
-                  <Text style={[tw`w-[80%] text-center text-[#CC1A21]`, {
-                  fontFamily:fontFamily.Bold
-                }]}>+234 800 000 0000</Text>
-              </View>
+              source={require("../../../../assets/images/Intro_logo.png")}
+              style={[tw`self-center h-150 w-150 absolute -top-20`]}
+              resizeMode="contain"
+            />
+      <View style={tw`bg-white py-10 pb-15 px-5 gap-5 rounded-t-2xl`}>
+        <View style={[tw`items-center gap-1`]}>
+          <Text style={[tw`text-2xl`, {
+            fontFamily: fontFamily.Bold,
+          }]}>Verify your Email</Text>
+          <Text style={[tw`text-sm`, {
+            fontFamily: fontFamily.Regular,
+          }]}>Enter the 6-digit code sent to your email</Text>
+          <Text style={[tw`text-sm text-[#CC1A21]`, {
+            fontFamily: fontFamily.Regular,
+          }]}>{phoneNumber}</Text>
+        </View>
         <View style={tw`gap-10`}>
           <OtpInput
             numberOfDigits={6}
@@ -127,19 +130,18 @@ const UserOtpScreen = () => {
             focusColor={themeColors.tint}
           />
         </View>
-        <View style={[tw`gap-5`]}>
+
         {/* CONTINUE BUTTON */}
         <PrimaryButton
           bgColors={themeColors.primaryColor}
           height={50}
-            onpress={() => {
-            router.replace("/RegisterType")
-          }}
+          onpress={handleContinue}
           textColor={themeColors.text}
           text={loading ? "Verifying..." : "Continue"}
           disabled={otp.length !== 6 || loading}
-          />
-           <View style={[tw`flex-row items-center justify-center gap-1`]}>
+        />
+           {/* LOGIN LINK */}
+         <View style={[tw`flex-row items-center justify-center gap-1`]}>
                 <Text
                   style={[
                     tw``,
@@ -152,7 +154,7 @@ const UserOtpScreen = () => {
                 </Text>
                 <TouchableOpacity
                   onPress={() => {
-                    router.replace("/screens/Auth/User/SignIn");
+                    router.replace("/screens");
                   }}
                 >
                   <Text
@@ -168,8 +170,15 @@ const UserOtpScreen = () => {
                   </Text>
                 </TouchableOpacity>
               </View>
-        </View>
-        
+        <CompleteModal
+          visible={completeModalVisible}
+          onClose={() => {
+            setCompleteModalVisible(false);
+          }}
+          title="Registration Successful"
+          titleSubInfo1="Your account has been successful created."
+          titleSubInfo2="After documents approval you can start your Workorders."
+        />
       </View>
     </View>
   );

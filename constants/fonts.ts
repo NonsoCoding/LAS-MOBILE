@@ -3,4 +3,8 @@ export const fontFamily = {
     Regular: "MontserratRegular",
     Medium: "MontserratMedium",
     Bold: "MontserratBold",
+    MontserratEasyLight: "MontserratEasyLight",
+    MontserratEasyBold: "MontserratEasyBold",
+    MontserratEasyMedium: "MontserratEasyMedium",
+    MontserratEasyRegular: "MontserratEasyRegular",
 };

@@ -1,3 +1,4 @@
+import { fontFamily } from "@/constants/fonts";
 import tw from "@/constants/tailwind";
 import { LucideIcon } from "lucide-react-native";
 import { KeyboardTypeOptions, TextInput, View } from "react-native";
@@ -32,7 +33,7 @@ const TextInputFields = ({
   return (
     <View
       style={[
-        tw`py-4.5 bg-[#19488A22] text-[17px] gap-2 flex-row items-center rounded border border-gray-200 px-3`,
+        tw`bg-[#19488A11] text-[17px] gap-2 flex-row items-center rounded-full border border-gray-200 px-3`,
         {},
       ]}
     >
@@ -50,8 +51,8 @@ const TextInputFields = ({
         placeholderTextColor={placeholderTextColor}
         onBlur={onBlur}
         secureTextEntry={secureTextEntry}
-        style={[tw`w-full text-black`, {
-          fontFamily: "MontserratLight"
+        style={[tw`w-full text-black py-3.5`, {
+          fontFamily: fontFamily.Regular
         }]}
       />
     </View>

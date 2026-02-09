@@ -1,3 +1,4 @@
+import PrimaryButton from "@/components/Buttons/PrimaryButton";
 import PasswordTextInputFields from "@/components/Inputs/PasswordTextInputField";
 import TextInputFields from "@/components/Inputs/TextInputFields";
 import { checkCarrierExists } from "@/components/services/api/authApi";
@@ -27,18 +28,6 @@ const validationSchema = Yup.object().shape({
   password: Yup.string()
     .min(6, "Password must be at least 6 characters")
     .required("Password is required"),
-  firstName: Yup.string()
-    .min(2, "First name must be at least 2 characters")
-    .required("First name is required"),
-  lastName: Yup.string()
-    .min(2, "Last name must be at least 2 characters")
-    .required("Last name is required"),
-  phoneNumber: Yup.string()
-    .matches(/^[0-9]{10,15}$/, "Please enter a valid phone number")
-    .required("Phone number is required"),
-  plateNumber: Yup.string()
-    .min(3, "Plate number must be at least 3 characters")
-    .required("Plate number is required"),
 });
 
 export default function RiderAuthIndex() {
@@ -63,13 +52,54 @@ export default function RiderAuthIndex() {
     }
   }, []);
 
+  // const handleSubmit = async (values: {
+  //   email: string;
+  //   password: string;
+  //   firstName: string;
+  //   lastName: string;
+  //   phoneNumber: string;
+  //   plateNumber: string;
+  // }) => {
+  //   try {
+  //     setLoading(true);
+
+  //     const exists = await checkCarrierExists(values.email);
+
+  //     if (exists) {
+  //       Alert.alert(
+  //         "Account Already Exists",
+  //         "An account with this email and plate number already exists. Please sign in instead"
+  //       );
+  //       return;
+  //     }
+  //     router.push({
+  //       pathname: "/screens/Auth/Rider/Verification",
+  //       params: {
+  //         email: values.email,
+  //         password: values.password,
+  //         firstName: values.firstName,
+  //         lastName: values.lastName,
+  //         phoneNumber: values.phoneNumber,
+  //         plateNumber: values.plateNumber,
+  //         indemnityAccepted: params.indemnityAccepted,
+  //         indemnityAcceptedAt: params.indemnityAcceptedAt,
+  //         indemnityVersion: params.indemnityVersion,
+  //       },
+  //     });
+  //   } catch (error: any) {
+  //     Alert.alert(
+  //       "Error",
+  //       error.message || "Unable to validate account. Please try again."
+  //     );
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+  
+  
   const handleSubmit = async (values: {
     email: string;
     password: string;
-    firstName: string;
-    lastName: string;
-    phoneNumber: string;
-    plateNumber: string;
   }) => {
     try {
       setLoading(true);
@@ -84,14 +114,10 @@ export default function RiderAuthIndex() {
         return;
       }
       router.push({
-        pathname: "/screens/Auth/Rider/Verification",
+        pathname: "/screens/Auth/Rider/PersonalDetails",
         params: {
           email: values.email,
           password: values.password,
-          firstName: values.firstName,
-          lastName: values.lastName,
-          phoneNumber: values.phoneNumber,
-          plateNumber: values.plateNumber,
           indemnityAccepted: params.indemnityAccepted,
           indemnityAcceptedAt: params.indemnityAcceptedAt,
           indemnityVersion: params.indemnityVersion,
@@ -132,10 +158,6 @@ export default function RiderAuthIndex() {
             initialValues={{
               email: "",
               password: "",
-              firstName: "",
-              lastName: "",
-              phoneNumber: "",
-              plateNumber: "",
             }}
             validationSchema={validationSchema}
             onSubmit={handleSubmit}
@@ -175,7 +197,7 @@ export default function RiderAuthIndex() {
                       autoCapitalize="none"
                     />
                     {touched.email && errors.email && (
-                      <Text style={[tw`text-red-500 text-xs mt-1`, { fontFamily: fontFamily.Regular }]}>
+                      <Text style={[tw`text-red-500 text-xs mt-1 ml-4`, { fontFamily: fontFamily.Regular }]}>
                         {errors.email}
                       </Text>
                     )}
@@ -194,68 +216,12 @@ export default function RiderAuthIndex() {
                       secureTextEntry={true}
                     />
                     {touched.password && errors.password && (
-                      <Text style={[tw`text-red-500 text-xs mt-1`, { fontFamily: fontFamily.Regular }]}>
+                      <Text style={[tw`text-red-500 text-xs mt-1 ml-4`, { fontFamily: fontFamily.Regular }]}>
                         {errors.password}
                       </Text>
                     )}
                   </View>
                 </View>
-
-                  {/* <View style={[tw`flex-row gap-2`]}>
-                    <View style={[tw`flex-1`]}>
-                      <TextInputFields
-                        icon={User}
-                        iconColor={themeColors.primaryColor}
-                        iconSize={18}
-                        value={values.firstName}
-                        placeholderTextColor="black"
-                        onChangeText={handleChange("firstName")}
-                        onBlur={handleBlur("firstName")}
-                        placeholderText="First Name"
-                      />
-                      {touched.firstName && errors.firstName && (
-                        <Text style={[tw`text-red-500 text-xs mt-1`]}>
-                          {errors.firstName}
-                        </Text>
-                      )}
-                    </View>
-
-                    <View style={[tw`flex-1`]}>
-                      <TextInputFields
-                        icon={User}
-                        iconColor={themeColors.primaryColor}
-                        iconSize={18}
-                        placeholderTextColor="black"
-                        value={values.lastName}
-                        onChangeText={handleChange("lastName")}
-                        onBlur={handleBlur("lastName")}
-                        placeholderText="Last Name"
-                      />
-                      {touched.lastName && errors.lastName && (
-                        <Text style={[tw`text-red-500 text-xs mt-1`]}>
-                          {errors.lastName}
-                        </Text>
-                      )}
-                    </View>
-                  </View>
-                  <View>
-                    <TextInputFields
-                      icon={Car}
-                      iconColor={themeColors.primaryColor}
-                      iconSize={18}
-                      placeholderTextColor="black"
-                      value={values.plateNumber}
-                      onChangeText={handleChange("plateNumber")}
-                      onBlur={handleBlur("plateNumber")}
-                      placeholderText="Plate Number (e.g., LAS-12345)"
-                      autoCapitalize="characters"
-                    />
-                    {touched.plateNumber && errors.plateNumber && (
-                      <Text style={[tw`text-red-500 text-xs mt-1`]}>
-                        {errors.plateNumber}
-                      </Text>
-                    )}
-                  </View> */}
                 </View>
 
                 <View style={[tw`flex-row items-center gap-3`]}>
@@ -293,8 +259,19 @@ export default function RiderAuthIndex() {
                       <Text style={[tw`text-sm`, { fontFamily: fontFamily.Light }]}>Apple</Text>
                     </TouchableOpacity>
                   )}
-                </View>
-
+              </View>
+               <View style={[tw`gap-2`]}>
+                <PrimaryButton
+                  bgColors={themeColors.primaryColor}
+                  height={50}
+                  textColor="white"
+                  onpress={() => {
+                    handleSubmit();
+                  }}
+                  text={loading ? "Loading..." : "Continue"}
+                  disabled={loading}
+                />
+              </View>
                <View style={[tw`flex-row items-center justify-center gap-1`]}>
                     <Text style={[tw``, {
                   fontFamily: fontFamily.Light

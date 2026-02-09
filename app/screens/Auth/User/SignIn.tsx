@@ -65,7 +65,13 @@ export default function UserSignInIndex() {
                         [
                           {
                             text: "OK",
-                            onPress: () => router.push("/(drawer)"),
+                            onPress: () => router.push({
+                              pathname: "/screens/Auth/User/Otp",
+                              params: {
+                                email: values.email,
+                                
+                              }
+                            }),
                           },
                         ]
                       );

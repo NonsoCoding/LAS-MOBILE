@@ -1,23 +1,24 @@
 import PrimaryButton from "@/components/Buttons/PrimaryButton";
-import SharedLayout from "@/components/Layout/SharedLayout";
 import CompleteModal from "@/components/Modals/CompleteModal";
 import { registeredRider } from "@/components/services/api/authApi";
 import useAuthStore from "@/components/store/authStore";
 import Colors from "@/constants/Colors";
+import { fontFamily } from "@/constants/fonts";
 import tw from "@/constants/tailwind";
 import * as DocumentPicker from "expo-document-picker";
 import * as ImagePicker from "expo-image-picker";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { Upload } from "lucide-react-native";
+import { CheckCircle2, Eye, FileText, Trash2, Upload, X } from "lucide-react-native";
 import { useState } from "react";
 import {
-  ActivityIndicator,
   Alert,
+  Image,
+  Modal,
   ScrollView,
   Text,
   TouchableOpacity,
   useColorScheme,
-  View,
+  View
 } from "react-native";
 
 interface DocumentState {
@@ -34,13 +35,14 @@ const Verification = () => {
   const colorScheme = useColorScheme();
   const themeColors = Colors[colorScheme ?? "light"];
   const [completeModalVisible, setCompleteModalVisible] = useState(false);
-
+  const { phoneNumber, country } = useAuthStore();
   const [documents, setDocuments] = useState<DocumentState>({
     government_id: null,
     drivers_license: null,
     proof_of_address: null,
     work_authorization: null,
   });
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
 
   const pickDocument = async (documentType: keyof DocumentState) => {
     try {
@@ -124,7 +126,7 @@ const Verification = () => {
       formData.append("password_confirm", params.password as string);
       formData.append("first_name", params.firstName as string);
       formData.append("last_name", params.lastName as string);
-      formData.append("phone_number", params.phoneNumber as string);
+      formData.append("phone_number", phoneNumber as string);
       formData.append("plate_number", params.plateNumber as string);
 
       // Convert indemnity to boolean properly
@@ -139,7 +141,7 @@ const Verification = () => {
         email: params.email,
         firstName: params.firstName,
         lastName: params.lastName,
-        phoneNumber: params.phoneNumber,
+        phoneNumber: phoneNumber,
         plateNumber: params.plateNumber,
         indemnityAccepted: indemnityAccepted,
         indemnityAcceptedType: typeof indemnityAccepted,
@@ -182,7 +184,12 @@ const Verification = () => {
           [
             {
               text: "OK",
-              onPress: () => router.replace("/screens/Otp"),
+              onPress: () => router.replace({
+                pathname: "/screens/Auth/Rider/Otp",
+                params: {
+                  email: params.email,
+                },
+              }),
             },
           ]
         );
@@ -218,80 +225,126 @@ const Verification = () => {
   ];
 
   return (
-    <SharedLayout>
-      {loading ? (
-        <View style={[tw`flex-1 items-center justify-center`]}>
-          <ActivityIndicator size="large" color={themeColors.primaryColor} />
-        </View>
-      ) : (
+    <View style={[tw`flex-1 bg-[#19488A]`]}>
+       <Image
+              source={require("../../../../assets/images/Intro_logo.png")}
+              style={[tw`self-center h-150 w-150 absolute -top-20`]}
+              resizeMode="contain"
+            />
+     
         <ScrollView
           style={[tw``]}
-          contentContainerStyle={[tw`pt-10 flex-1`]}
+          contentContainerStyle={[tw`pt-10 flex-1 justify-end`]} // Add pb-10 to push content up
           showsVerticalScrollIndicator={false}
         >
-          <View style={[tw`flex-1 justify-between`]}>
-            <View style={[tw`gap-8`]}>
-              <View style={[tw`gap-3`]}>
-                <View style={[tw`flex-row gap-2`]}>
-                  <Text style={[tw`text-3xl font-bold text-[#003C7A]`]}>
-                    Account
-                  </Text>
-                  <Text style={[tw`text-3xl font-bold text-[#CC1A21]`]}>
-                    Verification
-                  </Text>
+          <View style={[tw`px-5 bg-white py-10 pb-15 rounded-t-2xl`]}>
+              <View style={[tw`gap-8`]}>
+                <View style={[tw`items-center gap-2`]}>
+                    <Text style={[tw`text-2xl`, {
+                      fontFamily: fontFamily.Bold
+                    }]}>Verify your Identity</Text>
+                    <Text style={[tw`text-center`, {
+                      fontFamily: fontFamily.Light
+                    }]}>Add all the required documents it will be reviewed by our team.</Text>
                 </View>
-                <Text style={[tw`font-light text-gray-600`]}>
-                  Kindly provide us your legal documentation to complete the
-                  verification process
-                </Text>
-              </View>
-
               <View style={[tw`gap-4`]}>
-                {documentFields.map((field) => (
-                  <TouchableOpacity
-                    key={field.key}
-                    style={[
-                      tw`py-4 px-4 bg-gray-50 rounded-lg border border-gray-200`,
-                      documents[field.key] && tw`bg-green-50 border-green-300`,
-                    ]}
-                    onPress={() => pickDocument(field.key)}
-                    activeOpacity={0.7}
-                  >
-                    <View style={[tw`flex-row items-center justify-between`]}>
-                      <Text
-                        style={[
-                          tw`text-base`,
-                          documents[field.key]
-                            ? tw`text-green-700 font-medium`
-                            : tw`text-gray-700`,
-                        ]}
-                      >
-                        {field.label}
-                      </Text>
+                {documentFields.map((field) => {
+                  const isSelected = !!documents[field.key];
+                  const doc = documents[field.key];
+                  const isImage = doc?.type?.startsWith("image") || doc?.mimeType?.startsWith("image") || (doc?.uri && !doc.uri.toLowerCase().endsWith(".pdf"));
 
-                      <View
+                  return (
+                    <View key={field.key} style={[tw`mb-0`]}>
+                      <TouchableOpacity
                         style={[
-                          tw`p-2 rounded-full`,
-                          documents[field.key]
-                            ? tw`bg-green-100`
-                            : tw`bg-blue-100`,
+                          tw`p-4 bg-white rounded-xl border border-gray-100`,
+                          isSelected ? tw`border-blue-500 bg-blue-50/10` : tw`border-gray-200`,
                         ]}
+                        onPress={() => {
+                          if (!isSelected) {
+                            pickDocument(field.key);
+                          } else if (isImage) {
+                            setPreviewImage(doc.uri);
+                          }
+                        }}
+                        activeOpacity={0.7}
                       >
-                        <Upload
-                          size={20}
-                          color={documents[field.key] ? "#15803d" : "#003C7A"}
-                        />
-                      </View>
+                        <View style={[tw`flex-row items-center justify-between`]}>
+                          <View style={[tw`flex-row items-center flex-1`]}>
+                            <View
+                              style={[
+                                tw`w-12 h-12 rounded-full items-center justify-center mr-4`,
+                                isSelected ? tw`bg-blue-100` : tw`bg-gray-50`,
+                              ]}
+                            >
+                              {isSelected ? (
+                                isImage ? (
+                                  <Image 
+                                    source={{ uri: doc.uri }} 
+                                    style={[tw`w-12 h-12 rounded-full`]} 
+                                  />
+                                ) : (
+                                  <CheckCircle2 size={24} color="#3b82f6" />
+                                )
+                              ) : (
+                                <FileText size={24} color="#64748b" />
+                              )}
+                            </View>
+
+                            <View style={[tw`flex-1`]}>
+                              <Text
+                                style={[
+                                  tw`text-base text-gray-900`,
+                                  { fontFamily: fontFamily.Bold },
+                                ]}
+                              >
+                                {field.label}
+                              </Text>
+                              <Text
+                                style={[
+                                  tw`text-xs text-gray-500 mt-0.5`,
+                                  { fontFamily: fontFamily.Regular },
+                                ]}
+                                numberOfLines={1}
+                              >
+                                {isSelected
+                                  ? doc.name || `${field.label} uploaded`
+                                  : `Upload your ${field.label.toLowerCase()}`}
+                              </Text>
+                            </View>
+                          </View>
+
+                          <View style={[tw`flex-row items-center gap-3`]}>
+                            {isSelected && isImage && (
+                              <TouchableOpacity 
+                                onPress={() => setPreviewImage(doc.uri)}
+                                style={[tw`p-2 bg-blue-100 rounded-full`]}
+                              >
+                                <Eye size={18} color="#3b82f6" />
+                              </TouchableOpacity>
+                            )}
+                            
+                            {!isSelected ? (
+                              <Upload size={20} color="#94a3b8" />
+                            ) : (
+                              <TouchableOpacity
+                                onPress={() =>
+                                  setDocuments((prev) => ({
+                                    ...prev,
+                                    [field.key]: null,
+                                  }))
+                                }
+                                style={[tw`p-2 bg-red-50 rounded-full`]}
+                              >
+                                <Trash2 size={18} color="#ef4444" />
+                              </TouchableOpacity>
+                            )}
+                          </View>
+                        </View>
+                      </TouchableOpacity>
                     </View>
-                    {documents[field.key] && (
-                      <View style={[tw`flex-row items-center mt-2`]}>
-                        <Text style={[tw`text-sm text-green-700`]}>
-                          ✓ {documents[field.key].name || `${field.key}.jpg`}
-                        </Text>
-                      </View>
-                    )}
-                  </TouchableOpacity>
-                ))}
+                  );
+                })}
               </View>
             </View>
 
@@ -307,6 +360,31 @@ const Verification = () => {
                 disabled={loading}
               />
             </View>
+
+            {/* Preview Modal */}
+            <Modal
+              visible={!!previewImage}
+              transparent={true}
+              animationType="fade"
+              onRequestClose={() => setPreviewImage(null)}
+            >
+              <View style={[tw`flex-1 bg-black/90 justify-center items-center`]}>
+                <TouchableOpacity
+                  style={[tw`absolute top-12 right-6 z-10 p-2 bg-white/20 rounded-full`]}
+                  onPress={() => setPreviewImage(null)}
+                >
+                  <X size={24} color="white" />
+                </TouchableOpacity>
+                {previewImage && (
+                  <Image
+                    source={{ uri: previewImage }}
+                    style={[tw`w-full h-3/4`]}
+                    resizeMode="contain"
+                  />
+                )}
+              </View>
+            </Modal>
+
             <CompleteModal
               visible={completeModalVisible}
               onClose={() => {
@@ -318,8 +396,7 @@ const Verification = () => {
             />
           </View>
         </ScrollView>
-      )}
-    </SharedLayout>
+    </View>
   );
 };
 

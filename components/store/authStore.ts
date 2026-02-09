@@ -21,6 +21,9 @@ interface AuthState {
   refreshToken: string | null; // Property
   isAuthenticated: boolean;
 
+  phoneNumber: string | null;
+  country: string | null;
+
   login: (
     accessToken: string,
     refreshToken: string,
@@ -28,8 +31,11 @@ interface AuthState {
   ) => Promise<void>;
   logout: () => Promise<void>;
   loadAuth: () => Promise<void>;
+  setPhoneNumber: (phone: string) => Promise<void>;
+  setCountry: (country: string) => Promise<void>;
   fetchUserProfile: () => Promise<void>;
   refreshAuthToken: () => Promise<void>; // Renamed from refreshToken to refreshAuthToken
+  clearSignupData: () => void;
 }
 
 const useAuthStore = create<AuthState>((set, get) => ({
@@ -37,6 +43,8 @@ const useAuthStore = create<AuthState>((set, get) => ({
   accessToken: null,
   refreshToken: null,
   isAuthenticated: false,
+  phoneNumber: null,
+  country: null,
 
   login: async (accessToken, refreshToken, user) => {
     await AsyncStorage.setItem("accessToken", accessToken);
@@ -115,6 +123,15 @@ const useAuthStore = create<AuthState>((set, get) => ({
       get().logout();
       throw error;
     }
+  },
+  setPhoneNumber: async (phoneNumber: string) => {
+    set({ phoneNumber });
+  },
+  setCountry: async(country: string) => {
+    set({ country });
+  },
+  clearSignupData: () => {
+    set({ phoneNumber: null, country: null });
   },
 }));
 

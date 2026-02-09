@@ -100,7 +100,7 @@ const IntroScreen = ({}: IntroScreenProps) => {
                   entering={FadeIn.delay(200)}
                   key={`title-${index}`}
                 >
-                  {item.title1}
+                  {item.title1} 
                 </Animated.Text>
                 <Animated.Text
                   style={[tw`text-center text-gray-600`, {
@@ -140,7 +140,7 @@ const IntroScreen = ({}: IntroScreenProps) => {
             textColor="white"
             onpress={() => {
               if (currentSlide === slides.length - 1) {
-                router.replace("/screens/Auth/User/SignIn");
+                router.navigate("/RegisterType");
               } else {
                 handleNext();
               }
@@ -160,7 +160,7 @@ const IntroScreen = ({}: IntroScreenProps) => {
             onpress={() => {
               if (currentSlide === slides.length - 1) {
                 // "choose where to route it too" -> RegisterType (Account Type Selection)
-                router.replace("/screens/Auth/User/PhoneLocation");
+                router.navigate("/PhoneLocation");
               } else {
                 // Skip -> Last Slide
                 setCurrentSlide(slides.length - 1);

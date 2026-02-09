@@ -6,7 +6,7 @@ export default {
   light: {
     text: "white",
     background: "#fff",
-    primaryColor: "#003C7A",
+    primaryColor: "#19488A",
     tint: tintColorLight,
     tintLight: tintColorLightOverlay,
     secondaryColor: "#41872C",
