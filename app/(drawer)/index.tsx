@@ -13,6 +13,7 @@ import { fontFamily } from "@/constants/fonts";
 import tw from "@/constants/tailwind";
 import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
 import { DrawerActions } from "@react-navigation/native";
+import * as Location from "expo-location";
 import { useNavigation, useRouter } from "expo-router";
 import { AlignCenter, InfoIcon, MapPin, Minus, Plus, X, XIcon } from "lucide-react-native";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -129,6 +130,42 @@ const UserHomePage = ({}: UserHomePageProps) => {
 
 
 
+  useEffect(() => {
+    (async () => {
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert('Permission to access location was denied');
+        return;
+      }
+
+      let location = await Location.getCurrentPositionAsync({});
+      setOrigin({
+        latitude: location.coords.latitude,
+        longitude: location.coords.longitude,
+      });
+      moveTo({
+        latitude: location.coords.latitude,
+        longitude: location.coords.longitude,
+      });
+
+      let addressResponse = await Location.reverseGeocodeAsync({
+        latitude: location.coords.latitude,
+        longitude: location.coords.longitude,
+      });
+
+      if (addressResponse.length > 0) {
+        const address = addressResponse[0];
+        const parts = [];
+        if (address.streetNumber) parts.push(address.streetNumber);
+        if (address.street) parts.push(address.street);
+        if (address.city) parts.push(address.city);
+        if (address.region) parts.push(address.region);
+        
+        const formattedAddress = parts.join(", ");
+         setPickupAddress(formattedAddress);
+      }
+    })();
+  }, []);
   useEffect(() => {
     if (isAuthenticated) {
       // Fetch fresh user data when component mounts
@@ -373,7 +410,7 @@ const UserHomePage = ({}: UserHomePageProps) => {
                       bottomSheetRef.current?.close();
                       setRouteSearchSheet(true);
                     }}>
-                    <Image style={[tw`h-3.5 w-3.5`]} source={require("../../assets/images/IntroImages/LocationMarker.png")}/>
+                    <Image style={[tw`h-3.5 w-3.5`]} source={require("../../assets/images/IntroImages/LocationMarker2.png")}/>
                     <Text style={[tw`uppercase text-xs`, {
                       fontFamily: fontFamily.MontserratEasyMedium
                     }]} numberOfLines={1}>{destinationAddress.length > 20 ? destinationAddress.slice(0, 35) + "..." : destinationAddress || "Package destination"}</Text>
@@ -498,7 +535,7 @@ const UserHomePage = ({}: UserHomePageProps) => {
                   />
                 </View>
               </View>
-              {distance && duration && (
+              {distance > 0 && duration > 0 && (
                 <View style={tw`flex-row justify-between px-2`}>
                   <Text style={[tw`text-[10px] text-gray-500 uppercase`, { fontFamily: fontFamily.MontserratEasyMedium }]}>
                     distance: {Math.ceil(distance)} km
