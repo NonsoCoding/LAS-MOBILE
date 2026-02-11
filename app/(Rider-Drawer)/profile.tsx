@@ -47,6 +47,10 @@ const ProfileScreen = () => {
     </TouchableOpacity>
   );
 
+  const pprofileButtons = [
+    {name}
+  ]
+
   return (
     <View
       style={[

@@ -95,7 +95,7 @@ const RiderHomePage = ({}: UserHomePageProps) => {
                 borderColor: "#D37A0F"
               }]}>
                 <View style={[tw`flex-row items-center w-[70%] gap-2`]}>
-                <InfoIcon color={"#D37A0F"} />
+                <InfoIcon color={"#D37A0F"}  />
                 <Text style={[tw`text-[#D37A0F] uppercase text-[11px]`, {
                   fontFamily: fontFamily.MontserratEasyMedium
                 }]}>Visit your profile to complete your registration</Text>
