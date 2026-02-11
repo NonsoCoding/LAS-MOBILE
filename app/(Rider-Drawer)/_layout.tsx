@@ -5,15 +5,22 @@ import { fontFamily } from "@/constants/fonts";
 import tw from "@/constants/tailwind";
 import { MaterialIcons } from "@expo/vector-icons";
 import { DrawerContentScrollView, DrawerItemList } from "@react-navigation/drawer";
+import { useRouter } from "expo-router";
 import { Drawer } from "expo-router/drawer";
-import { Bell, CarFront, ChevronRight, Gift, Info, MessageCircle, SettingsIcon, Shield, Wallet } from "lucide-react-native";
+import { Bell, CarFront, ChevronRight, Gift, Info, LogOut, MessageCircle, SettingsIcon, Shield, Wallet } from "lucide-react-native";
 import React from "react";
 import { Image, Text, TouchableOpacity, View } from "react-native";
 
 function CustomDrawerContent(props: any) {
-  const { user } = useAuthStore();
+  const { user, logout } = useAuthStore();
   const colorScheme = useColorScheme();
   const themeColors = Colors[colorScheme ?? "light"];
+  const router = useRouter();
+
+  const handleLogout = () => {
+    logout();
+    router.replace("/");
+  };
 
   return (
     <DrawerContentScrollView {...props} contentContainerStyle={{ paddingTop: 0 }}>
@@ -48,6 +55,19 @@ function CustomDrawerContent(props: any) {
       {/* Drawer Items */}
       <View style={[tw`flex-1 pt-5`]}>
         <DrawerItemList {...props} />
+      </View>
+
+      {/* Logout Button */}
+      <View style={[tw`px-5 py-8 border-t border-gray-100`]}>
+        <TouchableOpacity 
+          style={[tw`flex-row items-center gap-3`]}
+          onPress={handleLogout}
+        >
+          <LogOut size={20} color="#FF3B30" />
+          <Text style={[tw`text-[#FF3B30] text-sm`, { fontFamily: fontFamily.MontserratEasyMedium }]}>
+            Logout
+          </Text>
+        </TouchableOpacity>
       </View>
     </DrawerContentScrollView>
   );

@@ -3,7 +3,7 @@ import { fontFamily } from "@/constants/fonts";
 import tw from "@/constants/tailwind";
 import { useRouter } from "expo-router";
 import { useState } from "react";
-import { Image, useColorScheme, View } from "react-native";
+import { Image, Platform, useColorScheme, View } from "react-native";
 import Animated, {
   FadeIn,
   useAnimatedStyle,
@@ -57,6 +57,14 @@ const IntroScreen = ({}: IntroScreenProps) => {
         tw`flex-1 pt-10 justify-end`,
         {
           backgroundColor: "#19488A",
+          ...Platform.select({
+                  ios: {
+                    paddingTop: 0
+                  },
+                  android: {
+                    paddingTop: 20
+                  }
+                })
         },
       ]}
     >
@@ -67,10 +75,18 @@ const IntroScreen = ({}: IntroScreenProps) => {
       />
       <View
         style={[
-          tw`relative bg-white h-85 pb-10 justify-center px-5`,
+          tw`relative bg-white h-85 justify-center px-5`,
           {
             borderTopRightRadius: 20,
             borderTopLeftRadius: 20,
+            ...Platform.select({
+                  ios: {
+                    paddingBottom: 20
+                  },
+                  android: {
+                    paddingBottom: 40
+                  }
+                })
           },
         ]}
       >

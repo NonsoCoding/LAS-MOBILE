@@ -15,7 +15,7 @@ const DeliveryButton = ({icon, text, onPress}: IDeliveryButtonProps) => {
             onPress()
         }}
             style={[tw`flex-row justify-between items-center border border-1 border-[#19488A] p-3 px-5 rounded-full`]}>
-            <View style={[tw`flex-row items-center gap-3`]}>
+            <View style={[tw`flex-row items-center gap-3 w-[90%]`]}>
             <Image style={[tw`h-3.5 w-3.5`]} source={icon}/>
                 <View style={[tw`border border-[1px] h-5 border-[#19488A22]`]}/>
                 <Text style={[tw`uppercase text-xs`]}>{text}</Text>

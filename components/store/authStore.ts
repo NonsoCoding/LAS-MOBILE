@@ -2,7 +2,9 @@ import {
   getUserProfile,
   refreshAccessToken,
 } from "@/components/services/api/authApi";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as AsyncStore from "@/components/services/storage/asyncStore";
+import * as SecureStore from "@/components/services/storage/secureStore";
+import { STORAGE_KEYS } from "@/components/services/storage/storageKeys";
 import { create } from "zustand";
 
 interface User {
@@ -18,7 +20,7 @@ interface User {
 interface AuthState {
   user: User | null;
   accessToken: string | null;
-  refreshToken: string | null; // Property
+  refreshToken: string | null;
   isAuthenticated: boolean;
 
   phoneNumber: string | null;
@@ -31,10 +33,10 @@ interface AuthState {
   ) => Promise<void>;
   logout: () => Promise<void>;
   loadAuth: () => Promise<void>;
-  setPhoneNumber: (phone: string) => Promise<void>;
-  setCountry: (country: string) => Promise<void>;
+  setPhoneNumber: (phone: string) => void;
+  setCountry: (country: string) => void;
   fetchUserProfile: () => Promise<void>;
-  refreshAuthToken: () => Promise<void>; // Renamed from refreshToken to refreshAuthToken
+  refreshAuthToken: () => Promise<void>;
   clearSignupData: () => void;
 }
 
@@ -47,10 +49,12 @@ const useAuthStore = create<AuthState>((set, get) => ({
   country: null,
 
   login: async (accessToken, refreshToken, user) => {
-    await AsyncStorage.setItem("accessToken", accessToken);
-    await AsyncStorage.setItem("refreshToken", refreshToken);
-    await AsyncStorage.setItem("user", JSON.stringify(user));
-
+    await SecureStore.setItem(STORAGE_KEYS.ACCESS_TOKEN, accessToken);
+    await SecureStore.setItem(STORAGE_KEYS.REFRESH_TOKEN, refreshToken);
+    await AsyncStore.setItem(STORAGE_KEYS.USER, JSON.stringify(user));
+    await AsyncStore.setItem(STORAGE_KEYS.USER_TYPE, "user");
+    console.log(accessToken);
+    
     set({
       accessToken,
       refreshToken,
@@ -60,9 +64,10 @@ const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   logout: async () => {
-    await AsyncStorage.removeItem("accessToken");
-    await AsyncStorage.removeItem("refreshToken");
-    await AsyncStorage.removeItem("user");
+    await SecureStore.deleteItem(STORAGE_KEYS.ACCESS_TOKEN);
+    await SecureStore.deleteItem(STORAGE_KEYS.REFRESH_TOKEN);
+    await AsyncStore.removeItem(STORAGE_KEYS.USER);
+    await AsyncStore.removeItem(STORAGE_KEYS.USER_TYPE);
 
     set({
       accessToken: null,
@@ -73,9 +78,9 @@ const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   loadAuth: async () => {
-    const accessToken = await AsyncStorage.getItem("accessToken");
-    const refreshToken = await AsyncStorage.getItem("refreshToken");
-    const userString = await AsyncStorage.getItem("user");
+    const accessToken = await SecureStore.getItem(STORAGE_KEYS.ACCESS_TOKEN);
+    const refreshToken = await SecureStore.getItem(STORAGE_KEYS.REFRESH_TOKEN);
+    const userString = await AsyncStore.getItem(STORAGE_KEYS.USER);
 
     if (accessToken && refreshToken && userString) {
       set({
@@ -95,7 +100,7 @@ const useAuthStore = create<AuthState>((set, get) => ({
 
     try {
       const userData = await getUserProfile(accessToken);
-      await AsyncStorage.setItem("user", JSON.stringify(userData));
+      await AsyncStore.setItem(STORAGE_KEYS.USER, JSON.stringify(userData));
 
       set({ user: userData });
     } catch (error: any) {
@@ -105,7 +110,6 @@ const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   refreshAuthToken: async () => {
-    // Renamed method
     const { refreshToken } = get();
     if (!refreshToken) {
       throw new Error("No refresh token available");
@@ -115,19 +119,18 @@ const useAuthStore = create<AuthState>((set, get) => ({
       const response = await refreshAccessToken(refreshToken);
       const newAccessToken = response.access;
 
-      await AsyncStorage.setItem("accessToken", newAccessToken);
+      await SecureStore.setItem(STORAGE_KEYS.ACCESS_TOKEN, newAccessToken);
       set({ accessToken: newAccessToken });
     } catch (error: any) {
       console.error("Error refreshing token:", error);
-      // If refresh fails, logout user
-      get().logout();
+      await get().logout();
       throw error;
     }
   },
-  setPhoneNumber: async (phoneNumber: string) => {
+  setPhoneNumber: (phoneNumber: string) => {
     set({ phoneNumber });
   },
-  setCountry: async(country: string) => {
+  setCountry: (country: string) => {
     set({ country });
   },
   clearSignupData: () => {

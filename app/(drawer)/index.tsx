@@ -3,6 +3,7 @@ import SecondaryButton from "@/components/Buttons/SecondaryButons";
 import CarrierCard from "@/components/Cards/CarrierCard";
 import OrderCard from "@/components/Cards/OrderCard";
 import DropDown from "@/components/DropDown/DropDown";
+import CustomTextInput from "@/components/Inputs/CustomTextinput";
 import RouteNumberTextInput from "@/components/Inputs/RouteNumberTextInput";
 import RouteSearchTextInput from "@/components/Inputs/RouteTextInputs";
 import SearchTextInput from "@/components/Inputs/SearchTextInput";
@@ -21,13 +22,13 @@ import {
   Alert,
   Image,
   Modal,
+  Platform,
   Text,
   TouchableOpacity,
   useColorScheme,
   View
 } from "react-native";
 import { TextInput } from "react-native-gesture-handler";
-import { GooglePlaceDetail } from "react-native-google-places-autocomplete";
 import MapView, { LatLng, Marker, PROVIDER_GOOGLE } from "react-native-maps";
 import MapViewDirections from "react-native-maps-directions";
 
@@ -87,23 +88,12 @@ const UserHomePage = ({}: UserHomePageProps) => {
   }
   const { user, fetchUserProfile, isAuthenticated, accessToken } = useAuthStore();
   const GoogleApiKey = process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY;
-  const onPlaceSelected = (details: GooglePlaceDetail | null, flag: "origin" | "destination") => {
-    const set = flag === "origin" ? setOrigin : setDestination
-    if (details?.geometry.location) {
-      const position = {
-        latitude: details.geometry.location.lat,
-        longitude: details.geometry.location.lng,
-      };
-      set(position);
-      moveTo(position);
-    }
-  }
 
-  const edgePaddingValue = 300;
+  const edgePaddingValue = 50;
 
   const edgePadding = {
-    top: edgePaddingValue,
-    bottom: edgePaddingValue,
+    top: 100, // Reduced from 300 to show more map
+    bottom: 400, // Increased to account for bottom sheet
     left: edgePaddingValue,
     right: edgePaddingValue
   }
@@ -111,7 +101,12 @@ const UserHomePage = ({}: UserHomePageProps) => {
   const traceRoute = () => {
     if (origin && destination) {
       setShowDirection(true);
-      mapRef.current?.fitToCoordinates([origin, destination], {edgePadding})
+      mapRef.current?.fitToCoordinates([origin, destination], {
+        edgePadding,
+        animated: true,
+      });
+      // Snap bottom sheet to 40% (index 0)
+      routeSearchSheetRef.current?.snapToIndex(0);
     }
   }
 
@@ -173,10 +168,6 @@ const UserHomePage = ({}: UserHomePageProps) => {
     }
   }, [isAuthenticated]);
 
-  const handleDeclineOrder = () => {
-    console.log("Order declined");
-  }; 
-
   const carrierCardInfo = [
     { name: "Ebenihi", amount: 4200, carrierType: "Toyota Camry", image: require("../../assets/images/EppMeBuyMainLogo.png"), rating: 4.5, totalRides: 100, time: "7 mins" },
     { name: "Ebenihi", amount: 4200, carrierType: "Toyota Camry", image: require("../../assets/images/EppMeBuyMainLogo.png"), rating: 4.5, totalRides: 100, time: "7 mins" },
@@ -228,26 +219,41 @@ const UserHomePage = ({}: UserHomePageProps) => {
 
   return (
     <View style={[tw`flex-1 justify-end`, {
-      backgroundColor: themeColors.background 
+      backgroundColor: themeColors.background,
+      ...Platform.select({
+        ios: {
+          paddingTop: 0
+        },
+        android: {
+          paddingTop: 20
+        }
+      })
     }]}>
-      <MapView  
-        provider={PROVIDER_GOOGLE}
-        ref={mapRef}
-        style={[tw`flex-1`]}
-        region={{
-          latitude: 37.78825,
-          longitude: -122.4324,
-          latitudeDelta: 0.0922,
-          longitudeDelta: 0.0421,
-        }}
-        showsUserLocation={true}
-        showsPointsOfInterest={true}
-        showsBuildings={true}
-        showsIndoors={true}
-        showsCompass={true}
-        showsScale={true}
-        mapType="hybrid"
-      >
+     <MapView  
+  provider={PROVIDER_GOOGLE}
+  ref={mapRef}
+  style={[tw`flex-1`]}
+  region={{
+    latitude: 37.78825,
+    longitude: -122.4324,
+    latitudeDelta: 0.0922,
+    longitudeDelta: 0.0421,
+  }}
+  showsUserLocation={true}
+  showsMyLocationButton={false} // Custom button looks better
+  showsPointsOfInterest={false} // Cleaner for logistics
+  showsBuildings={false} // Less visual clutter
+  showsIndoors={false}
+  showsCompass={false} // Use custom compass
+  showsScale={false}
+  mapType="standard"
+  rotateEnabled={true}
+  pitchEnabled={false} // Keep 2D for logistics clarity
+  toolbarEnabled={false}
+  loadingEnabled={true}
+  loadingIndicatorColor="#yourBrandColor"
+  loadingBackgroundColor="#ffffff"
+>
         {origin &&
           <Marker
             coordinate={origin}
@@ -271,7 +277,7 @@ const UserHomePage = ({}: UserHomePageProps) => {
         origin={origin}
         destination={destination}
         apikey={GoogleApiKey || ""}
-        strokeColor="#19488A"
+        strokeColor={themeColors.primaryColor}
           strokeWidth={6}
           onReady={trackRouteOnReady}
        />
@@ -287,8 +293,6 @@ const UserHomePage = ({}: UserHomePageProps) => {
               >
                 <AlignCenter color={themeColors.primaryColor} />
         </TouchableOpacity>
-        
-        
       </MapView>
       <Modal
           transparent={true}
@@ -427,7 +431,22 @@ const UserHomePage = ({}: UserHomePageProps) => {
                     />
                 </View>
                 )}
-                    <DeliveryButton
+                {senderPhone && recipientPhone && recipientName && itemDescription && itemValue && deliveryType ? (
+                  <DeliveryButton
+                      icon={require("../../assets/images/IntroImages/icon/Details.png")}
+                      text={(() => {
+                        const type = deliveryType.charAt(0).toUpperCase() + deliveryType.slice(1);
+                        const str = `To ${type}, From ${senderPhone}, to ${recipientPhone}`;
+                        return str.length > 35 ? str.slice(0, 35) + "..." : str;
+                      })()}
+                  onPress={() => {
+                    bottomSheetRef.current?.close();
+                    setOrderDetailSheet(true);
+                      }}
+                    />
+                ): (
+                    <View>
+                       <DeliveryButton
                       icon={require("../../assets/images/IntroImages/icon/Details.png")}
                       text="Order details"
                   onPress={() => {
@@ -435,6 +454,9 @@ const UserHomePage = ({}: UserHomePageProps) => {
                     setOrderDetailSheet(true);
                       }}
                     />
+                      </View>
+                )}
+                   
                     <DeliveryButton
                       icon={require("../../assets/images/IntroImages/icon/Offer.png")}
                       text="Offer your request"
@@ -634,7 +656,12 @@ const UserHomePage = ({}: UserHomePageProps) => {
                 direction="Recipient's Phone Number"
                 value={recipientPhone}
                 onChangeText={setRecipientPhone}
-              />
+                />
+                <CustomTextInput
+                  placeholderText="Recipients full name"
+                  onChangeText={setRecipientName}
+                  value={recipientName}
+                />
               </View>
               <View style={[tw`gap-4`]}>
                 <View style={[tw`justify-between flex-row items-center`]}>

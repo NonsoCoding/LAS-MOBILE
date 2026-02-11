@@ -3,15 +3,24 @@ import {
   DefaultTheme,
   ThemeProvider,
 } from "@react-navigation/native";
-import { SplashScreen, Stack } from "expo-router";
+import { Stack, useRouter } from "expo-router";
 import "react-native-reanimated";
 
 import { AppModeProvider, useAppMode } from "../context/AppModeContext";
 
+import * as AsyncStore from "@/components/services/storage/asyncStore";
+import * as SecureStore from "@/components/services/storage/secureStore";
+import { STORAGE_KEYS } from "@/components/services/storage/storageKeys";
+import useRiderAuthStore from "@/components/store/RiderAuthStore";
+import useAuthStore from "@/components/store/authStore";
 import { useColorScheme } from "@/components/useColorScheme";
 import { fontFamily } from "@/constants/fonts";
 import { useFonts } from "expo-font";
-import { useEffect } from "react";
+import * as SplashScreen from "expo-splash-screen";
+import { useEffect, useState } from "react";
+
+// Keep the splash screen visible while we fetch resources
+SplashScreen.preventAutoHideAsync();
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -20,12 +29,15 @@ export {
 
 export const unstable_settings = {
   // Ensure that reloading on `/modal` keeps a back button present.
-  initialRouteName: "screens/Auth/Intro",
+  initialRouteName: "index",
 };
 
 function RootLayoutNav() {
   const colorScheme = useColorScheme();
-  const { mode } = useAppMode();
+  const { mode, setMode } = useAppMode();
+  const router = useRouter();
+  const [appIsReady, setAppIsReady] = useState(false);
+
   const [loaded, error] = useFonts({
     [fontFamily.Bold]: require("../assets/fonts/MontserratAlternates-Bold.ttf"),
     [fontFamily.Medium]: require("../assets/fonts/MontserratAlternates-Medium.ttf"),
@@ -36,15 +48,52 @@ function RootLayoutNav() {
     [fontFamily.MontserratEasyRegular]: require("../assets/fonts/Montserrat-Regular.ttf"),
     [fontFamily.MontserratEasyLight]: require("../assets/fonts/Montserrat-Light.ttf"),
   });
-  
+
   useEffect(() => {
-    if (loaded || error) {
-      SplashScreen.hideAsync();
+    async function prepare() {
+      try {
+        // Wait for fonts to load
+        if (!loaded && !error) {
+          return;
+        }
+
+        // Check authentication
+        const accessToken = await SecureStore.getItem(STORAGE_KEYS.ACCESS_TOKEN);
+        const userType = await AsyncStore.getItem(STORAGE_KEYS.USER_TYPE);
+
+        if (accessToken && userType) {
+          if (userType === "rider") {
+             // Hydrate Rider Store
+             await useRiderAuthStore.getState().loadAuth();
+            setMode("rider");
+            router.replace("/(Rider-Drawer)");
+          } else {
+            // Hydrate User Store
+             await useAuthStore.getState().loadAuth();
+            setMode("user");
+            router.replace("/(drawer)");
+          }
+        }
+      } catch (error) {
+        console.error("Error during app preparation:", error);
+      } finally {
+        // Tell the application to render
+        setAppIsReady(true);
+      }
     }
+
+    prepare();
   }, [loaded, error]);
 
-  if (!loaded && !error) {
-    return null
+  useEffect(() => {
+    // Hide splash screen when app is ready
+    if (appIsReady) {
+      SplashScreen.hideAsync();
+    }
+  }, [appIsReady]);
+
+  if (!appIsReady) {
+    return null;
   }
 
   return (
@@ -55,10 +104,18 @@ function RootLayoutNav() {
             headerShown: false,
             contentStyle: { backgroundColor: "#FFFFFF" },
           }}
-          initialRouteName="(drawer)"
+          initialRouteName="index"
         >
           <Stack.Screen
+            name="index"
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
             name="screens/Auth/User/index"
+            options={{ headerShown: false }}
+          />
+           <Stack.Screen
+            name="(drawer)"
             options={{ headerShown: false }}
           />
         </Stack>
@@ -68,7 +125,7 @@ function RootLayoutNav() {
             headerShown: false,
             contentStyle: { backgroundColor: "#FFFFFF" },
           }}
-          initialRouteName="(drawer)"
+          initialRouteName="(Rider-Drawer)"
         >
           <Stack.Screen
             name="screens/Auth/Rider/index"
@@ -83,6 +140,7 @@ function RootLayoutNav() {
             options={{ headerShown: false }}
           />
           <Stack.Screen name="(rider-tabs)" options={{ headerShown: false }} />
+           <Stack.Screen name="(Rider-Drawer)" options={{ headerShown: false }} />
         </Stack>
       )}
     </ThemeProvider>
@@ -90,31 +148,8 @@ function RootLayoutNav() {
 }
 
 export default function RootLayout() {
-  // useEffect(() => {
-  //   SplashScreen.preventAutoHideAsync();
-  // }, []);
-
-  // const [loaded, error] = useFonts({
-  //   SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
-  //   ...FontAwesome.font,
-  // });
-
-  // // Expo Router uses Error Boundaries to catch errors in the navigation tree.
-  // useEffect(() => {
-  //   if (error) throw error;
-  // }, [error]);
-
-  // useEffect(() => {
-  //   if (loaded) {
-  //     SplashScreen.hideAsync();
-  //   }
-  // }, [loaded]);
-
-  // if (!loaded) {
-  //   return null;
-  // }
-
   return (
+  
     <AppModeProvider>
       <RootLayoutNav />
     </AppModeProvider>
