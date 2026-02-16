@@ -11,7 +11,6 @@ import { AppModeProvider, useAppMode } from "../context/AppModeContext";
 import * as AsyncStore from "@/components/services/storage/asyncStore";
 import * as SecureStore from "@/components/services/storage/secureStore";
 import { STORAGE_KEYS } from "@/components/services/storage/storageKeys";
-import useRiderAuthStore from "@/components/store/RiderAuthStore";
 import useAuthStore from "@/components/store/authStore";
 import { useColorScheme } from "@/components/useColorScheme";
 import { fontFamily } from "@/constants/fonts";
@@ -58,19 +57,18 @@ function RootLayoutNav() {
         }
 
         // Check authentication
+        const loadAuth = useAuthStore.getState().loadAuth;
+        await loadAuth();
+
         const accessToken = await SecureStore.getItem(STORAGE_KEYS.ACCESS_TOKEN);
         const userType = await AsyncStore.getItem(STORAGE_KEYS.USER_TYPE);
 
         if (accessToken && userType) {
-          if (userType === "rider") {
-             // Hydrate Rider Store
-             await useRiderAuthStore.getState().loadAuth();
-            setMode("rider");
+          if (userType === "carrier") {
+            setMode("carrier");
             router.replace("/(Rider-Drawer)");
           } else {
-            // Hydrate User Store
-             await useAuthStore.getState().loadAuth();
-            setMode("user");
+            setMode("shipper");
             router.replace("/(drawer)");
           }
         }
@@ -98,7 +96,7 @@ function RootLayoutNav() {
 
   return (
     <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-      {mode === "user" ? (
+      {mode === "shipper" ? (
         <Stack
           screenOptions={{
             headerShown: false,
@@ -108,6 +106,10 @@ function RootLayoutNav() {
         >
           <Stack.Screen
             name="index"
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="login"
             options={{ headerShown: false }}
           />
           <Stack.Screen
@@ -128,6 +130,10 @@ function RootLayoutNav() {
           initialRouteName="(Rider-Drawer)"
         >
           <Stack.Screen
+            name="login"
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
             name="screens/Auth/Rider/index"
             options={{ headerShown: false }}
           />
@@ -139,7 +145,6 @@ function RootLayoutNav() {
             name="screens/Auth/Rider/Otp"
             options={{ headerShown: false }}
           />
-          <Stack.Screen name="(rider-tabs)" options={{ headerShown: false }} />
            <Stack.Screen name="(Rider-Drawer)" options={{ headerShown: false }} />
         </Stack>
       )}
@@ -149,7 +154,6 @@ function RootLayoutNav() {
 
 export default function RootLayout() {
   return (
-  
     <AppModeProvider>
       <RootLayoutNav />
     </AppModeProvider>

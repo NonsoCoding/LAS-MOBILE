@@ -32,7 +32,7 @@ const SecondaryButton = ({
       disabled={disabled}
       onPress={onpress}
       style={[
-        tw`items-center justify-center rounded-md flex-row gap-2 flex-1`,
+        tw`items-center justify-center rounded-full flex-row gap-2 flex-1`,
         { backgroundColor: bgColors, height: height, width: width, borderColor: borderColor, borderWidth: borderWidth },
       ]}
       >

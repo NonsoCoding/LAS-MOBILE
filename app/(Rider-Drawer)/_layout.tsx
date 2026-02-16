@@ -19,7 +19,7 @@ function CustomDrawerContent(props: any) {
 
   const handleLogout = () => {
     logout();
-    router.replace("/");
+    router.replace("/login");
   };
 
   return (
@@ -103,6 +103,14 @@ export default function DrawerLayout() {
         options={{
           drawerLabel: "Home",
           title: "Rider Home",
+          drawerIcon: ({ color, size }) => <CarFront color={color} size={18} />,
+        }}
+      />
+      <Drawer.Screen
+        name="request"
+        options={{
+          drawerLabel: "Request",
+          title: "Request",
           drawerIcon: ({ color, size }) => <CarFront color={color} size={18} />,
         }}
       />

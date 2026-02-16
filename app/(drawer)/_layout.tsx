@@ -19,7 +19,7 @@ function CustomDrawerContent(props: any) {
 
   const handleLogout = () => {
     logout();
-    router.replace("/");
+    router.replace("/login");
   };
 
   return (

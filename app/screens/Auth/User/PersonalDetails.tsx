@@ -12,13 +12,13 @@ import { Formik } from "formik";
 import { CheckCircle2, Eye, FileText, Trash2, Upload, User, X } from "lucide-react-native";
 import React, { useState } from "react";
 import {
-  Alert,
-  Image,
-  Modal,
-  Text,
-  TouchableOpacity,
-  useColorScheme,
-  View
+    Alert,
+    Image,
+    Modal,
+    Text,
+    TouchableOpacity,
+    useColorScheme,
+    View
 } from "react-native";
 import * as Yup from "yup";
 
@@ -42,7 +42,7 @@ export default function UserPersonalDetailsIndex() {
   const [documents, setDocuments] = useState<DocumentState>({
     government_id: null,
   });
-  const {phoneNumber} = useAuthStore();
+  const {phoneNumber, role} = useAuthStore();
 
   // Get email and password from previous screen
   const params = useLocalSearchParams();
@@ -131,6 +131,7 @@ export default function UserPersonalDetailsIndex() {
     formData.append("first_name", values.firstName as string);
     formData.append("last_name", values.lastName as string);
     formData.append("phone_number", phoneNumber as string);
+    formData.append("role", role as string);
 
     // Append document file
     if (documents.government_id) {
@@ -160,7 +161,7 @@ export default function UserPersonalDetailsIndex() {
             .login(
               response.tokens.access,
               response.tokens.refresh,
-              response.user
+              { ...response.user, role: "shipper" }
             );
         }
 

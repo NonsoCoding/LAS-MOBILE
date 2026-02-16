@@ -6,6 +6,7 @@ import Colors from "@/constants/Colors";
 import { fontFamily } from "@/constants/fonts";
 import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
 import { useNavigation } from "@react-navigation/native";
+import { useRouter } from "expo-router";
 import { BellIcon, ChevronRight, InfoIcon, MapPin } from "lucide-react-native";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
@@ -15,12 +16,14 @@ import {
   useColorScheme,
   View
 } from "react-native";
-import MapView, { Marker } from "react-native-maps";
+import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
 import tw from "twrnc";
 
 const ProfileScreen = () => {
+  const router = useRouter();
   const [isOnline, setIsOnline] = useState(false);
   const colorScheme = useColorScheme();
+    const mapRef = useRef<MapView>(null);
   const snapPoints = useMemo(() => ["10%", "45%"], []);
   const themeColors = Colors[colorScheme ?? "light"];
       const [step, setStep] = useState<1 | 2 | 3 | 4 | 5>(1);
@@ -47,10 +50,6 @@ const ProfileScreen = () => {
     </TouchableOpacity>
   );
 
-  const pprofileButtons = [
-    {name}
-  ]
-
   return (
     <View
       style={[
@@ -58,12 +57,28 @@ const ProfileScreen = () => {
       ]}
     >
       <MapView style={[tw`flex-1`]}
-         region={{
-          latitude: 37.78825,
-          longitude: -122.4324,
-          latitudeDelta: 0.0922,
-          longitudeDelta: 0.0421,
-        }}
+          provider={PROVIDER_GOOGLE}
+  ref={mapRef}
+  region={{
+    latitude: 37.78825,
+    longitude: -122.4324,
+    latitudeDelta: 0.0922,
+    longitudeDelta: 0.0421,
+  }}
+  showsUserLocation={true}
+  showsMyLocationButton={false} // Custom button looks better
+  showsPointsOfInterest={false} // Cleaner for logistics
+  showsBuildings={false} // Less visual clutter
+  showsIndoors={false}
+  showsCompass={false} // Use custom compass
+  showsScale={false}
+  mapType="standard"
+  rotateEnabled={true}
+  pitchEnabled={false} // Keep 2D for logistics clarity
+  toolbarEnabled={false}
+  loadingEnabled={true}
+  loadingIndicatorColor="#yourBrandColor"
+  loadingBackgroundColor="#ffffff"
       >
         <Marker
            coordinate={{
@@ -95,10 +110,10 @@ const ProfileScreen = () => {
                 <View style={[tw``]}>
                       <Text style={[tw`uppercase text-white`, {
                       fontFamily: fontFamily.MontserratEasyBold
-                    }]}>Welcome, Godson</Text>
+                    }]}>Welcome, {user?.first_name || "User"}</Text>
                     <View style={[tw`flex-row items-center gap-1`]}>
                       <MapPin size={12} color={"white"}/>
-                  <Text style={[tw`text-white uppercase text-[10px]`]}>Gwarimpa first avenu</Text>
+                  <Text style={[tw`text-white uppercase text-[10px]`]}>{user?.phone_number || "No location available"}</Text>
                     </View>
                   </View>
                   </View>
@@ -118,7 +133,11 @@ const ProfileScreen = () => {
                   fontFamily: fontFamily.MontserratEasyMedium
                 }]}>Visit your profile to complete your registration</Text>
                 </View>
-                <TouchableOpacity style={[tw`bg-[#D37A0F99] h-9 w-9 rounded-full flex-row items-center justify-center`]}>
+                  <TouchableOpacity
+                    onPress={() => {
+                      router.navigate("/screens/Rider/CompleteProfile")
+                  }}
+                    style={[tw`bg-[#D37A0F99] h-9 w-9 rounded-full flex-row items-center justify-center`]}>
                   <ChevronRight size={16} color={"white"}/>
                 </TouchableOpacity>
               </View>

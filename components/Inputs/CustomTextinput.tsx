@@ -94,7 +94,6 @@ const CustomTextInput = ({
                             placeholderTextColor={"#00000044"}
                             value={value}
                             onChangeText={onChangeText}
-                            keyboardType="phone-pad"
                             onFocus={(e) => {
                                 setIsFocusedInternal(true);
                                 onFocus?.(e);
@@ -103,7 +102,7 @@ const CustomTextInput = ({
                                 setIsFocusedInternal(false);
                                 onBlur?.(e);
                             }}
-                            style={[tw`text-[10px] uppercase`, {
+                            style={[tw`text-xs`, {
                                 fontFamily: fontFamily.MontserratEasyRegular,
                                 color: "black",
                                 height: 30,

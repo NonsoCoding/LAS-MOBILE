@@ -27,6 +27,7 @@ const RiderHomePage = ({}: UserHomePageProps) => {
     const [step, setStep] = useState<1 | 2 | 3 | 4 | 5>(1);
   const [isEnabled, setIsEnabled] = useState(false);
   const [orderAccepted, setOrderAccepted] = useState(false);
+  const mapRef = useRef<MapView>(null);
   const navigation = useNavigation();
   const [isOnline, setIsOnline] = useState(false);
   const bottomSheetRef = useRef<BottomSheet>(null);
@@ -55,14 +56,29 @@ const RiderHomePage = ({}: UserHomePageProps) => {
     }]}>
       <MapView
         provider={PROVIDER_GOOGLE}
-        style={[tw`flex-1`]}
-        region={{
-          latitude: 37.78825,
-          longitude: -122.4324,
-          latitudeDelta: 0.0922,
-          longitudeDelta: 0.0421,
-        }}
-      >
+          ref={mapRef}
+          style={[tw`flex-1`]}
+          region={{
+            latitude: 37.78825,
+            longitude: -122.4324,
+            latitudeDelta: 0.0922,
+            longitudeDelta: 0.0421,
+          }}
+          showsUserLocation={true}
+          showsMyLocationButton={false} // Custom button looks better
+          showsPointsOfInterest={false} // Cleaner for logistics
+          showsBuildings={false} // Less visual clutter
+          showsIndoors={false}
+          showsCompass={false} // Use custom compass
+          showsScale={false}
+          mapType="standard"
+          rotateEnabled={true}
+          pitchEnabled={false} // Keep 2D for logistics clarity
+          toolbarEnabled={false}
+          loadingEnabled={true}
+          loadingIndicatorColor="#yourBrandColor"
+          loadingBackgroundColor="#ffffff"
+        >
         <Marker
         coordinate={{
           latitude: 37.78825,

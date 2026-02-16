@@ -1,4 +1,5 @@
 import PrimaryButton from "@/components/Buttons/PrimaryButton";
+import useAuthStore from "@/components/store/authStore";
 import Colors from "@/constants/Colors";
 import { fontFamily } from "@/constants/fonts";
 import tw from "@/constants/tailwind";
@@ -19,27 +20,39 @@ const RegisterType = ({}: RegisterTypePropss) => {
   const [selected, setSelected] = useState<number | null>(null);
   const colorScheme = useColorScheme();
   const themeColors = Colors[colorScheme ?? "light"];
+  const authStore = useAuthStore();
 
-  const AccountType = [
+  interface AccountOption {
+    name: string;
+    image: any;
+    info: string;
+    navigation: string;
+    role: "shipper" | "carrier";
+  }
+
+  const AccountType: AccountOption[] = [
     {
       name: "I'm a Carrier",
       image: require("../assets/images/IntroImages/OnboardingIcon.png"),
       info: "Send and receive packages across Nigeria, Ghana & Kenya",
-      navigation: "/screens/Rider/Carrier-indemnity",
+      navigation: "/screens/Auth/Rider/Carrier-indemnity",
+      role: "carrier",
     },
     {
       name: "I'm a Customer",
       image: require("../assets/images/IntroImages/OnboardingIcon2.png"),
       info: "Deliver packages and earn money with your vehicle",
       navigation: "/screens/Auth/User",
+      role: "shipper",
     },
   ];
 
   const handleNext = () => {
     if (selected !== null) {
-      const selectedRoute = AccountType[selected].navigation;
-      console.log("Navigating to:", selectedRoute); // Debug log
-      router.push(selectedRoute as any);
+      const selectedAccount = AccountType[selected];
+      authStore.setRole(selectedAccount.role);
+      console.log("Navigating to:", selectedAccount.navigation); // Debug log
+      router.push(selectedAccount.navigation as any);
     }
   };
 

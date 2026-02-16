@@ -1,6 +1,6 @@
 import {
-  getUserProfile,
-  refreshAccessToken,
+    getUserProfile,
+    refreshAccessToken,
 } from "@/components/services/api/authApi";
 import * as AsyncStore from "@/components/services/storage/asyncStore";
 import * as SecureStore from "@/components/services/storage/secureStore";
@@ -15,6 +15,7 @@ interface User {
   email?: string;
   phone_number?: string;
   is_email_verified?: boolean;
+  role: "shipper" | "carrier";
 }
 
 interface AuthState {
@@ -22,6 +23,7 @@ interface AuthState {
   accessToken: string | null;
   refreshToken: string | null;
   isAuthenticated: boolean;
+  role: "shipper" | "carrier";
 
   phoneNumber: string | null;
   country: string | null;
@@ -32,6 +34,7 @@ interface AuthState {
     user: User
   ) => Promise<void>;
   logout: () => Promise<void>;
+  setRole: (role: "shipper" | "carrier") => void;
   loadAuth: () => Promise<void>;
   setPhoneNumber: (phone: string) => void;
   setCountry: (country: string) => void;
@@ -45,6 +48,7 @@ const useAuthStore = create<AuthState>((set, get) => ({
   accessToken: null,
   refreshToken: null,
   isAuthenticated: false,
+  role: "shipper",
   phoneNumber: null,
   country: null,
 
@@ -52,7 +56,7 @@ const useAuthStore = create<AuthState>((set, get) => ({
     await SecureStore.setItem(STORAGE_KEYS.ACCESS_TOKEN, accessToken);
     await SecureStore.setItem(STORAGE_KEYS.REFRESH_TOKEN, refreshToken);
     await AsyncStore.setItem(STORAGE_KEYS.USER, JSON.stringify(user));
-    await AsyncStore.setItem(STORAGE_KEYS.USER_TYPE, "user");
+    await AsyncStore.setItem(STORAGE_KEYS.USER_TYPE, user.role);
     console.log(accessToken);
     
     set({
@@ -126,6 +130,9 @@ const useAuthStore = create<AuthState>((set, get) => ({
       await get().logout();
       throw error;
     }
+  },
+  setRole: (role: "shipper" | "carrier") => {
+    set({ role });
   },
   setPhoneNumber: (phoneNumber: string) => {
     set({ phoneNumber });

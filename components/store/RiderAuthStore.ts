@@ -1,6 +1,6 @@
 import {
-  getUserProfile,
-  refreshAccessToken,
+    getUserProfile,
+    refreshAccessToken,
 } from "@/components/services/api/authApi";
 import * as AsyncStore from "@/components/services/storage/asyncStore";
 import * as SecureStore from "@/components/services/storage/secureStore";
@@ -12,6 +12,7 @@ interface User {
   first_name?: string;
   last_name?: string;
   full_name?: string;
+  role: "carrier" | "shipper";
   email?: string;
   phone_number?: string;
   is_email_verified?: boolean;
@@ -22,7 +23,7 @@ interface AuthState {
   accessToken: string | null;
   refreshToken: string | null;
   isAuthenticated: boolean;
-
+  role: "carrier" | "shipper";
   login: (
     accessToken: string,
     refreshToken: string,
@@ -39,12 +40,12 @@ const useRiderAuthStore = create<AuthState>((set, get) => ({
   accessToken: null,
   refreshToken: null,
   isAuthenticated: false,
-
+  role: "carrier",
   login: async (accessToken, refreshToken, user) => {
     await SecureStore.setItem(STORAGE_KEYS.ACCESS_TOKEN, accessToken);
     await SecureStore.setItem(STORAGE_KEYS.REFRESH_TOKEN, refreshToken);
     await AsyncStore.setItem(STORAGE_KEYS.USER, JSON.stringify(user));
-    await AsyncStore.setItem(STORAGE_KEYS.USER_TYPE, "rider");
+    await AsyncStore.setItem(STORAGE_KEYS.USER_TYPE, user.role);
 
     set({
       accessToken,

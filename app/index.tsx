@@ -81,7 +81,7 @@ const IntroScreen = ({}: IntroScreenProps) => {
             borderTopLeftRadius: 20,
             ...Platform.select({
                   ios: {
-                    paddingBottom: 20
+                    paddingBottom: 40
                   },
                   android: {
                     paddingBottom: 40
@@ -156,7 +156,7 @@ const IntroScreen = ({}: IntroScreenProps) => {
             textColor="white"
             onpress={() => {
               if (currentSlide === slides.length - 1) {
-                router.navigate("/RegisterType");
+                router.navigate("/login");
               } else {
                 handleNext();
               }
@@ -168,7 +168,7 @@ const IntroScreen = ({}: IntroScreenProps) => {
               currentSlide === slides.length - 1 ? "Create an account!" : "Skip"
             }
             bgColors={
-              currentSlide === slides.length - 1 ? "#19488A66" : "transparent"
+              currentSlide === slides.length - 1 ? "#19488A" : "transparent"
             }
             textColor={
               currentSlide === slides.length - 1 ? "white" : "#19488A"

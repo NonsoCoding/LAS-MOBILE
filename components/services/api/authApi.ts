@@ -1,27 +1,9 @@
-const apiUrl = "https://web-production-4a8a5.up.railway.app";
+export const apiUrl = "https://web-production-4a8a5.up.railway.app";
 
 export const loginUser = async (email: string, password: string) => {
   try {
     // Try with /api/ prefix to match your other endpoints
-    const res = await fetch(`${apiUrl}/api/auth/shipper/login/`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
-    });
-
-    const responseData = await res.json();
-    console.log("Login API response:", responseData);
-
-    return responseData;
-  } catch (error: any) {
-    console.log("Error logging in:", error);
-    throw error;
-  }
-};
-export const loginCarrier = async (email: string, password: string) => {
-  try {
-    // Try with /api/ prefix to match your other endpoints
-    const res = await fetch(`${apiUrl}/api/auth/carrier/login/`, {
+    const res = await fetch(`${apiUrl}/api/auth/login/`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password }),
@@ -41,52 +23,13 @@ export const registeredUser = async (data: FormData) => {
   try {
     console.log("Registration data being sent:", data); // Debug log
 
-    const res = await fetch(`${apiUrl}/api/auth/shipper/register/`, {
+    const res = await fetch(`${apiUrl}/api/auth/register/`, {
       method: "POST",
       body: data,
     });
 
     const responseData = await res.json();
     console.log("Registration response:", responseData); // Debug log
-
-    if (!res.ok) {
-      throw new Error(
-        responseData.message || `HTTP error! status: ${res.status}`
-      );
-    }
-
-    return responseData;
-  } catch (error: any) {
-    console.log("Error registering user:", error);
-    throw error;
-  }
-};
-
-export const registeredRider = async (data: FormData | any) => {
-  try {
-    console.log("Registration data being sent:", data);
-
-    // Determine if we're sending FormData or JSON
-    const isFormData = data instanceof FormData;
-
-    const headers: HeadersInit = isFormData
-      ? {
-          // Don't set Content-Type for FormData - let the browser set it with boundar
-        }
-      : {
-          "Content-Type": "application/json",
-        };
-
-    const body = isFormData ? data : JSON.stringify(data);
-
-    const res = await fetch(`${apiUrl}/api/auth/shipper/register/`, {
-      method: "POST",
-      headers: headers,
-      body: body,
-    });
-
-    const responseData = await res.json();
-    console.log("Registration response:", responseData);
 
     if (!res.ok) {
       throw new Error(
@@ -138,6 +81,25 @@ export const createShippment = async (data: FormData | any, token: string) => {
     return responseData;
   } catch (error: any) {
     console.log("Error creating shipment:", error);
+    throw error;
+  }
+}
+
+export const offerPrice = async (id: any, data: { final_price: string; payment_method: string }, token: string) => {
+  try {
+    const res = await fetch(`${apiUrl}/api/shipments/${id}/offer/`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
+      },
+      body: JSON.stringify(data)
+    })
+    const responseData = await res.json();
+    console.log("Offer price response:", responseData); // Debug log
+    return responseData;
+  } catch (error: any) {
+    console.log("Error offering price:", error);
     throw error;
   }
 }

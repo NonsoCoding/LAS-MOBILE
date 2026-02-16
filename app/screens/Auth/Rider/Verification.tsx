@@ -1,6 +1,6 @@
 import PrimaryButton from "@/components/Buttons/PrimaryButton";
 import CompleteModal from "@/components/Modals/CompleteModal";
-import { registeredRider } from "@/components/services/api/authApi";
+import { registeredUser } from "@/components/services/api/authApi";
 import useAuthStore from "@/components/store/authStore";
 import Colors from "@/constants/Colors";
 import { fontFamily } from "@/constants/fonts";
@@ -11,14 +11,14 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { CheckCircle2, Eye, FileText, Trash2, Upload, X } from "lucide-react-native";
 import { useState } from "react";
 import {
-  Alert,
-  Image,
-  Modal,
-  ScrollView,
-  Text,
-  TouchableOpacity,
-  useColorScheme,
-  View
+    Alert,
+    Image,
+    Modal,
+    ScrollView,
+    Text,
+    TouchableOpacity,
+    useColorScheme,
+    View
 } from "react-native";
 
 interface DocumentState {
@@ -35,7 +35,7 @@ const Verification = () => {
   const colorScheme = useColorScheme();
   const themeColors = Colors[colorScheme ?? "light"];
   const [completeModalVisible, setCompleteModalVisible] = useState(false);
-  const { phoneNumber, country } = useAuthStore();
+  const { phoneNumber, role } = useAuthStore();
   const [documents, setDocuments] = useState<DocumentState>({
     government_id: null,
     drivers_license: null,
@@ -128,6 +128,7 @@ const Verification = () => {
       formData.append("last_name", params.lastName as string);
       formData.append("phone_number", phoneNumber as string);
       formData.append("plate_number", params.plateNumber as string);
+      formData.append("role", role as string);
 
       // Convert indemnity to boolean properly
       // params are always strings from useLocalSearchParams
@@ -143,6 +144,7 @@ const Verification = () => {
         lastName: params.lastName,
         phoneNumber: phoneNumber,
         plateNumber: params.plateNumber,
+        role: role,
         indemnityAccepted: indemnityAccepted,
         indemnityAcceptedType: typeof indemnityAccepted,
       });
@@ -159,7 +161,7 @@ const Verification = () => {
         }
       });
 
-      const response = await registeredRider(formData);
+      const response = await registeredUser(formData);
 
       console.log("Registration response:", response);
 
@@ -175,7 +177,7 @@ const Verification = () => {
             .login(
               response.tokens.access,
               response.tokens.refresh,
-              response.user
+              { ...response.user, role: "carrier" }
             );
         }
         Alert.alert(

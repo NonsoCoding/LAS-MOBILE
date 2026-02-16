@@ -11,9 +11,9 @@ interface BackButtonProps {
 
 const BackButton = ({ onPress }: BackButtonProps) => {
     return (
-        <TouchableOpacity style={[tw`bg-white h-10 w-10 rounded-full items-center justify-center`   , {
+        <TouchableOpacity style={[tw`bg-white h-12 w-12 rounded-full items-center justify-center`   , {
         }]} onPress={onPress}>
-            <ChevronLeft color="#19488A" />
+            <ChevronLeft color="#000000" />
         </TouchableOpacity>
     );
 };

@@ -1,7 +1,7 @@
 import PrimaryButton from "@/components/Buttons/PrimaryButton";
 import PasswordTextInputFields from "@/components/Inputs/PasswordTextInputField";
 import TextInputFields from "@/components/Inputs/TextInputFields";
-import { loginCarrier, resendOtp } from "@/components/services/api/authApi";
+import { getUserProfile, loginUser, resendOtp } from "@/components/services/api/authApi";
 import useAuthStore from "@/components/store/authStore";
 import yup from "@/components/utils/formik";
 import Colors from "@/constants/Colors";
@@ -12,13 +12,13 @@ import { Formik } from "formik";
 import { AtSign, Lock } from "lucide-react-native";
 import React, { useState } from "react";
 import {
-  Alert,
-  Image,
-  Platform,
-  Text,
-  TouchableOpacity,
-  useColorScheme,
-  View,
+    Alert,
+    Image,
+    Platform,
+    Text,
+    TouchableOpacity,
+    useColorScheme,
+    View,
 } from "react-native";
 
 const validationSchema = yup.object().shape({
@@ -43,45 +43,72 @@ export default function UserSignInIndex() {
 
     try {
       setLoading(true);
-      const res = await loginCarrier(values.email, values.password);
+      const res = await loginUser(values.email, values.password);
       console.log("Login response:", res);
 
-      if (res.tokens && res.user) {
-        if (!res.user.is_email_verified) {
-          Alert.alert(
-            "Email Not Verified",
-            "Please verify your email to continue.",
-            [
-              {
-                text: "Send Code",
-                onPress: async () => {
-                  try {
-                    setLoading(true);
-                    const otpRes = await resendOtp(values.email);
+      if (res.tokens) {
+        let user = res.user;
 
-                    Alert.alert("Code Sent", "Verification code sent", [
-                      {
-                        text: "OK",
-                        onPress: () => router.push("/screens/Otp"),
-                      },
-                    ]);
-                  } catch (err) {
-                    Alert.alert("Error", "Failed to send verification code");
-                  } finally {
-                    setLoading(false);
-                  }
-                },
-              },
-              { text: "Cancel", style: "cancel" },
-            ]
-          );
-        } else {
-          await useAuthStore
-            .getState()
-            .login(res.tokens.access, res.tokens.refresh, res.user);
-
-          router.replace("/(Rider-Drawer)");
+        // If user object or role is missing, fetch profile
+        if (!user || !user.role) {
+          try {
+             const profile = await getUserProfile(res.tokens.access);
+             console.log("Fetched profile:", profile);
+             user = { ...user, ...profile };
+          } catch (error) {
+             console.error("Failed to fetch profile:", error);
+          }
         }
+        
+        // Ensure we have a user and role before proceeding
+        if (user) {
+             if (!user.is_email_verified) {
+                Alert.alert(
+                    "Email Not Verified",
+                    "Please verify your email to continue.",
+                    [
+                    {
+                        text: "Send Code",
+                        onPress: async () => {
+                        try {
+                            setLoading(true);
+                            const otpRes = await resendOtp(values.email);
+
+                            Alert.alert("Code Sent", "Verification code sent", [
+                            {
+                                text: "OK",
+                                onPress: () => router.push("/screens/Otp"),
+                            },
+                            ]);
+                        } catch (err) {
+                            Alert.alert("Error", "Failed to send verification code");
+                        } finally {
+                            setLoading(false);
+                        }
+                        },
+                    },
+                    { text: "Cancel", style: "cancel" },
+                    ]
+                );
+                return; 
+            }
+
+            const role = user.user_type || user.role || "shipper"; 
+            
+            await useAuthStore
+                .getState()
+                .login(res.tokens.access, res.tokens.refresh, { ...user, role });
+
+            if (role === "carrier") {
+                router.replace("/(Rider-Drawer)");
+            } else {
+                router.replace("/(drawer)");
+            }
+
+        } else {
+             Alert.alert("Login Failed", "Could not retrieve user details.");
+        }
+
       } else {
         Alert.alert("Login Failed", res.message || "Invalid credentials");
       }
@@ -104,7 +131,7 @@ export default function UserSignInIndex() {
   return (
     <View style={[tw`flex-1 bg-[#19488A] justify-end`]}>
        <Image
-              source={require("../../../../assets/images/Intro_logo.png")}
+              source={require("../assets/images/Intro_logo.png")}
               style={[tw`self-center h-150 w-150 absolute -top-20`]}
               resizeMode="contain"
             />
@@ -204,7 +231,7 @@ export default function UserSignInIndex() {
                   >
                     <Image
                       style={[tw`h-5 w-5`]}
-                      source={require("../../../../assets/images/IntroImages/icon/google.png")}
+                      source={require("../assets/images/IntroImages/icon/google.png")}
                     />
                     <Text style={[tw`text-sm`, { fontFamily: fontFamily.Light }]}>Google</Text>
                   </TouchableOpacity>
@@ -218,7 +245,7 @@ export default function UserSignInIndex() {
                     >
                       <Image
                         style={[tw`h-5 w-5`]}
-                        source={require("../../../../assets/images/IntroImages/icon/apple.png")}
+                        source={require("../assets/images/IntroImages/icon/apple.png")}
                       />
                       <Text style={[tw`text-sm`, { fontFamily: fontFamily.Light }]}>Apple</Text>
                     </TouchableOpacity>
@@ -241,7 +268,7 @@ export default function UserSignInIndex() {
                 }]}>Don't have an account?</Text>
               <TouchableOpacity
                 onPress={() => {
-                   router.replace("/screens/Rider/Carrier-indemnity"); // Update to your signup route
+                   router.push("/RegisterType"); // Update to your signup route
                 }}
               >
                 <Text

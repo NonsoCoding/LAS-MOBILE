@@ -3,4 +3,5 @@ export const STORAGE_KEYS = {
   REFRESH_TOKEN: "refreshToken",
   USER: "user",
   USER_TYPE: "userType", // "user" | "rider"
+  ACTIVE_SHIPMENT: "activeShipment",
 } as const;

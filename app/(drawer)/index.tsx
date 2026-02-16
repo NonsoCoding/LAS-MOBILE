@@ -7,8 +7,10 @@ import CustomTextInput from "@/components/Inputs/CustomTextinput";
 import RouteNumberTextInput from "@/components/Inputs/RouteNumberTextInput";
 import RouteSearchTextInput from "@/components/Inputs/RouteTextInputs";
 import SearchTextInput from "@/components/Inputs/SearchTextInput";
-import { createShippment } from "@/components/services/api/authApi";
+import { createShippment, offerPrice } from "@/components/services/api/authApi";
+import { confirmCarrierAcceptance, getShipmentDetails, requestOfferPrice } from "@/components/services/api/carriersApi";
 import useAuthStore from "@/components/store/authStore";
+import useShipmentStore from "@/components/store/shipmentStore";
 import Colors from "@/constants/Colors";
 import { fontFamily } from "@/constants/fonts";
 import tw from "@/constants/tailwind";
@@ -17,8 +19,9 @@ import { DrawerActions } from "@react-navigation/native";
 import * as Location from "expo-location";
 import { useNavigation, useRouter } from "expo-router";
 import { AlignCenter, InfoIcon, MapPin, Minus, Plus, X, XIcon } from "lucide-react-native";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
+  ActivityIndicator,
   Alert,
   Image,
   Modal,
@@ -42,41 +45,59 @@ const UserHomePage = ({}: UserHomePageProps) => {
   const routeSearchSnapPoints = useMemo(() => ["90%", "90%"], []);
   const orderDetailSearchSnapPoints = useMemo(() => ["90%"], []);
   const offerSnapPoints = useMemo(() => ["43%"], []);
-  const [step, setStep] = useState<1 | 2 | 3 | 4 | 5>(1);
+
+  const {
+    activeShipmentId: createdShipmentId,
+    pickupAddress,
+    destinationAddress,
+    origin,
+    destination,
+    calculatedPrice,
+    finalPrice,
+    paymentMethod,
+    isSearching: chooseCarrierModal,
+    step,
+    senderPhone,
+    recipientPhone,
+    recipientName,
+    itemDescription,
+    deliveryType,
+    setShipmentData,
+    clearShipment,
+    loadShipment
+  } = useShipmentStore();
+
+  const setStep = (step: 1 | 2) => setShipmentData({ step });
+  const setPaymentMethod = (paymentMethod: string) => setShipmentData({ paymentMethod });
+  const setPickupAddress = (pickupAddress: string) => setShipmentData({ pickupAddress });
+  const setDestinationAddress = (destinationAddress: string) => setShipmentData({ destinationAddress });
+  const setchooseCarrierModal = (isSearching: boolean) => setShipmentData({ isSearching });
+  const setDeliveryType = (deliveryType: "building" | "door") => setShipmentData({ deliveryType });
+  const setSenderPhone = (senderPhone: string) => setShipmentData({ senderPhone });
+  const setRecipientPhone = (recipientPhone: string) => setShipmentData({ recipientPhone });
+  const setItemDescription = (itemDescription: string) => setShipmentData({ itemDescription });
+  const setRecipientName = (recipientName: string) => setShipmentData({ recipientName });
+  const setCreatedShipmentId = (activeShipmentId: number | null) => setShipmentData({ activeShipmentId });
+  const setCalculatedPrice = (calculatedPrice: string | null) => setShipmentData({ calculatedPrice });
+  const setFinalPrice = (finalPrice: number) => setShipmentData({ finalPrice });
+  const setOrigin = (origin: LatLng | null) => setShipmentData({ origin });
+  const setDestination = (destination: LatLng | null) => setShipmentData({ destination });
+
   const [selected, setSelected] = useState<number | null>(null);
   const [RouteSearchSheet, setRouteSearchSheet] = useState<boolean>(false);
   const [orderDetailSheet, setOrderDetailSheet] = useState<boolean>(false);
   const [offerSheet, setOfferSheet] = useState<boolean>(false);
-  const [paymentMethod, setPaymentMethod] = useState<string>("");
-  const [pickupAddress, setPickupAddress] = useState<string>("");
-  const [pickupCoords, setPickupCoords] = useState<{
-    latitude: number;
-    longitude: number;
-  } | null>(null);
-  const [destinationAddress, setDestinationAddress] = useState<string>("");
-  const [destinationCoords, setDestinationCoords] = useState<{
-    latitude: number;
-    longitude: number;
-  } | null>(null);
-  const [chooseCarrierModal, setchooseCarrierModal] = useState(false);
-  const [deliveryType, setDeliveryType] = useState<"building" | "door">("building");
-  // New state variables for shipment creation
-  const [senderPhone, setSenderPhone] = useState("");
-  const [recipientPhone, setRecipientPhone] = useState("");
-  const [itemDescription, setItemDescription] = useState("");
   const [itemValue, setItemValue] = useState<number>(1500);
-  const [recipientName, setRecipientName] = useState(""); // UI doesn't have an explicit field for this yet, using recipientPhone or adding one?
-  // Assuming vehicle_type_id is selected later or defaults to 1 as per user JSON
-  // const [vehicleTypeId, setVehicleTypeId] = useState(1);
+
+  const [offers, setOffers] = useState<any[]>([]);
+  const [loadingOffers, setLoadingOffers] = useState(false);
   const routeSearchSheetRef = useRef<BottomSheet>(null);
   const bottomSheetRef = useRef<BottomSheet>(null);
   const OrderDetailSheetRef = useRef<BottomSheet>(null);
   const offerSheetRef = useRef<BottomSheet>(null);
   const navigation = useNavigation();
-  const [origin, setOrigin] = useState<LatLng | null>(null)
   const [duration, setDuration] = useState<number>(0)
   const [distance, setDistance] = useState<number>(0)
-  const [destination, setDestination] = useState<LatLng | null>(null);
   const [showDirection, setShowDirection] = useState<boolean>(false);
   const mapRef = useRef<MapView>(null);
   const moveTo = async (position: LatLng) => {
@@ -126,7 +147,41 @@ const UserHomePage = ({}: UserHomePageProps) => {
 
 
   useEffect(() => {
-    (async () => {
+    const initialize = async () => {
+      await loadShipment();
+      
+      // After loading, we need to check if we should restore UI states
+      const state = useShipmentStore.getState();
+      const { accessToken: token } = useAuthStore.getState();
+
+      if (state.activeShipmentId && token) {
+        try {
+          console.log("Syncing active shipment status from backend for ID:", state.activeShipmentId);
+          const detail = await getShipmentDetails(token, state.activeShipmentId);
+          console.log("Restored shipment detail:", detail);
+          
+          if (detail) {
+            // Update store with latest data from backend if needed
+            setShipmentData({
+              calculatedPrice: detail.calculated_price,
+              finalPrice: detail.final_price || state.finalPrice,
+              isSearching: detail.status === "searching" || detail.status === "offered",
+              // Add other relevant fields if necessary
+            });
+          }
+        } catch (error) {
+          console.error("Failed to sync shipment status on init:", error);
+        }
+      }
+
+      const updatedState = useShipmentStore.getState();
+      if (updatedState.step > 1) {
+        bottomSheetRef.current?.expand();
+      }
+      if (updatedState.origin && updatedState.destination) {
+        setShowDirection(true);
+      }
+
       let { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== 'granted') {
         Alert.alert('Permission to access location was denied');
@@ -134,32 +189,38 @@ const UserHomePage = ({}: UserHomePageProps) => {
       }
 
       let location = await Location.getCurrentPositionAsync({});
-      setOrigin({
-        latitude: location.coords.latitude,
-        longitude: location.coords.longitude,
-      });
+      if (!origin) {
+        setOrigin({
+          latitude: location.coords.latitude,
+          longitude: location.coords.longitude,
+        });
+      }
+      
       moveTo({
         latitude: location.coords.latitude,
         longitude: location.coords.longitude,
       });
 
-      let addressResponse = await Location.reverseGeocodeAsync({
-        latitude: location.coords.latitude,
-        longitude: location.coords.longitude,
-      });
+      if (!pickupAddress) {
+        let addressResponse = await Location.reverseGeocodeAsync({
+          latitude: location.coords.latitude,
+          longitude: location.coords.longitude,
+        });
 
-      if (addressResponse.length > 0) {
-        const address = addressResponse[0];
-        const parts = [];
-        if (address.streetNumber) parts.push(address.streetNumber);
-        if (address.street) parts.push(address.street);
-        if (address.city) parts.push(address.city);
-        if (address.region) parts.push(address.region);
-        
-        const formattedAddress = parts.join(", ");
-         setPickupAddress(formattedAddress);
+        if (addressResponse.length > 0) {
+          const address = addressResponse[0];
+          const parts = [];
+          if (address.streetNumber) parts.push(address.streetNumber);
+          if (address.street) parts.push(address.street);
+          if (address.city) parts.push(address.city);
+          if (address.region) parts.push(address.region);
+          
+          const formattedAddress = parts.join(", ");
+          setPickupAddress(formattedAddress);
+        }
       }
-    })();
+    };
+    initialize();
   }, []);
   useEffect(() => {
     if (isAuthenticated) {
@@ -175,9 +236,37 @@ const UserHomePage = ({}: UserHomePageProps) => {
   ];
 
   const handleCreateEvent = async () => {
-    // Basic validation
-    if (!pickupAddress || !destinationAddress || !senderPhone || !recipientPhone || !itemDescription) {
-      alert("Please fill in all required fields (addresses, phones, description)");
+    // Detailed validation
+    if (!pickupAddress) {
+      alert("Please enter a pickup address");
+      return;
+    }
+    if (!destinationAddress) {
+      alert("Please enter a destination address");
+      return;
+    }
+    if (!origin) {
+      alert("Please select a pickup location on the map");
+      return;
+    }
+    if (!destination) {
+      alert("Please select a destination location on the map");
+      return;
+    }
+    if (!senderPhone) {
+      alert("Please enter the sender's phone number");
+      return;
+    }
+    if (!recipientPhone) {
+      alert("Please enter the recipient's phone number");
+      return;
+    }
+    if (!recipientName) {
+      alert("Please enter the recipient's full name");
+      return;
+    }
+    if (!itemDescription) {
+      alert("Please describe the item to be delivered");
       return;
     }
 
@@ -196,7 +285,7 @@ const UserHomePage = ({}: UserHomePageProps) => {
       recipient_name: recipientName || recipientPhone, // Fallback if no name field
       recipient_phone: recipientPhone,
       recipient_instructions: "",
-      sender_phone: senderPhone,
+      sender_phone: senderPhone, 
       // vehicle_type_id: vehicleTypeId
     };
 
@@ -209,13 +298,88 @@ const UserHomePage = ({}: UserHomePageProps) => {
       }
       const response = await createShippment(payload, accessToken);
       console.log("Shipment created successfully:", response);
-      // Handle success (e.g., navigate to next step, show success message)
-      setOrderDetailSheet(false);
-      setOfferSheet(true); // Move to offer/payment or next logical step
+      if (response && response.id) {
+        setCreatedShipmentId(response.id);
+        setCalculatedPrice(response.calculated_price);
+        setOrderDetailSheet(false);
+        setStep(2);
+        bottomSheetRef.current?.expand();
+      } else {
+        Alert.alert("Error", "Failed to get shipment ID from response");
+      }
     } catch (error: any) {
-      
+      console.error("Error creating shipment:", error);
+      Alert.alert("Error", error.message || "Failed to create shipment");
     }
   }
+
+  const handleOfferPrice = async () => {
+    if (!createdShipmentId) {
+      Alert.alert("Error", "No shipment ID found. Please create a shipment first.");
+      return;
+    }
+    if (!paymentMethod) {
+      Alert.alert("Error", "Please select a payment method");
+      return;
+    }
+    if (!accessToken) return;
+
+    try {
+      const data = {
+        final_price: finalPrice.toString(),
+        payment_method: paymentMethod.toLowerCase()
+      };
+      const response = await offerPrice(createdShipmentId, data, accessToken);
+      console.log("Offer price successful:", response);
+      // setOfferSheet(false);
+      // bottomSheetRef.current?.expand();
+      Alert.alert("Success", "Your offer has been sent to riders!");
+    } catch (error: any) {
+      console.error("Error offering price:", error);
+      Alert.alert("Error", error.message || "Failed to send offer");
+    }
+  }
+
+  const fetchOffers = useCallback(async (silent: boolean = false) => {
+    const { activeShipmentId: createdShipmentId } = useShipmentStore.getState();
+    const { accessToken } = useAuthStore.getState();
+    if (!createdShipmentId || !accessToken) return;
+    try {
+      if (!silent) setLoadingOffers(true);
+      const data = await requestOfferPrice(accessToken, createdShipmentId);
+      console.log("RAW OFFERS DATA:", JSON.stringify(data, null, 2));
+      
+      // Handle various response formats
+      let offersList = [];
+      if (data && data.results) {
+        offersList = data.results;
+      } else if (Array.isArray(data)) {
+        offersList = data;
+      } else if (data && data.data && Array.isArray(data.data)) {
+        offersList = data.data;
+      }
+
+      console.log(`Parsed ${offersList.length} offers`);
+      setOffers(offersList);
+    } catch (error) {
+      console.error("Error fetching offers:", error);
+    } finally {
+      if (!silent) setLoadingOffers(false);
+    }
+  }, [createdShipmentId, accessToken]);
+
+  useEffect(() => {
+    let interval: any;
+    if (chooseCarrierModal && createdShipmentId) {
+      fetchOffers(); // Initial fetch
+      interval = setInterval(() => {
+        fetchOffers(true); // Silent background poll
+      }, 5000);
+    }
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [chooseCarrierModal, createdShipmentId, fetchOffers]);
 
   return (
     <View style={[tw`flex-1 justify-end`, {
@@ -317,30 +481,63 @@ const UserHomePage = ({}: UserHomePageProps) => {
               <Text style={[tw`text-2xl text-white`, {
                 fontFamily: fontFamily.MontserratEasyBold
               }]}>Choose a carrier</Text>
+              
               <View style={[tw`gap-3`]}>
-              {carrierCardInfo.map((item, index) => {
-                return (
-                  <CarrierCard
-                    name={item.name}
-                    amount={item.amount}
-                    carrierType="Rider"
-                    image={item.image}
-                    acceptOnPress={() => {
-                      setchooseCarrierModal(false)
-                      bottomSheetRef.current?.expand();
-                    }}
-                    declineOnPress={() => {
-                      setchooseCarrierModal(false)
-                      bottomSheetRef.current?.expand();
-                    }}
-                    rating={item.rating}
-                    time={item.time}
-                    totalRides={item.totalRides}
-                    key={index}
-                    
-                  />
-                )
-              })}
+              {loadingOffers && offers.length === 0 ? (
+                <View style={[tw`py-10 items-center`]}>
+                  <ActivityIndicator size="large" color="white" />
+                  <Text style={[tw`text-white mt-2`, { fontFamily: fontFamily.MontserratEasyMedium }]}>Searching for riders...</Text>
+                </View>
+              ) : offers.length === 0 ? (
+                <View style={[tw`py-10 items-center`]}>
+                  <Text style={[tw`text-white text-center`, { fontFamily: fontFamily.MontserratEasyMedium }]}>No riders have accepted your offer yet.{"\n"}Rider offers will appear here automatically.</Text>
+                </View>
+              ) : (
+                offers.map((offer, index) => {
+                  return (
+                    <CarrierCard
+                      name={(() => {
+                        const carrier = offer.carrier || offer.acceptance_sender || offer.user;
+                        return carrier?.first_name ? `${carrier.first_name} ${carrier.last_name || ""}` : "Carrier";
+                      })()}
+                      amount={offer.final_price || offer.offered_price || finalPrice}
+                      carrierType={(() => {
+                        const carrier = offer.carrier || offer.acceptance_sender || offer.user;
+                        return carrier?.vehicle_type?.name || "Rider";
+                      })() as any}
+                      image={(() => {
+                        const carrier = offer.carrier || offer.acceptance_sender || offer.user;
+                        return carrier?.profile_picture ? { uri: carrier.profile_picture } : require("../../assets/images/pfp.png");
+                      })()}
+                      acceptOnPress={async () => {
+                        try {
+                          if (!accessToken || !createdShipmentId || !offer.id) {
+                            Alert.alert("Error", "Missing required information to accept offer");
+                            return;
+                          }
+                          const response = await confirmCarrierAcceptance(accessToken, createdShipmentId, offer.id);
+                          console.log("Carrier accepted successfully:", response);
+                          await clearShipment();
+                          setchooseCarrierModal(false);
+                          bottomSheetRef.current?.expand();
+                          setStep(1); // Reset or navigate away
+                          Alert.alert("Success", "Carrier selected! Your shipment is now being processed.");
+                        } catch (error: any) {
+                          console.error("Error accepting carrier:", error);
+                          Alert.alert("Error", error.message || "Failed to accept carrier");
+                        }
+                      }}
+                      declineOnPress={() => {
+                        // Optional: ignore this offer
+                      }}
+                      rating={4.5} // Backend needs to provide this
+                      time="Nearby" // Backend needs to provide this
+                      totalRides={offer.carrier?.total_trips || 0}
+                      key={offer.id || index}
+                    />
+                  )
+                })
+              )}
               </View>
             </View>
           </View>
@@ -459,7 +656,7 @@ const UserHomePage = ({}: UserHomePageProps) => {
                    
                     <DeliveryButton
                       icon={require("../../assets/images/IntroImages/icon/Offer.png")}
-                      text="Offer your request"
+                      text={paymentMethod && createdShipmentId ? `₦${finalPrice} via ${paymentMethod}` : "Offer your request"}
                   onPress={() => {
                     bottomSheetRef.current?.close();
                     setOfferSheet(true);
@@ -473,7 +670,7 @@ const UserHomePage = ({}: UserHomePageProps) => {
                 <InfoIcon color={"#D37A0F"} />
                 <Text style={[tw`text-[#D37A0F]`, {
                   fontFamily: fontFamily.MontserratEasyMedium
-                }]}>Recommended price: 2000</Text>
+                }]}>Recommended price: ₦{calculatedPrice || "0"}</Text>
               </View>
               <SecondaryButton
                 bgColors={themeColors.primaryColor}
@@ -481,6 +678,7 @@ const UserHomePage = ({}: UserHomePageProps) => {
                 height={50}
                 textColor={"white"}
                 onpress={() => {
+                  handleOfferPrice();
                   bottomSheetRef.current?.close();
                   setchooseCarrierModal(true);
                 }}
@@ -528,6 +726,10 @@ const UserHomePage = ({}: UserHomePageProps) => {
                         longitude: details.longitude
                       });
                       setPickupAddress(details.description);
+                      setCalculatedPrice(null);
+                      setCreatedShipmentId(null);
+                      setPaymentMethod("");
+                      setFinalPrice(2000);
                       moveTo({
                         latitude: details.latitude,
                         longitude: details.longitude
@@ -549,6 +751,10 @@ const UserHomePage = ({}: UserHomePageProps) => {
                         longitude: details.longitude
                       });
                       setDestinationAddress(details.description);
+                      setCalculatedPrice(null);
+                      setCreatedShipmentId(null);
+                      setPaymentMethod("");
+                      setFinalPrice(2000);
                       moveTo({
                         latitude: details.latitude,
                         longitude: details.longitude
@@ -748,6 +954,16 @@ const UserHomePage = ({}: UserHomePageProps) => {
                     <X size={20} color={themeColors.primaryColor} />
                   </TouchableOpacity>
             </View>
+
+              <View style={[tw`flex-row rounded-lg gap-3 p-4 items-center bg-[#D37A0F22]`, {
+                borderLeftWidth: 3,
+                borderColor: "#D37A0F"
+              }]}>
+                <InfoIcon color={"#D37A0F"} />
+                <Text style={[tw`text-[#D37A0F]`, {
+                  fontFamily: fontFamily.MontserratEasyMedium
+                }]}>Recommended price: ₦{calculatedPrice || "0"}</Text>
+              </View>
             
               <View style={[tw`gap-4`]}>
                  <DropDown
@@ -759,13 +975,19 @@ const UserHomePage = ({}: UserHomePageProps) => {
                   options={paymentaOptions}
                 />
                 <View style={[tw`flex-row justify-between items-center bg-[#19488A11] p-5 py-7 rounded-md`]}>
-                  <TouchableOpacity style={[tw`p-2 bg-white rounded-full`]}>
+                  <TouchableOpacity 
+                    onPress={() => setFinalPrice(finalPrice + 500)}
+                    style={[tw`p-2 bg-white rounded-full`]}
+                  >
                     <Plus/>
                   </TouchableOpacity>
                   <Text style={[tw`text-5xl text-[#00000055]`, {
                     fontFamily: fontFamily.Medium
-                  }]}>1500</Text>
-                  <TouchableOpacity style={[tw`p-2 bg-white rounded-full` ]} >
+                  }]}>{finalPrice}</Text>
+                  <TouchableOpacity 
+                    onPress={() => setFinalPrice(Math.max(0, finalPrice - 500))}
+                    style={[tw`p-2 bg-white rounded-full` ]} 
+                  >
                   <Minus/>
                   </TouchableOpacity>
                 </View>
@@ -780,7 +1002,7 @@ const UserHomePage = ({}: UserHomePageProps) => {
                 textColor={"white"}
                 onpress={() => {
                   setOfferSheet(false);
-                  bottomSheetRef.current?.expand();
+      bottomSheetRef.current?.expand();
                 }}
               />
             </View>
