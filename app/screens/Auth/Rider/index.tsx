@@ -278,7 +278,7 @@ export default function RiderAuthIndex() {
                 }]}>Already have an account?</Text>
               <TouchableOpacity
                 onPress={() => {
-                   router.replace("/screens/Auth/Rider/RiderSignIn"); // Update to your signup route
+                   router.replace("/screens/Auth/Rider"); // Update to your signup route
                 }}
               >
                 <Text

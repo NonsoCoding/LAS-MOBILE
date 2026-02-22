@@ -2,7 +2,7 @@ export const order = async (
   id: string,
   pickUp: string,
   destination: string,
-  status: "pending" | "accepted" | "in-transit" | "completed" | "cancelled",
+  status: "pending" | "in-transit" | "completed" | "cancelled",
   customer: any
 ) => {
   try {

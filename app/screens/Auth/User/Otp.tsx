@@ -2,7 +2,6 @@ import PrimaryButton from "@/components/Buttons/PrimaryButton";
 import CompleteModal from "@/components/Modals/CompleteModal";
 import { verifyOtp } from "@/components/services/api/authApi";
 import useAuthStore from "@/components/store/authStore";
-import useRiderAuthStore from "@/components/store/RiderAuthStore";
 import Colors from "@/constants/Colors";
 import { fontFamily } from "@/constants/fonts";
 import tw from "@/constants/tailwind";
@@ -25,12 +24,11 @@ const UserOtpScreen = () => {
   const params = useLocalSearchParams();
 
   // Get login function from Zustand store
-  const { login } = useRiderAuthStore();
+  const { login, phoneNumber } = useAuthStore();
 
   const [otp, setOtp] = useState<string>("");
   const [loading, setLoading] = useState(false);
   const [completeModalVisible, setCompleteModalVisible] = useState(false);
-  const {phoneNumber} = useAuthStore();
 
   const handleContinue = async () => {
     if (otp.length !== 6) {

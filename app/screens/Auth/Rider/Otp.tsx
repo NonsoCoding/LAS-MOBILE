@@ -2,21 +2,21 @@ import PrimaryButton from "@/components/Buttons/PrimaryButton";
 import CompleteModal from "@/components/Modals/CompleteModal";
 import { verifyOtp } from "@/components/services/api/authApi";
 import useAuthStore from "@/components/store/authStore";
-import useRiderAuthStore from "@/components/store/RiderAuthStore";
 import Colors from "@/constants/Colors";
 import { fontFamily } from "@/constants/fonts";
 import tw from "@/constants/tailwind";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useState } from "react";
 import {
-    Alert,
-    Image,
-    Text,
-    TouchableOpacity,
-    useColorScheme,
-    View,
+  Alert,
+  Image,
+  Text,
+  TouchableOpacity,
+  useColorScheme,
+  View,
 } from "react-native";
 import { OtpInput } from "react-native-otp-entry";
+
 
 const UserOtpScreen = () => {
   const router = useRouter();
@@ -25,7 +25,7 @@ const UserOtpScreen = () => {
   const params = useLocalSearchParams();
 
   // Get login function from Zustand store
-  const { login } = useRiderAuthStore();
+  const { login, phoneNumber } = useAuthStore();
 
   const [otp, setOtp] = useState<string>("");
   const [loading, setLoading] = useState(false);
@@ -87,7 +87,7 @@ const UserOtpScreen = () => {
           }]}>Enter the 6-digit code sent to your email</Text>
           <Text style={[tw`text-sm text-[#CC1A21]`, {
             fontFamily: fontFamily.Regular,
-          }]}>{params.email}</Text>
+          }]}>{phoneNumber || params.email}</Text>
         </View>
         <View style={tw`gap-10`}>
           <OtpInput

@@ -1,13 +1,32 @@
-import { Text, View } from "react-native";
+import Colors from "@/constants/Colors";
+import tw from "@/constants/tailwind";
+import { DrawerActions } from "@react-navigation/native";
+import { useNavigation } from "expo-router";
+import { AlignCenter } from "lucide-react-native";
+import { TouchableOpacity, useColorScheme, View } from "react-native";
 
 interface SettingsScreenProps {
     
 }
 
 const SettingsScreen = ({}: SettingsScreenProps) => {
+    
+    const navigation = useNavigation();
+     const colorScheme = useColorScheme();
+          const themeColors = Colors[colorScheme ?? "light"];
     return (
         <View>
-            <Text>Settings</Text>
+             <TouchableOpacity
+                style={[
+                  tw`p-2.5 absolute left-5 top-15 rounded-full self-start`,
+                  {
+                    backgroundColor: themeColors.background,
+                  },
+                ]}
+                onPress={() => navigation.dispatch(DrawerActions.openDrawer())}
+              >
+                <AlignCenter color={themeColors.primaryColor} />
+        </TouchableOpacity>
         </View>
     )
 }

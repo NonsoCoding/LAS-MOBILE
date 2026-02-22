@@ -3,6 +3,25 @@ import { STORAGE_KEYS } from "@/components/services/storage/storageKeys";
 import { LatLng } from "react-native-maps";
 import { create } from "zustand";
 
+export interface AcceptedShipment {
+    id: number;
+    pickupAddress: string;
+    destinationAddress: string;
+    calculatedPrice: string | null;
+    finalPrice: number;
+    paymentMethod: string;
+    status: "pending" | "picked" | "in-transit" | "delivered";
+    trackingStatus: "waiting" | "trackable";
+    acceptedAt: string; // ISO date string
+    carrierName?: string;
+    carrierImage?: string;
+    pickupLatitude?: string;
+    pickupLongitude?: string;
+    deliveryLatitude?: string;
+    deliveryLongitude?: string;
+    isAssigned?: boolean;
+}
+
 interface ShipmentState {
     activeShipmentId: number | null;
     pickupAddress: string;
@@ -19,8 +38,11 @@ interface ShipmentState {
     recipientName: string;
     itemDescription: string;
     deliveryType: "building" | "door";
+    acceptedShipments: AcceptedShipment[];
 
     setShipmentData: (data: Partial<ShipmentState>) => void;
+    addAcceptedShipment: (shipment: AcceptedShipment) => Promise<void>;
+    updateShipmentTrackingStatus: (shipmentId: number, trackingStatus: "waiting" | "trackable", isAssigned?: boolean) => Promise<void>;
     clearShipment: () => Promise<void>;
     loadShipment: () => Promise<void>;
 }
@@ -41,6 +63,7 @@ const initialState: {
     recipientName: string;
     itemDescription: string;
     deliveryType: "building" | "door";
+    acceptedShipments: AcceptedShipment[];
 } = {
     activeShipmentId: null,
     pickupAddress: "",
@@ -57,6 +80,7 @@ const initialState: {
     recipientName: "",
     itemDescription: "",
     deliveryType: "building",
+    acceptedShipments: [],
 };
 
 const useShipmentStore = create<ShipmentState>((set, get) => ({
@@ -81,13 +105,43 @@ const useShipmentStore = create<ShipmentState>((set, get) => ({
             recipientName: currentState.recipientName,
             itemDescription: currentState.itemDescription,
             deliveryType: currentState.deliveryType,
+            acceptedShipments: currentState.acceptedShipments,
         };
         await AsyncStore.setItem(STORAGE_KEYS.ACTIVE_SHIPMENT, JSON.stringify(persistentData));
     },
 
+    addAcceptedShipment: async (shipment) => {
+        const currentState = get();
+        const updatedShipments = [...currentState.acceptedShipments, shipment];
+        set({ acceptedShipments: updatedShipments });
+        // Persist the updated list
+        const persistentData = {
+            ...currentState,
+            acceptedShipments: updatedShipments,
+        };
+        // Remove functions before persisting
+        const { setShipmentData, clearShipment, loadShipment, addAcceptedShipment: _a, updateShipmentTrackingStatus: _u, ...dataOnly } = persistentData as any;
+        await AsyncStore.setItem(STORAGE_KEYS.ACTIVE_SHIPMENT, JSON.stringify(dataOnly));
+    },
+
+    updateShipmentTrackingStatus: async (shipmentId, trackingStatus, isAssigned) => {
+        const currentState = get();
+        const updatedShipments = currentState.acceptedShipments.map(s =>
+            s.id === shipmentId ? { ...s, trackingStatus, isAssigned: isAssigned ?? s.isAssigned } : s
+        );
+        set({ acceptedShipments: updatedShipments });
+        // Persist
+        const { setShipmentData, clearShipment, loadShipment, addAcceptedShipment: _a, updateShipmentTrackingStatus: _u, ...dataOnly } = { ...currentState, acceptedShipments: updatedShipments } as any;
+        await AsyncStore.setItem(STORAGE_KEYS.ACTIVE_SHIPMENT, JSON.stringify(dataOnly));
+    },
+
     clearShipment: async () => {
-        await AsyncStore.removeItem(STORAGE_KEYS.ACTIVE_SHIPMENT);
-        set(initialState);
+        // Preserve acceptedShipments across new requests
+        const { acceptedShipments } = get();
+        set({ ...initialState, acceptedShipments });
+        // Persist the accepted shipments so they survive reload
+        const persistentData = { ...initialState, acceptedShipments };
+        await AsyncStore.setItem(STORAGE_KEYS.ACTIVE_SHIPMENT, JSON.stringify(persistentData));
     },
 
     loadShipment: async () => {
@@ -95,7 +149,11 @@ const useShipmentStore = create<ShipmentState>((set, get) => ({
         if (storedData) {
             try {
                 const parsedData = JSON.parse(storedData);
+                // Clear old accepted shipments data (schema changed)
+                parsedData.acceptedShipments = [];
                 set(parsedData);
+                // Persist the cleared data
+                await AsyncStore.setItem(STORAGE_KEYS.ACTIVE_SHIPMENT, JSON.stringify(parsedData));
             } catch (error) {
                 console.error("Error parsing stored shipment data:", error);
             }

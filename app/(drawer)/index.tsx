@@ -7,10 +7,11 @@ import CustomTextInput from "@/components/Inputs/CustomTextinput";
 import RouteNumberTextInput from "@/components/Inputs/RouteNumberTextInput";
 import RouteSearchTextInput from "@/components/Inputs/RouteTextInputs";
 import SearchTextInput from "@/components/Inputs/SearchTextInput";
+import { useShipmentTracking } from "@/components/hooks/useShipmentTracking";
 import { createShippment, offerPrice } from "@/components/services/api/authApi";
-import { confirmCarrierAcceptance, getShipmentDetails, requestOfferPrice } from "@/components/services/api/carriersApi";
+import { confirmCarrierAcceptance, getShipmentDetails, getShipperCurrentShipments, requestOfferPrice } from "@/components/services/api/carriersApi";
 import useAuthStore from "@/components/store/authStore";
-import useShipmentStore from "@/components/store/shipmentStore";
+import useShipmentStore, { AcceptedShipment } from "@/components/store/shipmentStore";
 import Colors from "@/constants/Colors";
 import { fontFamily } from "@/constants/fonts";
 import tw from "@/constants/tailwind";
@@ -18,11 +19,13 @@ import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
 import { DrawerActions } from "@react-navigation/native";
 import * as Location from "expo-location";
 import { useNavigation, useRouter } from "expo-router";
-import { AlignCenter, InfoIcon, MapPin, Minus, Plus, X, XIcon } from "lucide-react-native";
+import { AlignCenter, InfoIcon, MapPin, Minus, Navigation, Plus, X, XIcon } from "lucide-react-native";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
+  Dimensions,
+  FlatList,
   Image,
   Modal,
   Platform,
@@ -34,6 +37,7 @@ import {
 import { TextInput } from "react-native-gesture-handler";
 import MapView, { LatLng, Marker, PROVIDER_GOOGLE } from "react-native-maps";
 import MapViewDirections from "react-native-maps-directions";
+import Animated, { SlideInRight } from "react-native-reanimated";
 
 interface UserHomePageProps {}
 
@@ -62,10 +66,19 @@ const UserHomePage = ({}: UserHomePageProps) => {
     recipientName,
     itemDescription,
     deliveryType,
+    acceptedShipments,
     setShipmentData,
+    addAcceptedShipment,
+    updateShipmentTrackingStatus,
     clearShipment,
     loadShipment
   } = useShipmentStore();
+
+  // Live tracking state
+  const [trackingModalVisible, setTrackingModalVisible] = useState(false);
+  const [trackedShipment, setTrackedShipment] = useState<AcceptedShipment | null>(null);
+  const { carrierLocation, shipmentStatus, isConnected, connect: connectTracking, disconnect: disconnectTracking } = useShipmentTracking();
+  const trackingMapRef = useRef<MapView>(null);
 
   const setStep = (step: 1 | 2) => setShipmentData({ step });
   const setPaymentMethod = (paymentMethod: string) => setShipmentData({ paymentMethod });
@@ -99,6 +112,28 @@ const UserHomePage = ({}: UserHomePageProps) => {
   const [duration, setDuration] = useState<number>(0)
   const [distance, setDistance] = useState<number>(0)
   const [showDirection, setShowDirection] = useState<boolean>(false);
+  const isFormValid = !!(
+    pickupAddress &&
+    destinationAddress &&
+    senderPhone &&
+    recipientPhone &&
+    recipientName &&
+    itemDescription &&
+    paymentMethod &&
+    createdShipmentId
+  );
+
+  const isOrderDetailValid = !!(
+    pickupAddress &&
+    destinationAddress &&
+    origin &&
+    destination &&
+    senderPhone &&
+    recipientPhone &&
+    recipientName &&
+    itemDescription
+  );
+
   const mapRef = useRef<MapView>(null);
   const moveTo = async (position: LatLng) => {
     const camera = await mapRef.current?.getCamera();
@@ -150,30 +185,6 @@ const UserHomePage = ({}: UserHomePageProps) => {
     const initialize = async () => {
       await loadShipment();
       
-      // After loading, we need to check if we should restore UI states
-      const state = useShipmentStore.getState();
-      const { accessToken: token } = useAuthStore.getState();
-
-      if (state.activeShipmentId && token) {
-        try {
-          console.log("Syncing active shipment status from backend for ID:", state.activeShipmentId);
-          const detail = await getShipmentDetails(token, state.activeShipmentId);
-          console.log("Restored shipment detail:", detail);
-          
-          if (detail) {
-            // Update store with latest data from backend if needed
-            setShipmentData({
-              calculatedPrice: detail.calculated_price,
-              finalPrice: detail.final_price || state.finalPrice,
-              isSearching: detail.status === "searching" || detail.status === "offered",
-              // Add other relevant fields if necessary
-            });
-          }
-        } catch (error) {
-          console.error("Failed to sync shipment status on init:", error);
-        }
-      }
-
       const updatedState = useShipmentStore.getState();
       if (updatedState.step > 1) {
         bottomSheetRef.current?.expand();
@@ -182,8 +193,8 @@ const UserHomePage = ({}: UserHomePageProps) => {
         setShowDirection(true);
       }
 
-      let { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== 'granted') {
+      let { status: locStatus } = await Location.requestForegroundPermissionsAsync();
+      if (locStatus !== 'granted') {
         Alert.alert('Permission to access location was denied');
         return;
       }
@@ -221,7 +232,58 @@ const UserHomePage = ({}: UserHomePageProps) => {
       }
     };
     initialize();
-  }, []);
+  }, [loadShipment]);
+
+  // Poll for current shipper shipments
+  useEffect(() => {
+    if (!isAuthenticated || !accessToken) return;
+
+    const fetchCurrent = async () => {
+      try {
+        console.log("Polling active shipments for shipper...");
+        const currentShipments = await getShipperCurrentShipments(accessToken);
+        
+        if (currentShipments) {
+          const shipmentsList = Array.isArray(currentShipments) ? currentShipments : 
+                               (currentShipments.results ? currentShipments.results : [currentShipments]);
+          
+          const formattedShipments = shipmentsList
+            .filter((s: any) => s && s.id)
+            .map((s: any) => ({
+              id: s.id,
+              pickupAddress: s.pickup_address,
+              destinationAddress: s.delivery_address,
+              calculatedPrice: s.calculated_price,
+              finalPrice: parseFloat(s.final_price) || 0,
+              paymentMethod: s.payment_method,
+              status: (s.status === "accepted" || s.status === "pending") ? "pending" : (s.status === "picked_up" ? "picked" : (s.status === "in_transit" ? "in-transit" : (s.status === "delivered" ? "delivered" : "pending"))),
+              trackingStatus: (s.status === "picked" || s.status === "in_transit" || s.is_assigned === true || s.is_assigned === "true") ? "trackable" : "waiting",
+              acceptedAt: s.created_at || new Date().toISOString(),
+              pickupLatitude: s.pickup_latitude,
+              pickupLongitude: s.pickup_longitude,
+              deliveryLatitude: s.delivery_latitude,
+              deliveryLongitude: s.delivery_longitude,
+              isAssigned: s.is_assigned === true || s.is_assigned === "true",
+              carrierName: s.driver ? `${s.driver.first_name || ""} ${s.driver.last_name || ""}` : (s.carrier ? `${s.carrier.first_name || ""} ${s.carrier.last_name || ""}` : undefined),
+              carrierImage: s.driver?.profile_picture || s.carrier?.profile_picture
+            }));
+
+          setShipmentData({ 
+            acceptedShipments: formattedShipments as any
+          });
+        } else {
+          setShipmentData({ acceptedShipments: [] });
+        }
+      } catch (error) {
+        console.error("Failed to poll shipments for shipper:", error);
+        setShipmentData({ acceptedShipments: [] });
+      }
+    };
+
+    fetchCurrent();
+    const interval = setInterval(fetchCurrent, 10000);
+    return () => clearInterval(interval);
+  }, [isAuthenticated, accessToken, setShipmentData]);
   useEffect(() => {
     if (isAuthenticated) {
       // Fetch fresh user data when component mounts
@@ -333,12 +395,43 @@ const UserHomePage = ({}: UserHomePageProps) => {
       console.log("Offer price successful:", response);
       // setOfferSheet(false);
       // bottomSheetRef.current?.expand();
-      Alert.alert("Success", "Your offer has been sent to riders!");
+      // Alert.alert("Success", "Your offer has been sent to riders!");
     } catch (error: any) {
       console.error("Error offering price:", error);
       Alert.alert("Error", error.message || "Failed to send offer");
     }
   }
+
+  const handleCancelShipment = async () => {
+    Alert.alert(
+      "Cancel Request",
+      "Are you sure you want to cancel this delivery request?",
+      [
+        {
+          text: "No",
+          style: "cancel"
+        },
+        {
+          text: "Yes, Cancel",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              // Clear the store and local states as requested
+              await clearShipment();
+              setchooseCarrierModal(false);
+              setStep(1);
+              setShowDirection(false);
+              setOffers([]);
+              // If there was an API to call, it would go here
+              Alert.alert("Cancelled", "Your delivery request has been cancelled.");
+            } catch (error) {
+              console.error("Error cancelling shipment:", error);
+            }
+          }
+        }
+      ]
+    );
+  };
 
   const fetchOffers = useCallback(async (silent: boolean = false) => {
     const { activeShipmentId: createdShipmentId } = useShipmentStore.getState();
@@ -380,6 +473,85 @@ const UserHomePage = ({}: UserHomePageProps) => {
       if (interval) clearInterval(interval);
     };
   }, [chooseCarrierModal, createdShipmentId, fetchOffers]);
+
+  // Check shipment status for accepted shipments that are still "waiting"
+  useEffect(() => {
+    const waitingShipments = acceptedShipments.filter(s => s.trackingStatus === "waiting");
+    if (waitingShipments.length === 0) return;
+
+    const checkStatuses = async () => {
+      const { accessToken: token } = useAuthStore.getState();
+      if (!token) return;
+
+      for (const shipment of waitingShipments) {
+        try {
+          const detail = await getShipmentDetails(token);
+          const status = detail?.status;
+          const isAssigned = detail?.is_assigned === true;
+          
+          if (isAssigned) {
+            await updateShipmentTrackingStatus(shipment.id, "trackable", true);
+          }
+        } catch (error) {
+          // Silently ignore 404s — shipment may not be accessible yet
+        }
+      }
+    };
+
+    checkStatuses();
+    const interval = setInterval(checkStatuses, 8000);
+    return () => clearInterval(interval);
+  }, [acceptedShipments]);
+
+  // Handle opening live tracking
+  const handleTrackShipment = useCallback((shipment: AcceptedShipment) => {
+    setTrackedShipment(shipment);
+    setTrackingModalVisible(true);
+    connectTracking(shipment.id, shipment.status);
+  }, [connectTracking]);
+
+  // Handle closing live tracking
+  const handleCloseTracking = useCallback(() => {
+    disconnectTracking();
+    setTrackingModalVisible(false);
+    setTrackedShipment(null);
+  }, [disconnectTracking]);
+
+  // Fit map to carrier + route when carrier location updates or modal opens
+  useEffect(() => {
+    if (trackingModalVisible && trackedShipment && trackingMapRef.current) {
+      const coords: LatLng[] = [];
+      
+      if (carrierLocation) {
+        coords.push(carrierLocation);
+      }
+      
+      if (trackedShipment.pickupLatitude && trackedShipment.pickupLongitude) {
+        coords.push({
+          latitude: parseFloat(trackedShipment.pickupLatitude),
+          longitude: parseFloat(trackedShipment.pickupLongitude),
+        });
+      }
+      
+      if (trackedShipment.deliveryLatitude && trackedShipment.deliveryLongitude) {
+        coords.push({
+          latitude: parseFloat(trackedShipment.deliveryLatitude),
+          longitude: parseFloat(trackedShipment.deliveryLongitude),
+        });
+      }
+
+      if (coords.length > 0) {
+        // Use a small timeout to ensure map is ready if modal just opened
+        const timeout = setTimeout(() => {
+          trackingMapRef.current?.fitToCoordinates(coords, {
+            edgePadding: { top: 100, right: 70, bottom: 450, left: 70 },
+            animated: true,
+          });
+        }, 500);
+        return () => clearTimeout(timeout);
+      }
+    }
+  }, [carrierLocation, trackingModalVisible, trackedShipment]);
 
   return (
     <View style={[tw`flex-1 justify-end`, {
@@ -446,6 +618,7 @@ const UserHomePage = ({}: UserHomePageProps) => {
           onReady={trackRouteOnReady}
        />
         }
+      </MapView>
          <TouchableOpacity
                 style={[
                   tw`p-2.5 absolute left-5 top-15 rounded-full self-start`,
@@ -457,7 +630,6 @@ const UserHomePage = ({}: UserHomePageProps) => {
               >
                 <AlignCenter color={themeColors.primaryColor} />
         </TouchableOpacity>
-      </MapView>
       <Modal
           transparent={true}
           onRequestClose={() => {
@@ -467,10 +639,7 @@ const UserHomePage = ({}: UserHomePageProps) => {
           visible={chooseCarrierModal}
         >
           <View style={[tw`flex-1 px-5 pt-15 bg-black/80 gap-6`]}>
-          <TouchableOpacity onPress={() => {
-            bottomSheetRef.current?.expand();
-              setchooseCarrierModal(false)
-            }} style={[tw`bg-[#D37A0F88] flex-row items-center gap-2 px-3 py-2 self-start rounded-full`]}>
+            <TouchableOpacity onPress={handleCancelShipment} style={[tw`bg-[#D37A0F88] flex-row items-center gap-2 px-3 py-2 self-start rounded-full`]}>
               <XIcon color={"white"} size={17}/>
               <Text style={[tw`text-white text-xs`, {
                   fontFamily: fontFamily.MontserratEasyBold
@@ -495,6 +664,10 @@ const UserHomePage = ({}: UserHomePageProps) => {
               ) : (
                 offers.map((offer, index) => {
                   return (
+                    <Animated.View 
+                      entering={SlideInRight.delay(index * 100)}
+                      key={offer.id || index}
+                    >
                     <CarrierCard
                       name={(() => {
                         const carrier = offer.carrier || offer.acceptance_sender || offer.user;
@@ -511,16 +684,48 @@ const UserHomePage = ({}: UserHomePageProps) => {
                       })()}
                       acceptOnPress={async () => {
                         try {
-                          if (!accessToken || !createdShipmentId || !offer.id) {
-                            Alert.alert("Error", "Missing required information to accept offer");
+                          // Try to find the carrier ID in various possible structures
+                          const carrierId = 
+                            offer.carrier?.id || 
+                            offer.acceptance_sender?.id || 
+                            offer.user?.id || 
+                            offer.carrier_id;
+
+                          if (!accessToken || !createdShipmentId || !carrierId) {
+                            console.error("Missing info. Offer object:", JSON.stringify(offer, null, 2));
+                            Alert.alert("Error", "Missing required information to accept offer. Check console.");
                             return;
                           }
-                          const response = await confirmCarrierAcceptance(accessToken, createdShipmentId, offer.id);
+                          const response = await confirmCarrierAcceptance(accessToken, createdShipmentId, carrierId);
                           console.log("Carrier accepted successfully:", response);
+
+                          // Build the accepted shipment object and save to the array
+                          const carrierObj = offer.carrier || offer.acceptance_sender || offer.user || {};
+                          const acceptedShipment: AcceptedShipment = {
+                            id: createdShipmentId,
+                            pickupAddress,
+                            destinationAddress,
+                            calculatedPrice,
+                            finalPrice: offer.final_price || offer.offered_price || finalPrice,
+                            paymentMethod,
+                            status: "pending",
+                            trackingStatus: "waiting",
+                            acceptedAt: new Date().toISOString(),
+                            carrierName: carrierObj?.first_name ? `${carrierObj.first_name} ${carrierObj.last_name || ""}` : "Carrier",
+                            carrierImage: carrierObj?.profile_picture || undefined,
+                            pickupLatitude: origin?.latitude?.toFixed(6),
+                            pickupLongitude: origin?.longitude?.toFixed(6),
+                            deliveryLatitude: destination?.latitude?.toFixed(6),
+                            deliveryLongitude: destination?.longitude?.toFixed(6),
+                            isAssigned: response?.is_assigned === true,
+                          };
+                          await addAcceptedShipment(acceptedShipment);
+
+                          // Clear form for a fresh request
                           await clearShipment();
+                          setShowDirection(false);
                           setchooseCarrierModal(false);
                           bottomSheetRef.current?.expand();
-                          setStep(1); // Reset or navigate away
                           Alert.alert("Success", "Carrier selected! Your shipment is now being processed.");
                         } catch (error: any) {
                           console.error("Error accepting carrier:", error);
@@ -533,8 +738,8 @@ const UserHomePage = ({}: UserHomePageProps) => {
                       rating={4.5} // Backend needs to provide this
                       time="Nearby" // Backend needs to provide this
                       totalRides={offer.carrier?.total_trips || 0}
-                      key={offer.id || index}
                     />
+                    </Animated.View>
                   )
                 })
               )}
@@ -547,14 +752,54 @@ const UserHomePage = ({}: UserHomePageProps) => {
         ref={bottomSheetRef}
         enablePanDownToClose={false}
       >
-          <BottomSheetView style={[tw`px-5 justify-center pb-10`]}
+          <BottomSheetView style={[tw`justify-center pb-10`]}
           >
             
           {step === 1 && (
           <View style={[tw`gap-5`]}>
-            <SearchTextInput placeholderText="Track your shipment" />
-            <OrderCard />
-            <View style={[tw`flex-row justify-between items-center gap-2`]}>
+            <View style={tw`px-5`}>
+              <SearchTextInput placeholderText="Track your shipment" />
+            </View>
+              {acceptedShipments.length > 0 ? (
+                <FlatList
+                  data={acceptedShipments}
+                  horizontal
+                  decelerationRate="fast"
+                  snapToInterval={Dimensions.get('window').width - 40 + 12}
+                  snapToAlignment="start"
+                  showsHorizontalScrollIndicator={false}
+                  keyExtractor={(item) => item.id.toString()}
+                  contentContainerStyle={{ paddingHorizontal: 20, gap: 12 }}
+                  renderItem={({ item }) => (
+                    <View style={{ width: Dimensions.get('window').width - 40 }}>
+                      <OrderCard
+                        cardTitle="Current Shipping"
+                        shippingId={`#${item.id}`}
+                        pickupLocation={item.pickupAddress}
+                        destinationLocation={item.destinationAddress}
+                        pickupDate={new Date(item.acceptedAt).toLocaleDateString()}
+                        status={item.status}
+                        trackingStatus={item.trackingStatus}
+                        isAssigned={item.isAssigned}
+                        onTrackPress={() => handleTrackShipment(item)}
+                      />
+                    </View>
+                  )}
+                />
+              ) : (
+                <View style={tw`px-5`}>
+                  <OrderCard
+                    shippingId={createdShipmentId ? `#${createdShipmentId}` : undefined}
+                    pickupLocation={pickupAddress}
+                    destinationLocation={destinationAddress}
+                    pickupDate={new Date().toLocaleDateString()}
+                    status={createdShipmentId ? "pending" : undefined}
+                    trackingStatus={createdShipmentId ? "waiting" : undefined}
+                    isAssigned={false}
+                  />
+                </View>
+              )}
+            <View style={[tw`flex-row justify-between items-center gap-2 px-5`]}>
               <SecondaryButton
                 borderColor={themeColors.primaryColor}
                 borderWidth={1}
@@ -572,15 +817,18 @@ const UserHomePage = ({}: UserHomePageProps) => {
                   icon={require("../../assets/images/IntroImages/icon/TimeCount.png")}
                 height={50}
                 textColor={"white"}
-                onpress={() => {
-                  setStep(2)
+                onpress={async () => {
+                  await clearShipment();
+                  setShowDirection(false);
+                  setOffers([]);
+                  setStep(2);
                 }}
               />
             </View>
           </View>
           )}
           {step === 2 && (
-            <View style={[tw`gap-5`]}>
+            <View style={[tw`gap-5 px-5`]}>
               <View style={[tw`flex-row items-center justify-between`]}>
                   <Text style={[tw`text-2xl uppercase`, {
                     fontFamily: fontFamily.MontserratEasyBold,
@@ -673,14 +921,17 @@ const UserHomePage = ({}: UserHomePageProps) => {
                 }]}>Recommended price: ₦{calculatedPrice || "0"}</Text>
               </View>
               <SecondaryButton
-                bgColors={themeColors.primaryColor}
+                bgColors={isFormValid ? themeColors.primaryColor : "#ccc"}
                 text="Find Rider"
                 height={50}
                 textColor={"white"}
+                disabled={!isFormValid}
                 onpress={() => {
-                  handleOfferPrice();
-                  bottomSheetRef.current?.close();
-                  setchooseCarrierModal(true);
+                  if (isFormValid) {
+                    handleOfferPrice();
+                    bottomSheetRef.current?.close();
+                    setchooseCarrierModal(true);
+                  }
                 }}
               />
           </View>
@@ -901,7 +1152,7 @@ const UserHomePage = ({}: UserHomePageProps) => {
                 <View style={[tw`flex-row justify-between items-center bg-[#19488A11] p-5 py-7 rounded-md`]}>
                   <TouchableOpacity 
                     style={[tw`p-2 bg-white rounded-full`]}
-                    onPress={() => setItemValue(prev => prev + 500)}
+                    onPress={() => setItemValue(prev => prev + 100)}
                   >
                     <Plus/>
                   </TouchableOpacity>
@@ -910,7 +1161,7 @@ const UserHomePage = ({}: UserHomePageProps) => {
                   }]}>{itemValue}</Text>
                   <TouchableOpacity 
                     style={[tw`p-2 bg-white rounded-full`]}
-                    onPress={() => setItemValue(prev => Math.max(0, prev - 500))}
+                    onPress={() => setItemValue(prev => Math.max(0, prev - 100))}
                   >
                   <Minus/>
                   </TouchableOpacity>
@@ -919,10 +1170,11 @@ const UserHomePage = ({}: UserHomePageProps) => {
             </View>
             <View style={tw`mt-5`}>
               <SecondaryButton
-                bgColors={themeColors.primaryColor}
+                bgColors={isOrderDetailValid ? themeColors.primaryColor : "#ccc"}
                 text="Find Rider"
                 height={50}
                 textColor={"white"}
+                disabled={!isOrderDetailValid}
                 onpress={handleCreateEvent}
               />
             </View>
@@ -976,7 +1228,7 @@ const UserHomePage = ({}: UserHomePageProps) => {
                 />
                 <View style={[tw`flex-row justify-between items-center bg-[#19488A11] p-5 py-7 rounded-md`]}>
                   <TouchableOpacity 
-                    onPress={() => setFinalPrice(finalPrice + 500)}
+                    onPress={() => setFinalPrice(finalPrice + 100)}
                     style={[tw`p-2 bg-white rounded-full`]}
                   >
                     <Plus/>
@@ -985,7 +1237,7 @@ const UserHomePage = ({}: UserHomePageProps) => {
                     fontFamily: fontFamily.Medium
                   }]}>{finalPrice}</Text>
                   <TouchableOpacity 
-                    onPress={() => setFinalPrice(Math.max(0, finalPrice - 500))}
+                    onPress={() => setFinalPrice(Math.max(0, finalPrice - 100))}
                     style={[tw`p-2 bg-white rounded-full` ]} 
                   >
                   <Minus/>
@@ -1010,6 +1262,199 @@ const UserHomePage = ({}: UserHomePageProps) => {
   
       </BottomSheet>
       )}
+
+      {/* Live Tracking Modal */}
+      <Modal
+        visible={trackingModalVisible}
+        animationType="slide"
+        onRequestClose={handleCloseTracking}
+      >
+        <View style={[tw`flex-1`]}>
+          <MapView
+            provider={PROVIDER_GOOGLE}
+            ref={trackingMapRef}
+            style={[tw`flex-1`]}
+            region={{
+              latitude: carrierLocation?.latitude || (trackedShipment?.pickupLatitude ? parseFloat(trackedShipment.pickupLatitude) : 6.5244),
+              longitude: carrierLocation?.longitude || (trackedShipment?.pickupLongitude ? parseFloat(trackedShipment.pickupLongitude) : 3.3792),
+              latitudeDelta: 0.01,
+              longitudeDelta: 0.01,
+            }}
+            showsUserLocation={true}
+            showsMyLocationButton={false}
+            showsPointsOfInterest={false}
+            showsBuildings={false}
+            showsCompass={false}
+            mapType="standard"
+          >
+            {/* Carrier live marker */}
+            {carrierLocation && (
+              <Marker
+                coordinate={carrierLocation}
+                title="Carrier"
+              >
+                <View style={[tw`bg-[#19488A] p-2 rounded-full`]}>
+                  <Navigation size={18} color="white" fill="white" />
+                </View>
+              </Marker>
+            )}
+
+            {/* Pickup marker */}
+            {trackedShipment?.pickupLatitude && trackedShipment?.pickupLongitude && (
+              <Marker
+                coordinate={{
+                  latitude: parseFloat(trackedShipment.pickupLatitude),
+                  longitude: parseFloat(trackedShipment.pickupLongitude),
+                }}
+                title="Pickup"
+              >
+                <Image style={[tw`w-10 h-10`, { resizeMode: "contain" }]} source={require("../../assets/images/IntroImages/icon/pin.png")} />
+              </Marker>
+            )}
+
+            {/* Delivery marker */}
+            {trackedShipment?.deliveryLatitude && trackedShipment?.deliveryLongitude && (
+              <Marker
+                coordinate={{
+                  latitude: parseFloat(trackedShipment.deliveryLatitude),
+                  longitude: parseFloat(trackedShipment.deliveryLongitude),
+                }}
+                title="Delivery"
+              >
+                <Image style={[tw`w-10 h-10`, { resizeMode: "contain" }]} source={require("../../assets/images/IntroImages/icon/pin.png")} />
+              </Marker>
+            )}
+
+            {/* Route directions (Full Path) */}
+            {trackedShipment?.pickupLatitude && trackedShipment?.pickupLongitude &&
+             trackedShipment?.deliveryLatitude && trackedShipment?.deliveryLongitude && (
+              <MapViewDirections
+                origin={{
+                  latitude: parseFloat(trackedShipment.pickupLatitude),
+                  longitude: parseFloat(trackedShipment.pickupLongitude),
+                }}
+                destination={{
+                  latitude: parseFloat(trackedShipment.deliveryLatitude),
+                  longitude: parseFloat(trackedShipment.deliveryLongitude),
+                }}
+                apikey={GoogleApiKey || ""}
+                strokeColor={themeColors.primaryColor + "55"} // Faded full route
+                strokeWidth={3}
+              />
+            )}
+
+            {/* Live Carrier Directions (Current segment) */}
+            {carrierLocation && trackedShipment && (
+              <MapViewDirections
+                origin={carrierLocation}
+                destination={
+                  (trackedShipment.status === "picked" || trackedShipment.status === "in-transit")
+                    ? { latitude: parseFloat(trackedShipment.deliveryLatitude!), longitude: parseFloat(trackedShipment.deliveryLongitude!) }
+                    : { latitude: parseFloat(trackedShipment.pickupLatitude!), longitude: parseFloat(trackedShipment.pickupLongitude!) }
+                }
+                apikey={GoogleApiKey || ""}
+                strokeColor={themeColors.primaryColor} // Solid active segment
+                strokeWidth={5}
+                onReady={(result) => {
+                  console.log(`Route to next point: ${result.distance}km, ${result.duration}min`);
+                }}
+              />
+            )}
+          </MapView>
+
+          {/* Close button */}
+          <TouchableOpacity
+            onPress={handleCloseTracking}
+            style={[tw`absolute top-15 left-5 p-3 rounded-full`, { backgroundColor: themeColors.background }]}
+          >
+            <X size={22} color={themeColors.primaryColor} />
+          </TouchableOpacity>
+
+          {/* Connection status badge */}
+          <View style={[tw`absolute top-15 right-5`]}>
+            <View style={[tw`flex-row items-center gap-1 px-3 py-2 rounded-full`, {
+              backgroundColor: isConnected ? "#ECFDF5" : "#FEF2F2"
+            }]}>
+              <View style={[tw`w-2 h-2 rounded-full`, {
+                backgroundColor: isConnected ? "#10B981" : "#EF4444"
+              }]} />
+              <Text style={[tw`text-[10px]`, {
+                fontFamily: fontFamily.MontserratEasyMedium,
+                color: isConnected ? "#065F46" : "#991B1B"
+              }]}>{isConnected ? "LIVE" : "CONNECTING..."}</Text>
+            </View>
+          </View>
+
+          {/* Bottom info panel */}
+          {trackedShipment && (
+            <View style={[tw`absolute bottom-0 left-0 right-0 bg-white rounded-t-3xl px-5 pt-5 pb-10`, {
+              shadowColor: "#000",
+              shadowOffset: { width: 0, height: -3 },
+              shadowOpacity: 0.1,
+              shadowRadius: 10,
+              elevation: 10,
+            }]}>
+              {/* Header */}
+              <View style={[tw`flex-row justify-between items-center mb-4`]}>
+                <View style={[tw`flex-row items-center gap-2`]}>
+                  <Navigation size={20} color="#19488A" />
+                  <Text style={[tw`text-lg`, {
+                    fontFamily: fontFamily.MontserratEasyBold
+                  }]}>Live Tracking</Text>
+                </View>
+                {isConnected && (
+                  <View style={[tw`flex-row items-center gap-1 bg-green-100 px-3 py-1 rounded-full`]}>
+                    <View style={[tw`w-2 h-2 rounded-full bg-green-500`]} />
+                    <Text style={[tw`text-[10px] text-green-700`, {
+                      fontFamily: fontFamily.MontserratEasyMedium
+                    }]}>LIVE</Text>
+                  </View>
+                )}
+              </View>
+
+              {/* Route info */}
+              <View style={[tw`gap-3 mb-4`]}>
+                <View style={[tw`flex-row items-center gap-2`]}>
+                  <Image style={[tw`h-5 w-5`]} source={require("../../assets/images/IntroImages/LocationMarker.png")} />
+                  <View style={[tw`h-4 border border-[#19488A33]`]} />
+                  <Text style={[tw`uppercase text-xs flex-1`, {
+                    fontFamily: fontFamily.MontserratEasyMedium
+                  }]} numberOfLines={1}>{trackedShipment.pickupAddress}</Text>
+                </View>
+                <View style={[tw`flex-row items-center gap-2`]}>
+                  <Image style={[tw`h-5 w-5`]} source={require("../../assets/images/IntroImages/LocationMarker2.png")} />
+                  <View style={[tw`h-4 border border-[#19488A33]`]} />
+                  <Text style={[tw`uppercase text-xs flex-1`, {
+                    fontFamily: fontFamily.MontserratEasyMedium
+                  }]} numberOfLines={1}>{trackedShipment.destinationAddress}</Text>
+                </View>
+              </View>
+
+              {/* Carrier info */}
+              <View style={[tw`flex-row items-center justify-between`]}>
+                <View style={[tw`flex-row items-center gap-2`]}>
+                  <Image
+                    style={[tw`h-12 w-12 rounded-full`]}
+                    source={trackedShipment.carrierImage ? { uri: trackedShipment.carrierImage } : require("../../assets/images/pfp.png")}
+                  />
+                  <View style={[tw`gap-1`]}>
+                    <Text style={[tw`uppercase`, {
+                      fontFamily: fontFamily.MontserratEasyBold
+                    }]}>{trackedShipment.carrierName || "Carrier"}</Text>
+                    <Text style={[tw`text-xs text-gray-500`, {
+                      fontFamily: fontFamily.MontserratEasyMedium
+                    }]}>{shipmentStatus || "En route"}</Text>
+                  </View>
+                </View>
+                <Text style={[tw`text-lg`, {
+                  fontFamily: fontFamily.MontserratEasyBold,
+                  color: themeColors.primaryColor
+                }]}>{"\u20A6"}{trackedShipment.finalPrice}</Text>
+              </View>
+            </View>
+          )}
+        </View>
+      </Modal>
     
     </View>
   );

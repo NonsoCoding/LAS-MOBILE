@@ -2,19 +2,18 @@ import PrimaryButton from "@/components/Buttons/PrimaryButton";
 import CompleteModal from "@/components/Modals/CompleteModal";
 import { verifyOtp } from "@/components/services/api/authApi";
 import useAuthStore from "@/components/store/authStore";
-import useRiderAuthStore from "@/components/store/RiderAuthStore";
 import Colors from "@/constants/Colors";
 import { fontFamily } from "@/constants/fonts";
 import tw from "@/constants/tailwind";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useState } from "react";
 import {
-  Alert,
-  Image,
-  Text,
-  TouchableOpacity,
-  useColorScheme,
-  View,
+    Alert,
+    Image,
+    Text,
+    TouchableOpacity,
+    useColorScheme,
+    View,
 } from "react-native";
 import { OtpInput } from "react-native-otp-entry";
 
@@ -25,8 +24,7 @@ const OtpScreen = () => {
   const { phone } = useLocalSearchParams<{ phone: string }>();
 
   // Get login function from Zustand store
-  const { login } = useRiderAuthStore();
-  const { phoneNumber } = useAuthStore();
+  const { login, phoneNumber } = useAuthStore();
 
   const displayPhone = phone || phoneNumber;
 

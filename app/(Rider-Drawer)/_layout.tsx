@@ -1,3 +1,4 @@
+import LogoutModalTwo from "@/components/Modals/LogoutModal";
 import useAuthStore from "@/components/store/authStore";
 import { useColorScheme } from "@/components/useColorScheme";
 import Colors from "@/constants/Colors";
@@ -69,6 +70,11 @@ function CustomDrawerContent(props: any) {
           </Text>
         </TouchableOpacity>
       </View>
+      <LogoutModalTwo
+        visible={false}
+        onClose={() => {}}
+        onLogout={() => {}}
+      />
     </DrawerContentScrollView>
   );
 }

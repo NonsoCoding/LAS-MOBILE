@@ -1,8 +1,9 @@
 import BackButton from "@/components/Buttons/BackButton";
-import SecondaryButton from "@/components/Buttons/SecondaryButons";
-import { acceptRequest, requestShippments } from "@/components/services/api/carriersApi";
+import { useLocationTracking } from "@/components/hooks/useLocationTracking";
+import { acceptRequest, getShipmentDetails, requestShippments } from "@/components/services/api/carriersApi";
 import * as SecureStore from "@/components/services/storage/secureStore";
 import { STORAGE_KEYS } from "@/components/services/storage/storageKeys";
+import useAuthStore from "@/components/store/authStore";
 import Colors from "@/constants/Colors";
 import { fontFamily } from "@/constants/fonts";
 import tw from "@/constants/tailwind";
@@ -10,9 +11,11 @@ import BottomSheet, { BottomSheetScrollView, BottomSheetView } from "@gorhom/bot
 import { useRouter } from "expo-router";
 import { ChevronRight, Gift, MessageCircle, MoreVertical, PhoneCall, Star } from "lucide-react-native";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { ActivityIndicator, Image, Text, TouchableOpacity, useColorScheme, View } from "react-native";
+import { ActivityIndicator, Alert, Image, Text, TouchableOpacity, useColorScheme, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import MapView, { PROVIDER_GOOGLE } from "react-native-maps";
+import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
+import MapViewDirections from "react-native-maps-directions";
+import Animated, { SlideInRight } from "react-native-reanimated";
 
 interface IRequestScreenProps {
 
@@ -38,8 +41,38 @@ const RequestScreen = ({
     const [hasNextPage, setHasNextPage] = useState(false);
     const [acceptedRequest, setAcceptedRequest] = useState<any>(null);
     const [acceptingId, setAcceptingId] = useState<string | null>(null);
+    const [isAssigned, setIsAssigned] = useState(false);
+  const GoogleApiKey = process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY;
+  const {isOnline} = useAuthStore();
+  const { startTracking, stopTracking, isTracking } = useLocationTracking();
+
+    const edgePadding = {
+      top: 50,
+      right: 50,
+      bottom: 300,
+      left: 50,
+    };
+
+    const traceRoute = useCallback((request: any) => {
+      if (request.pickup_latitude && request.pickup_longitude && request.delivery_latitude && request.delivery_longitude) {
+        const origin = {
+          latitude: parseFloat(request.pickup_latitude),
+          longitude: parseFloat(request.pickup_longitude),
+        };
+        const destination = {
+          latitude: parseFloat(request.delivery_latitude),
+          longitude: parseFloat(request.delivery_longitude),
+        };
+        mapRef.current?.fitToCoordinates([origin, destination], {
+          edgePadding,
+          animated: true,
+        });
+      }
+    }, []);
 
     const fetchShipments = useCallback(async (pageNum: number = 1, append: boolean = false, silent: boolean = false) => {
+      if (acceptingId && !append) return; // Don't refresh whole list while accepting
+      
       try {
         if (append) {
           setLoadingMore(true);
@@ -48,12 +81,15 @@ const RequestScreen = ({
         }
         const token = await SecureStore.getItem(STORAGE_KEYS.ACCESS_TOKEN);
         if (!token) {
-          console.log("No token found");
           setLoading(false);
           return;
         }
         const data = await requestShippments(token, pageNum);
         const results = data.results || [];
+        
+        // Final check before state update to prevent race conditions
+        if (acceptingId && !append) return;
+
         if (append) {
           setRequests(prev => [...prev, ...results]);
         } else {
@@ -67,7 +103,7 @@ const RequestScreen = ({
         setLoading(false);
         setLoadingMore(false);
       }
-    }, []);
+    }, [acceptingId]);
 
     useEffect(() => {
       fetchShipments(1);
@@ -91,23 +127,35 @@ const RequestScreen = ({
       }
     }, [loadingMore, hasNextPage, page, fetchShipments]);
 
-    const handleAccept = async (request: any) => {
+    const handleAccept = useCallback(async (request: any) => {
+      if (acceptingId) return;
+      
       try {
         setAcceptingId(request.id);
         const token = await SecureStore.getItem(STORAGE_KEYS.ACCESS_TOKEN);
         if (!token) return;
         
+        console.log(`Rider accepting shipment ${request.id}...`);
         await acceptRequest(token, request.id);
         
+        // Remove from local list immediately to prevent double-rendering/animations
+        setRequests(prev => prev.filter(r => r.id !== request.id));
+        
+        // Update state to stop polling and show detail sheet
         setAcceptedRequest(request);
+        traceRoute(request);
+        
+        // Use a small delay for sheet transitions to prevent gorhom/bottom-sheet glitches
         requestSheetRef.current?.close();
-        acceptedSheetRef.current?.expand();
+        setTimeout(() => {
+          acceptedSheetRef.current?.expand();
+        }, 100);
       } catch (error) {
         console.log("Failed to accept shipment:", error);
       } finally {
         setAcceptingId(null);
       }
-    };
+    }, [acceptingId, traceRoute]);
 
     const openAcceptedSheet = useCallback((request: any) => {
       setAcceptedRequest(request);
@@ -121,14 +169,73 @@ const RequestScreen = ({
     }, []);
 
     const closeAcceptedSheet = useCallback(() => {
+      stopTracking();
       acceptedSheetRef.current?.close();
       setAcceptedRequest(null);
+      setIsAssigned(false);
       requestSheetRef.current?.expand();
     }, []);
 
+    // Poll shipment status using carrier endpoint until shipper confirms
+    useEffect(() => {
+      if (!acceptedRequest || isAssigned) return;
+
+      const pollStatus = async () => {
+        try {
+          const token = await SecureStore.getItem(STORAGE_KEYS.ACCESS_TOKEN);
+          if (!token) return;
+
+          // Use direct shipment ID polling to get the latest assignment field
+          // Use carrier's current shipment endpoint
+          try {
+            const data = await getShipmentDetails(token);
+            // Enhanced logging to see the exact structure and values
+            console.log("DEBUG: Current shipment data for carrier:", JSON.stringify(data, null, 2));
+
+            const results = data?.results || data || [];
+            const shipment = Array.isArray(results) ? results[0] : (results.id ? results : null);
+
+            if (shipment) {
+              const status = shipment.status || shipment.shipment_status || shipment.request_status;
+              const remoteId = String(shipment.id || shipment.shipment_id || "");
+              const localId = String(acceptedRequest.id);
+              
+              console.log(`DEBUG: Polling Shipment ID: ${remoteId} (Local ID: ${localId})`);
+              console.log(`DEBUG: Shipment Status: ${status}, is_assigned: ${shipment.is_assigned} (type: ${typeof shipment.is_assigned})`);
+
+              // Verify this is actually the shipment we accepted
+              if (remoteId !== localId && remoteId !== "") {
+                console.log("DEBUG: Mismatch! This shipment is not the one we just accepted. Ignoring.");
+                return;
+              }
+
+              // ONLY trigger tracking when is_assigned is strictly true
+              if (shipment.is_assigned === true || shipment.is_assigned === "true") {
+                console.log("DEBUG: SUCCESS! Shipper has confirmed assignment. Starting tracking.");
+                setIsAssigned(true);
+                startTracking(acceptedRequest.id, status || "status");
+                acceptedSheetRef.current?.snapToIndex(0);
+              } else {
+                console.log("DEBUG: Still waiting... is_assigned is not true.");
+              }
+            } else {
+              console.log("DEBUG: No active shipment found for carrier.");
+            }
+          } catch (error) {
+            // Silently ignore 404/polling errors
+          }
+        } catch (error) {
+          // Keep generic catch but silent to avoid spam
+        }
+      };
+
+      pollStatus(); // Initial check
+      const interval = setInterval(pollStatus, 5000);
+      return () => clearInterval(interval);
+    }, [acceptedRequest, isAssigned]);
+
     
-    
-    return (
+  return (
       <GestureHandlerRootView style={[tw`flex-1`]}>
         <View style={[tw`flex-1`]}>
              <MapView
@@ -142,28 +249,67 @@ const RequestScreen = ({
     longitudeDelta: 0.0421,
   }}
   showsUserLocation={true}
-  showsMyLocationButton={false} // Custom button looks better
-  showsPointsOfInterest={false} // Cleaner for logistics
-  showsBuildings={false} // Less visual clutter
+  showsMyLocationButton={false}
+  showsPointsOfInterest={false}
+  showsBuildings={false}
   showsIndoors={false}
-  showsCompass={false} // Use custom compass
+  showsCompass={false}
   showsScale={false}
   mapType="standard"
   rotateEnabled={true}
-  pitchEnabled={false} // Keep 2D for logistics clarity
+  pitchEnabled={false}
   toolbarEnabled={false}
   loadingEnabled={true}
   loadingIndicatorColor="#yourBrandColor"
   loadingBackgroundColor="#ffffff"
             >
+              {acceptedRequest && (
+                <>
+                  <Marker
+                    coordinate={{
+                      latitude: parseFloat(acceptedRequest.pickup_latitude),
+                      longitude: parseFloat(acceptedRequest.pickup_longitude),
+                    }}
+                  >
+                    <Image style={[tw`w-10 h-10`, { resizeMode: "contain" }]} source={require("../../assets/images/IntroImages/icon/pin.png")}/>
+                  </Marker>
+                  <Marker
+                    coordinate={{
+                      latitude: parseFloat(acceptedRequest.delivery_latitude),
+                      longitude: parseFloat(acceptedRequest.delivery_longitude),
+                    }}
+                  >
+                    <Image style={[tw`w-10 h-10`, { resizeMode: "contain" }]} source={require("../../assets/images/IntroImages/icon/pin.png")}/>
+                  </Marker>
+                  <MapViewDirections
+                    origin={{
+                      latitude: parseFloat(acceptedRequest.pickup_latitude),
+                      longitude: parseFloat(acceptedRequest.pickup_longitude),
+                    }}
+                    destination={{
+                      latitude: parseFloat(acceptedRequest.delivery_latitude),
+                      longitude: parseFloat(acceptedRequest.delivery_longitude),
+                    }}
+                    apikey={GoogleApiKey || ""}
+                    strokeColor={themeColors.primaryColor}
+                    strokeWidth={6}
+                  />
+                </>
+              )}
                 </MapView>
             <BottomSheet
         snapPoints={snapPoints}
         ref={requestSheetRef}
-        
+        backgroundStyle={{backgroundColor: "rgba(0, 0, 0, 0.5)"}}
       >
-          <BottomSheetScrollView style={[tw`pb-15`]}>
-                    {loading ? (
+          <BottomSheetScrollView style={[tw`p-5`]}>
+            {!isOnline ?  (
+              <View style={[tw`items-center justify-center`]}>
+                <Text style={[tw`mt-3 text-sm`, { fontFamily: fontFamily.MontserratEasyMedium }]}>You are offline</Text>
+              </View>
+            ) : (
+                <View>
+                     {loading ? (
                       <View style={[tw`items-center justify-center py-20`]}>
                         <ActivityIndicator size="large" color={themeColors.primaryColor} />
                         <Text style={[tw`mt-3 text-sm`, { fontFamily: fontFamily.MontserratEasyMedium }]}>Loading requests...</Text>
@@ -174,10 +320,14 @@ const RequestScreen = ({
                       </View>
                     ) : (
                     <>
-                    <View style={[tw``]}>
-                        {requests.map((request: any) => (
-                                <View key={request.id} style={[tw`flex-row items-center gap-5 px-5 border-b-2 py-4 border-[#19488A33]`]}>
-                                    <View style={[tw`items-center gap-3 w-[100px]`]}>
+                    <View style={[tw`gap-2`]}>
+                        {requests.map((request: any, index: number) => (
+                                <Animated.View 
+                                  entering={SlideInRight.delay(index * 100)}
+                                  key={request.id} 
+                                  style={[tw`flex-row bg-white/80 items-center gap-5 px-5 py-4 rounded-lg`]}
+                                >
+                                    <View style={[tw`items-center gap-3 w-[60px]`]}>
                                         <View style={[tw`h-14 w-14 rounded-full bg-[#19488A] flex items-center justify-center`]}>
                                             <Gift color="white" size={30}/>
                                         </View>
@@ -185,34 +335,29 @@ const RequestScreen = ({
                                         <Text style={[tw`text-[11px]`, {
                                                 fontFamily: fontFamily.MontserratEasyRegular
                                             }]}>{request.recipient_name || "Shipper"}</Text>
-                                            <View style={[tw`flex-row items-center gap-1`]}>
-                                                <Star size={10} fill="black"/>
-                                            <Text style={[tw`text-[10px]`, {
-                                                    fontFamily: fontFamily.MontserratEasyRegular
-                                                }]}>4.5</Text>
-                                            </View>
+                                            
                                         </View>
                                     </View>
                                     <View style={[tw`gap-2 flex-1`]}>
                                         <View style={[tw`flex-row items-center gap-3`]}>
                                         <Text style={[tw`text-xl`, {
                                             fontFamily: fontFamily.MontserratEasyMedium
-                                        }]}>₦{request.calculated_price}</Text>
+                                        }]}>{"\u20A6"}{request.calculated_price}</Text>
                                         <View style={[tw`h-3 border-1 border`]} />
                                         <Text style={[tw`text-[#19488A33]`, {
                                             fontFamily: fontFamily.MontserratEasyMedium
-                                        }]}>{request.vehicle_type_display}</Text>
+                                        }]}>{request.distance_display}</Text>
                                     </View>
                                     <View style={[tw`gap-1`]}>
                                     <View style={[tw`flex-row items-center gap-2`]}>
                                         <Image style={[tw`h-4 w-4`]} source={require("../../assets/images/IntroImages/LocationMarker.png")} />
-                                            <Text style={[tw`uppercase text-[10px] flex-1`, {
+                                            <Text numberOfLines={2} style={[tw`uppercase text-[10px] flex-1`, {
                                             fontFamily: fontFamily.MontserratEasyMedium
                                         }]}>{request.pickup_address}</Text>
                                         </View>
                                     <View style={[tw`flex-row items-center gap-2`]} >
                                         <Image style={[tw`h-4 w-4`]} source={require("../../assets/images/IntroImages/LocationMarker2.png")} />
-                                        <Text style={[tw`uppercase text-[10px] flex-1`, {
+                                        <Text numberOfLines={2} style={[tw`uppercase text-[10px] flex-1`, {
                                             fontFamily: fontFamily.MontserratEasyMedium
                                         }]}>{request.delivery_address}</Text>
                                         </View>
@@ -233,7 +378,7 @@ const RequestScreen = ({
                                         )}
                                     </TouchableOpacity>
                                 </View>
-                                </View>
+                                </Animated.View>
                             ))}
            </View>
                     {hasNextPage && (
@@ -250,111 +395,144 @@ const RequestScreen = ({
                     )}
                     </>
                     )}
+                </View>
+                
+            )}
+                   
         </BottomSheetScrollView>
       </BottomSheet>
 
-        {/* Accepted request detail sheet */}
+        {/* Accepted request detail sheet - Waiting for shipper */}
         <BottomSheet
           snapPoints={acceptedSheetSnapPoints}
           ref={acceptedSheetRef}
           enablePanDownToClose={true}
           index={-1}
           onClose={() => {
-            setAcceptedRequest(null);
-            requestSheetRef.current?.expand();
+            if (!isAssigned) {
+              setAcceptedRequest(null);
+              requestSheetRef.current?.expand();
+            }
           }}
         >
           <BottomSheetView style={[tw`px-5 pb-10`]}>
             {acceptedRequest && (
               <View style={[tw`gap-5`]}>
                <View style={[tw`flex-row justify-between items-center`]}>
-                                    <Text style={[tw`text-lg`, {
-                                        fontFamily: fontFamily.MontserratEasyBold
-                                    }]}>Arriving For Pick-Up</Text>
-                                    <Text style={[tw`text-lg`, {
-                                        fontFamily: fontFamily.MontserratEasyBold
-                                    }]}>ETA: 4min</Text>
-                                </View>
-                                <View style={[tw`gap-4 px-4`]}>           
-                <View style={[tw`flex-row items-center gap-2`]}>
-                      <Image style={[tw`h-5 w-5`]} source={require("../../assets/images/IntroImages/LocationMarker.png")} />
-                       <View style={[tw`h-4 border border-1 border-[#19488A33]`]} />
-                                        <Text style={[tw`uppercase text-xs flex-1`, {
-                    fontFamily: fontFamily.MontserratEasyMedium
-                }]}>{acceptedRequest.pickup_address}</Text>
-               </View>
-               <View style={[tw`flex-row items-center gap-2`]}>
-                      <Image style={[tw`h-5 w-5`]} source={require("../../assets/images/IntroImages/LocationMarker2.png")} />
-                       <View style={[tw`h-4 border border-1 border-[#19488A33]`]} />
-                <Text style={[tw`uppercase text-xs flex-1`, {
-                    fontFamily: fontFamily.MontserratEasyMedium
-                }]}>{acceptedRequest.delivery_address}</Text>
-                                    </View>
-                    <View style={[tw`flex-row items-center gap-2`]}>
-                      <Image style={[tw`h-5 w-5 `]} source={require("../../assets/images/IntroImages/icon/Details.png")} />
-                       <View style={[tw`h-4 border border-1 border-[#19488A33]`]} />
-                      <Text style={[tw`text-xs uppercase`, {
-                        fontFamily: fontFamily.MontserratEasyMedium
-                      }]}>{(() => {
-                        const type = (acceptedRequest.delivery_type || "").charAt(0).toUpperCase() + (acceptedRequest.delivery_type || "").slice(1);
-                        const str = `${type}, From ${acceptedRequest.sender_phone}, to ${acceptedRequest.recipient_phone}`;
-                        return str.length > 35 ? str.slice(0, 35) + "..." : str;
-                      })()}</Text>
+                  <Text style={[tw`text-lg`, {
+                    fontFamily: fontFamily.MontserratEasyBold
+                  }]}>Waiting for Confirmation</Text>
+                </View>
+                <View style={[tw`gap-4 px-4`]}>           
+                  <View style={[tw`flex-row items-center gap-2`]}>
+                    <Image style={[tw`h-5 w-5`]} source={require("../../assets/images/IntroImages/LocationMarker.png")} />
+                    <View style={[tw`h-4 border border-1 border-[#19488A33]`]} />
+                    <Text style={[tw`uppercase text-xs flex-1`, {
+                      fontFamily: fontFamily.MontserratEasyMedium
+                    }]}>{acceptedRequest.pickup_address}</Text>
+                  </View>
+                  <View style={[tw`flex-row items-center gap-2`]}>
+                    <Image style={[tw`h-5 w-5`]} source={require("../../assets/images/IntroImages/LocationMarker2.png")} />
+                    <View style={[tw`h-4 border border-1 border-[#19488A33]`]} />
+                    <Text style={[tw`uppercase text-xs flex-1`, {
+                      fontFamily: fontFamily.MontserratEasyMedium
+                    }]}>{acceptedRequest.delivery_address}</Text>
+                  </View>
+                  <View style={[tw`flex-row items-center gap-2`]}>
+                    <Image style={[tw`h-5 w-5`]} source={require("../../assets/images/IntroImages/icon/Details.png")} />
+                    <View style={[tw`h-4 border border-1 border-[#19488A33]`]} />
+                    <Text style={[tw`text-xs uppercase`, {
+                      fontFamily: fontFamily.MontserratEasyMedium
+                    }]}>{(() => {
+                      const type = (acceptedRequest.delivery_type || "").charAt(0).toUpperCase() + (acceptedRequest.delivery_type || "").slice(1);
+                      const str = `${type}, From ${acceptedRequest.sender_phone}, to ${acceptedRequest.recipient_phone}`;
+                      return str.length > 35 ? str.slice(0, 35) + "..." : str;
+                    })()}</Text>
+                  </View>
+                  <View style={[tw`flex-row items-center gap-2`]}> 
+                    <Image style={[tw`h-5 w-5`]} source={require("../../assets/images/IntroImages/icon/Offer.png")} />
+                    <View style={[tw`h-4 border border-1 border-[#19488A33]`]} />
+                    <Text style={[tw`text-xs uppercase`, {
+                      fontFamily: fontFamily.MontserratEasyMedium
+                    }]}>{acceptedRequest.final_price + " Via " + acceptedRequest.payment_method}</Text>
+                  </View>
+                </View>
+                <View style={[tw`flex-row items-center justify-between`]}>
+                  <View style={[tw`flex-row items-center gap-2`]}>
+                    <Image style={[tw`h-12 w-12 rounded-full`]} source={require("../../assets/images/pfp.png")} />
+                    <View style={[tw`gap-2`]}>
+                      <Text style={[tw`uppercase`, {
+                        fontFamily: fontFamily.MontserratEasyBold
+                      }]}>{acceptedRequest.recipient_name || "Shipper"}</Text>
+                      <View style={[tw`flex-row items-center gap-2`]}>
+                        <Star fill="black" size={15}/>
+                        <Text style={[tw`text-xs uppercase`, {
+                          fontFamily: fontFamily.MontserratEasyLight
+                        }]}>4.5 (270)</Text>
+                      </View>
                     </View>
-                    <View style={[tw`flex-row items-center gap-2`]}> 
-                      <Image style={[tw`h-5 w-5`]} source={require("../../assets/images/IntroImages/icon/Offer.png")} />
-                      <View style={[tw`h-4 border border-1 border-[#19488A33]`]} />
-                      <Text style={[tw`text-xs uppercase`, {
-                        fontFamily: fontFamily.MontserratEasyMedium
-                      }]}>{acceptedRequest.final_price + " Via " + acceptedRequest.payment_method}</Text>
-                    </View>
-                                </View>
-                                <View style={[tw`flex-row items-center justify-between`]}>
-                                    <View style={[tw`flex-row items-center gap-2`]}>
-                                    <Image style={[tw`h-12 w-12 rounded-full`]} source={require("../../assets/images/pfp.png")} />
-                                    <View style={[tw`gap-2`]}>
-                                            <Text style={[tw`uppercase`, {
-                                            fontFamily: fontFamily.MontserratEasyBold
-                                        }]}>{acceptedRequest.recipient_name || "Shipper"}</Text>
-                                        <View style={[tw`flex-row items-center gap-2`]}>
-                                            <Star fill="black" size={15}/>
-                                                <Text style={[tw`text-xs uppercase`, {
-                                                    fontFamily: fontFamily.MontserratEasyLight
-                                        }]}>4.5 (270)</Text>
-                                        </View>
-                                    </View>
-                                    </View>
-                                    <View style={[tw`flex-row items-center gap-5`]}>
-                                        <TouchableOpacity>
-                                            <MessageCircle/>
-                                        </TouchableOpacity>
-                                        <TouchableOpacity>
-                                            <PhoneCall/>
-                                        </TouchableOpacity>
-                                        <TouchableOpacity>
-                                            <MoreVertical   />
-                                        </TouchableOpacity>
-                    </View>
-                                </View>
-                    <SecondaryButton
-                      text="Waiting..."
-                    textColor="#19488A"
-                    bgColors="white"
-                    icon={require("../../assets/images/IntroImages/icon/history-line.png")}
-                    height={50}
-                    borderColor="#19488A"
-                    borderWidth={1}
-                    />
+                  </View>
+                  <View style={[tw`flex-row items-center gap-5`]}>
+                    <TouchableOpacity>
+                      <MessageCircle/>
+                    </TouchableOpacity>
+                    <TouchableOpacity>
+                      <PhoneCall/>
+                    </TouchableOpacity>
+                    <TouchableOpacity>
+                      <MoreVertical />
+                    </TouchableOpacity>
+                  </View>
+                </View>
+                {(() => {
+                  console.log(`DEBUG RENDER: isAssigned is ${isAssigned}`);
+                  return null;
+                })()}
+                {!isAssigned ? (
+                  <View style={[tw`flex-row items-center justify-center gap-3 py-3 rounded-full border`, { borderColor: "#19488A" }]}>
+                    <ActivityIndicator size="small" color="#19488A" />
+                    <Text style={[tw`text-sm`, {
+                      fontFamily: fontFamily.MontserratEasyBold,
+                      color: "#19488A"
+                    }]}>Waiting for shipper to confirm...</Text>
+                  </View>
+                ) : (
+                  <TouchableOpacity
+                    onPress={() => {
+                      // Navigate to index where map shows tracking
+                      router.push("/(Rider-Drawer)");
+                    }}
+                    style={[tw`flex-row items-center justify-center gap-2 py-3 rounded-full`, { backgroundColor: "#19488A" }]}
+                  >
+                    <View style={[tw`w-2 h-2 rounded-full bg-green-400`]} />
+                    <Text style={[tw`text-sm text-white`, { fontFamily: fontFamily.MontserratEasyBold }]}>Track Now</Text>
+                  </TouchableOpacity>
+                )}
               </View>
             )}
           </BottomSheetView>
         </BottomSheet>
 
-        {/* Back button — rendered last to be on top of everything */}
+
+
+        {/* Back button - rendered last to be on top of everything */}
         <View style={[tw`absolute top-15 left-5`, { zIndex: 999 }]}>
           <BackButton
             onPress={() => {
-              if (acceptedRequest) {
+              if (isAssigned) {
+                Alert.alert(
+                  "Stop Tracking?",
+                  "Are you sure you want to go back? This will stop live tracking.",
+                  [
+                    { text: "No", style: "cancel" },
+                    {
+                      text: "Yes",
+                      style: "destructive",
+                      onPress: () => closeAcceptedSheet()
+                    }
+                  ]
+                );
+              } else if (acceptedRequest) {
                 closeAcceptedSheet();
               } else {
                 router.back();

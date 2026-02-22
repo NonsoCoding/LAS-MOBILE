@@ -1,12 +1,11 @@
 import Colors from "@/constants/Colors";
 import tw from "@/constants/tailwind";
 import {
-  Check,
   CheckCircle,
   ChevronDown,
   Package,
   Truck,
-  X,
+  X
 } from "lucide-react-native";
 import { useState } from "react";
 import {
@@ -36,14 +35,6 @@ const StatusModal = ({
   const themeColors = Colors[colorScheme ?? "light"];
 
   const statusOptions = [
-    {
-      id: "accepted",
-      title: "Order Accepted",
-      description: "Confirm you will pick up this order",
-      icon: Check,
-      color: "#FFF4E6",
-      iconColor: "#F2994A",
-    },
     {
       id: "picked-up",
       title: "Picked Up",

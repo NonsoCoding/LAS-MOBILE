@@ -5,9 +5,9 @@ import useAuthStore from "@/components/store/authStore";
 import Colors from "@/constants/Colors";
 import { fontFamily } from "@/constants/fonts";
 import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
-import { useNavigation } from "@react-navigation/native";
+import { DrawerActions, useNavigation } from "@react-navigation/native";
 import { useRouter } from "expo-router";
-import { BellIcon, ChevronRight, InfoIcon, MapPin } from "lucide-react-native";
+import { AlignCenter, BellIcon, ChevronRight, InfoIcon, MapPin } from "lucide-react-native";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   Image,
@@ -18,6 +18,8 @@ import {
 } from "react-native";
 import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
 import tw from "twrnc";
+
+
 
 const ProfileScreen = () => {
   const router = useRouter();
@@ -31,6 +33,13 @@ const ProfileScreen = () => {
   const { user, fetchUserProfile, isAuthenticated } = useAuthStore();
   const [logoutModalVisible, setLogoutModalVisible] = useState(false);
   const bottomSheetRef = useRef<BottomSheet>(null);
+
+  const navRoute = [
+    { title: "View wallet", route: "/screens/Rider/CompleteProfile" },
+    { title: "Basic Information", route: "/screens/Rider/CompleteProfile" },
+    { title: "Vehicle Information", route: "/screens/Rider/CompleteProfile" },
+    { title: "Support", route: "/screens/Rider/CompleteProfile" }
+  ] as const;
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -90,6 +99,17 @@ const ProfileScreen = () => {
         />
 
       </MapView>
+       <TouchableOpacity
+                style={[
+                  tw`p-2.5 absolute left-5 top-15 rounded-full self-start`,
+                  {
+                    backgroundColor: themeColors.background,
+                  },
+                ]}
+                onPress={() => navigation.dispatch(DrawerActions.openDrawer())}
+              >
+                <AlignCenter color={themeColors.primaryColor} />
+        </TouchableOpacity>
       <BottomSheet
         snapPoints={snapPoints}
         ref={bottomSheetRef}
@@ -117,37 +137,45 @@ const ProfileScreen = () => {
                     </View>
                   </View>
                   </View>
-                  <TouchableOpacity style={[tw`h-12 w-12 rounded-full flex-row items-center justify-center bg-white`]}>
+                  <TouchableOpacity onPress={() => {
+                    router.navigate("/(Rider-Drawer)/notification")
+                  }} style={[tw`h-12 w-12 rounded-full flex-row items-center justify-center bg-white`]}>
                     <BellIcon/>
                   </TouchableOpacity>
                 </View>
               </View>
             <View style={[tw`gap-4 px-4`]}> 
-               <View style={[tw`flex-row rounded-lg gap-3 p-4 py-6 justify-between items-center bg-[#D37A0F22]`, {
-                borderLeftWidth: 3,
-                borderColor: "#D37A0F"
-              }]}>
-                <View style={[tw`flex-row items-center w-[70%] gap-2`]}>
-                <InfoIcon color={"#D37A0F"} />
-                <Text style={[tw`text-[#D37A0F] uppercase text-[11px]`, {
-                  fontFamily: fontFamily.MontserratEasyMedium
-                }]}>Visit your profile to complete your registration</Text>
+                <View style={[tw`flex-row rounded-lg gap-3 p-4 py-6 justify-between items-center bg-[#D37A0F22]`, {
+                  borderLeftWidth: 3,
+                  borderColor: user?.profile_review_status === "under_review" ? "#10B981" : "#D37A0F",
+                  backgroundColor: user?.profile_review_status === "under_review" ? "#10B98122" : "#D37A0F22"
+                }]}>
+                  <View style={[tw`flex-row items-center w-[70%] gap-2`]}>
+                  <InfoIcon color={user?.profile_review_status === "under_review" ? "#10B981" : "#D37A0F"} />
+                  <Text style={[tw`uppercase text-[11px]`, {
+                    fontFamily: fontFamily.MontserratEasyMedium,
+                    color: user?.profile_review_status === "under_review" ? "#10B981" : "#D37A0F"
+                  }]}>
+                    {user?.profile_review_status === "under_review" ? "Submitted Documents Under Review" : "Visit your profile to complete your registration"}
+                  </Text>
+                  </View>
+                    <TouchableOpacity
+                      onPress={() => {
+                        router.navigate("/screens/Rider/CompleteProfile")
+                    }}
+                      style={[tw`h-9 w-9 rounded-full flex-row items-center justify-center`, {
+                        backgroundColor: user?.profile_review_status === "under_review" ? "#10B98199" : "#D37A0F99"
+                      }]}>
+                    <ChevronRight size={16} color={"white"}/>
+                  </TouchableOpacity>
                 </View>
-                  <TouchableOpacity
-                    onPress={() => {
-                      router.navigate("/screens/Rider/CompleteProfile")
-                  }}
-                    style={[tw`bg-[#D37A0F99] h-9 w-9 rounded-full flex-row items-center justify-center`]}>
-                  <ChevronRight size={16} color={"white"}/>
-                </TouchableOpacity>
-              </View>
              
               <View style={[tw`flex-row gap-3`]}>
                 <RiderStatsCard
                   statsTitle="Total Earnings"
                   amount={4000}
                   onPress={() => {
-                    
+                    router.navigate("/screens/Rider/CompleteProfile")
                   }}
                 />
                 <RiderStatsCard
@@ -160,34 +188,18 @@ const ProfileScreen = () => {
               </View>
               
                 <View style={[tw`gap-3`]}>
-                <DeliveryButton
-                      icon={require("../../assets/images/IntroImages/icon/Details.png")}
-                      text="View Wallet"
-                  onPress={() => {
-                    
-                      }}
-                    />
-                <DeliveryButton
-                      icon={require("../../assets/images/IntroImages/icon/Details.png")}
-                      text="Basic Information"
-                  onPress={() => {
-                    
-                      }}
-                    />
-                <DeliveryButton
-                      icon={require("../../assets/images/IntroImages/icon/Details.png")}
-                      text="Vehicle Information"
-                  onPress={() => {
-                    
-                      }}
-                    />
-                <DeliveryButton
-                      icon={require("../../assets/images/IntroImages/icon/Details.png")}
-                      text="Support"
-                  onPress={() => {
-                    
-                      }}
-                    />
+                  {navRoute.map((item, index) => {
+                    return (
+                      <DeliveryButton
+                        key={index}
+                            icon={require("../../assets/images/IntroImages/icon/Details.png")}
+                            text={item.title}
+                        onPress={() => {
+                          router.navigate(item.route);
+                            }}
+                          />
+                 )
+               })}
                 </View>
                 <TertiaryButton
                 text="Logout"

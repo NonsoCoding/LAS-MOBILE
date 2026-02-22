@@ -1,5 +1,8 @@
 import TertiaryButton from "@/components/Buttons/TertiaryButtons";
 import RiderStatsCard from "@/components/Cards/RiderStatsCard";
+import { updateCarrierStatus } from "@/components/services/api/carriersApi";
+import * as AsyncStore from "@/components/services/storage/asyncStore";
+import { STORAGE_KEYS } from "@/components/services/storage/storageKeys";
 import useAuthStore from "@/components/store/authStore";
 import Colors from "@/constants/Colors";
 import { fontFamily } from "@/constants/fonts";
@@ -10,10 +13,10 @@ import { useNavigation, useRouter } from "expo-router";
 import { AlignCenter, ChevronRight, GiftIcon, InfoIcon } from "lucide-react-native";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
-  Text,
-  TouchableOpacity,
-  useColorScheme,
-  View
+    Text,
+    TouchableOpacity,
+    useColorScheme,
+    View
 } from "react-native";
 import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
 
@@ -29,7 +32,7 @@ const RiderHomePage = ({}: UserHomePageProps) => {
   const [orderAccepted, setOrderAccepted] = useState(false);
   const mapRef = useRef<MapView>(null);
   const navigation = useNavigation();
-  const [isOnline, setIsOnline] = useState(false);
+  const {isOnline, setIsOnline} = useAuthStore();
   const bottomSheetRef = useRef<BottomSheet>(null);
 
   const { user, fetchUserProfile, isAuthenticated } = useAuthStore();
@@ -41,6 +44,33 @@ const RiderHomePage = ({}: UserHomePageProps) => {
       fetchUserProfile().catch(console.error);
     }
   }, [isAuthenticated]);
+
+  useEffect(() => {
+    if (user) {
+      setIsOnline(user.is_online || false);
+    }
+  }, [user]);
+
+  const handleToggleStatus = async () => {
+    try {
+      const { accessToken, user } = useAuthStore.getState();
+      if (!accessToken || !user) return;
+      
+      const newStatus = !isOnline;
+      await updateCarrierStatus(accessToken, newStatus);
+      
+      // Update store state to avoid race condition with fetchUserProfile
+      const updatedUser = { ...user, is_online: newStatus };
+      useAuthStore.setState({ user: updatedUser });
+      
+      // Persist to local storage for app restarts
+      await AsyncStore.setItem(STORAGE_KEYS.USER, JSON.stringify(updatedUser));
+    } catch (error) {
+      console.error("Failed to toggle status:", error);
+      // Revert local state on error
+      setIsOnline(isOnline);
+    }
+  };
 
   const handleAcceptOrder = () => {
     setOrderAccepted(true);
@@ -56,38 +86,40 @@ const RiderHomePage = ({}: UserHomePageProps) => {
     }]}>
       <MapView
         provider={PROVIDER_GOOGLE}
-          ref={mapRef}
-          style={[tw`flex-1`]}
-          region={{
-            latitude: 37.78825,
-            longitude: -122.4324,
-            latitudeDelta: 0.0922,
-            longitudeDelta: 0.0421,
-          }}
-          showsUserLocation={true}
-          showsMyLocationButton={false} // Custom button looks better
-          showsPointsOfInterest={false} // Cleaner for logistics
-          showsBuildings={false} // Less visual clutter
-          showsIndoors={false}
-          showsCompass={false} // Use custom compass
-          showsScale={false}
-          mapType="standard"
-          rotateEnabled={true}
-          pitchEnabled={false} // Keep 2D for logistics clarity
-          toolbarEnabled={false}
-          loadingEnabled={true}
-          loadingIndicatorColor="#yourBrandColor"
-          loadingBackgroundColor="#ffffff"
+  ref={mapRef}
+  style={[tw`flex-1`]}
+  region={{
+    latitude: 37.78825,
+    longitude: -122.4324,
+    latitudeDelta: 0.0922,
+    longitudeDelta: 0.0421,
+  }}
+  showsUserLocation={true}
+  showsMyLocationButton={false} // Custom button looks better
+  showsPointsOfInterest={false} // Cleaner for logistics
+  showsBuildings={false} // Less visual clutter
+  showsIndoors={false}
+  showsCompass={false} // Use custom compass
+  showsScale={false}
+  mapType="standard"
+  rotateEnabled={true}
+  pitchEnabled={false} // Keep 2D for logistics clarity
+  toolbarEnabled={false}
+  loadingEnabled={true}
+  loadingIndicatorColor="#yourBrandColor"
+  loadingBackgroundColor="#ffffff"
         >
         <Marker
         coordinate={{
           latitude: 37.78825,
           longitude: -122.4324
         }}
-        />
+        >
+        </Marker>
+      </MapView>
         <TouchableOpacity
                 style={[
-                  tw`p-2.5 rounded-full self-start ml-5 mt-15`,
+                  tw`p-2.5 absolute rounded-full self-start ml-5 top-15`,
                   {
                     backgroundColor: themeColors.background,
                   },
@@ -96,7 +128,6 @@ const RiderHomePage = ({}: UserHomePageProps) => {
               >
                 <AlignCenter color={"black"} />
               </TouchableOpacity>
-      </MapView>
       <BottomSheet
         snapPoints={snapPoints}
         ref={bottomSheetRef}
@@ -106,20 +137,28 @@ const RiderHomePage = ({}: UserHomePageProps) => {
         >
           {step === 1 && (
             <View style={[tw`gap-4`]}> 
-               <View style={[tw`flex-row rounded-lg gap-3 p-4 py-6 justify-between items-center bg-[#D37A0F22]`, {
-                borderLeftWidth: 3,
-                borderColor: "#D37A0F"
-              }]}>
-                <View style={[tw`flex-row items-center w-[70%] gap-2`]}>
-                <InfoIcon color={"#D37A0F"}  />
-                <Text style={[tw`text-[#D37A0F] uppercase text-[11px]`, {
-                  fontFamily: fontFamily.MontserratEasyMedium
-                }]}>Visit your profile to complete your registration</Text>
+                <View style={[tw`flex-row rounded-lg gap-3 p-4 py-6 justify-between items-center bg-[#D37A0F22]`, {
+                  borderLeftWidth: 3,
+                  borderColor: user?.profile_review_status === "under_review" ? "#10B981" : "#D37A0F",
+                  backgroundColor: user?.profile_review_status === "under_review" ? "#10B98122" : "#D37A0F22"
+                }]}>
+                  <View style={[tw`flex-row items-center w-[70%] gap-2`]}>
+                  <InfoIcon color={user?.profile_review_status === "under_review" ? "#10B981" : "#D37A0F"}  />
+                  <Text style={[tw`uppercase text-[11px]`, {
+                    fontFamily: fontFamily.MontserratEasyMedium,
+                    color: user?.profile_review_status === "under_review" ? "#10B981" : "#D37A0F"
+                  }]}>
+                    {user?.profile_review_status === "under_review" ? "Submitted Documents Under Review" : "Visit your profile to complete your registration"}
+                  </Text>
+                  </View>
+                  <TouchableOpacity 
+                    onPress={() => router.navigate("/screens/Rider/CompleteProfile")}
+                    style={[tw`h-9 w-9 rounded-full flex-row items-center justify-center`, {
+                      backgroundColor: user?.profile_review_status === "under_review" ? "#10B98199" : "#D37A0F99"
+                    }]}>
+                    <ChevronRight size={16} color={"white"}/>
+                  </TouchableOpacity>
                 </View>
-                <TouchableOpacity style={[tw`bg-[#D37A0F99] h-9 w-9 rounded-full flex-row items-center justify-center`]}>
-                  <ChevronRight size={16} color={"white"}/>
-                </TouchableOpacity>
-              </View>
               <View style={[tw`flex-row items-center justify-between`]}>
                 <View style={[tw`flex-row gap-4 items-center`]}>
                 <View style={[tw`h-12 w-12 rounded-full bg-[#19488A] flex-row items-center justify-center`]}>
@@ -160,15 +199,12 @@ const RiderHomePage = ({}: UserHomePageProps) => {
                 />
               </View>
               <TertiaryButton
-                text="You are offline"
-
-                onpress={() => {
-
-                }}
+                text={isOnline ? "You are online" : "You are offline"}
+                onpress={handleToggleStatus}
                 height={50}
                 disabled={false}
-                bgColors="#D37A0F22"
-                textColor="#D37A0F"
+                bgColors={isOnline ? "#10B98122" : "#D37A0F22"}
+                textColor={isOnline ? "#10B981" : "#D37A0F"}
               />
             </View>
           )}
