@@ -112,8 +112,22 @@ const useShipmentStore = create<ShipmentState>((set, get) => ({
 
     addAcceptedShipment: async (shipment) => {
         const currentState = get();
-        const updatedShipments = [...currentState.acceptedShipments, shipment];
+        // Prevent duplicate IDs by using an upsert-style update
+        const exists = currentState.acceptedShipments.some(s => s.id === shipment.id);
+        let updatedShipments: AcceptedShipment[];
+        
+        if (exists) {
+            // Update existing shipment details instead of appending
+            updatedShipments = currentState.acceptedShipments.map(s => 
+                s.id === shipment.id ? { ...s, ...shipment } : s
+            );
+        } else {
+            // Append new shipment
+            updatedShipments = [...currentState.acceptedShipments, shipment];
+        }
+
         set({ acceptedShipments: updatedShipments });
+        
         // Persist the updated list
         const persistentData = {
             ...currentState,
@@ -149,8 +163,7 @@ const useShipmentStore = create<ShipmentState>((set, get) => ({
         if (storedData) {
             try {
                 const parsedData = JSON.parse(storedData);
-                // Clear old accepted shipments data (schema changed)
-                parsedData.acceptedShipments = [];
+                // We previously cleared this due to schema changes, but now we allow persistence
                 set(parsedData);
                 // Persist the cleared data
                 await AsyncStore.setItem(STORAGE_KEYS.ACTIVE_SHIPMENT, JSON.stringify(parsedData));

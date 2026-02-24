@@ -9,18 +9,18 @@ import { DrawerContentScrollView, DrawerItemList } from "@react-navigation/drawe
 import { useRouter } from "expo-router";
 import { Drawer } from "expo-router/drawer";
 import { Bell, CarFront, ChevronRight, Gift, Info, LogOut, MessageCircle, SettingsIcon, Shield, Wallet } from "lucide-react-native";
-import React from "react";
+import React, { useState } from "react";
 import { Image, Text, TouchableOpacity, View } from "react-native";
 
 function CustomDrawerContent(props: any) {
   const { user, logout } = useAuthStore();
   const colorScheme = useColorScheme();
   const themeColors = Colors[colorScheme ?? "light"];
+  const [logoutModalVisible, setLogoutModalVisible] = useState(false);
   const router = useRouter();
 
   const handleLogout = () => {
-    logout();
-    router.replace("/login");
+    setLogoutModalVisible(true);
   };
 
   return (
@@ -71,9 +71,14 @@ function CustomDrawerContent(props: any) {
         </TouchableOpacity>
       </View>
       <LogoutModalTwo
-        visible={false}
-        onClose={() => {}}
-        onLogout={() => {}}
+        visible={logoutModalVisible}
+        onClose={() => {
+          setLogoutModalVisible(false);
+        }}
+        onLogout={() => {
+          logout();
+          router.replace("/login");
+        }}
       />
     </DrawerContentScrollView>
   );

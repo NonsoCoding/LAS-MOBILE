@@ -211,12 +211,12 @@ const RequestScreen = ({
 
               // ONLY trigger tracking when is_assigned is strictly true
               if (shipment.is_assigned === true || shipment.is_assigned === "true") {
-                console.log("DEBUG: SUCCESS! Shipper has confirmed assignment. Starting tracking.");
+                console.log("[Rider] SUCCESS! Shipment is assigned. Starting tracking for ID:", acceptedRequest.id);
                 setIsAssigned(true);
                 startTracking(acceptedRequest.id, status || "status");
                 acceptedSheetRef.current?.snapToIndex(0);
               } else {
-                console.log("DEBUG: Still waiting... is_assigned is not true.");
+                console.log("[Rider] Poll: Shipment not yet assigned. Status:", status, "is_assigned:", shipment.is_assigned);
               }
             } else {
               console.log("DEBUG: No active shipment found for carrier.");

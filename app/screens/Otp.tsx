@@ -8,12 +8,16 @@ import tw from "@/constants/tailwind";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useState } from "react";
 import {
-    Alert,
-    Image,
-    Text,
-    TouchableOpacity,
-    useColorScheme,
-    View,
+  Alert,
+  Image,
+  Keyboard,
+  KeyboardAvoidingView,
+  Platform,
+  Text,
+  TouchableOpacity,
+  TouchableWithoutFeedback,
+  useColorScheme,
+  View,
 } from "react-native";
 import { OtpInput } from "react-native-otp-entry";
 
@@ -72,7 +76,12 @@ const OtpScreen = () => {
   };
 
   return (
-    <View style={[tw`flex-1 bg-[#19488A] justify-end`]}>
+     <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      style={tw`flex-1`}
+    >
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <View style={[tw`flex-1 bg-[#19488A] justify-end`]}>
       <Image
               source={require("../../assets/images/Intro_logo.png")}
               style={[tw`self-center h-150 w-150 absolute -top-20`]}
@@ -182,7 +191,9 @@ const OtpScreen = () => {
           titleSubInfo2="After documents approval you can start your Workorders."
         />
       </View>
-    </View>
+        </View>
+      </TouchableWithoutFeedback>
+      </KeyboardAvoidingView>
   );
 };
 

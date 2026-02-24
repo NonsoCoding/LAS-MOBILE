@@ -52,7 +52,7 @@ const TextInputFields = ({
         onBlur={onBlur}
         secureTextEntry={secureTextEntry}
         style={[tw`w-full text-black py-3.5`, {
-          fontFamily: fontFamily.Regular
+          fontFamily: fontFamily.MontserratEasyRegular
         }]}
       />
     </View>

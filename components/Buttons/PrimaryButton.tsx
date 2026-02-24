@@ -1,3 +1,4 @@
+import { fontFamily } from "@/constants/fonts";
 import tw from "@/constants/tailwind";
 import React from "react";
 import { Text, TouchableOpacity } from "react-native";
@@ -30,7 +31,7 @@ const PrimaryButton = ({
         { backgroundColor: bgColors, height: height, width: width },
       ]}
     >
-      <Text style={[tw`text-center`, { color: textColor, fontFamily: "MontserratBold" }]}>{text}</Text>
+      <Text style={[tw`text-center`, { color: textColor, fontFamily: fontFamily.MontserratEasyBold }]}>{text}</Text>
     </TouchableOpacity>
   );
 };

@@ -111,7 +111,7 @@ const IntroScreen = ({}: IntroScreenProps) => {
               >
                 <Animated.Text
                   style={[tw`text-2xl text-center mb-3`, {
-                    fontFamily: fontFamily.Bold
+                    fontFamily: fontFamily.MontserratEasyBold
                   }]}
                   entering={FadeIn.delay(200)}
                   key={`title-${index}`}
@@ -120,7 +120,7 @@ const IntroScreen = ({}: IntroScreenProps) => {
                 </Animated.Text>
                 <Animated.Text
                   style={[tw`text-center text-gray-600`, {
-                    fontFamily: fontFamily.Light
+                    fontFamily: fontFamily.MontserratEasyRegular
                   }]}
                   entering={FadeIn.delay(300)}
                   key={`info-${index}`}

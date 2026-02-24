@@ -19,7 +19,7 @@ import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
 import { DrawerActions } from "@react-navigation/native";
 import * as Location from "expo-location";
 import { useNavigation, useRouter } from "expo-router";
-import { AlignCenter, InfoIcon, MapPin, Minus, Navigation, Plus, X, XIcon } from "lucide-react-native";
+import { AlignCenter, InfoIcon, MapPin, Minus, Navigation, Plus, Star, X, XIcon } from "lucide-react-native";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
@@ -104,6 +104,7 @@ const UserHomePage = ({}: UserHomePageProps) => {
 
   const [offers, setOffers] = useState<any[]>([]);
   const [loadingOffers, setLoadingOffers] = useState(false);
+  const [isAccepting, setIsAccepting] = useState(false);
   const routeSearchSheetRef = useRef<BottomSheet>(null);
   const bottomSheetRef = useRef<BottomSheet>(null);
   const OrderDetailSheetRef = useRef<BottomSheet>(null);
@@ -526,18 +527,16 @@ const UserHomePage = ({}: UserHomePageProps) => {
         coords.push(carrierLocation);
       }
       
-      if (trackedShipment.pickupLatitude && trackedShipment.pickupLongitude) {
-        coords.push({
-          latitude: parseFloat(trackedShipment.pickupLatitude),
-          longitude: parseFloat(trackedShipment.pickupLongitude),
-        });
+      const pLat = parseFloat(String(trackedShipment.pickupLatitude));
+      const pLng = parseFloat(String(trackedShipment.pickupLongitude));
+      if (!isNaN(pLat) && !isNaN(pLng)) {
+        coords.push({ latitude: pLat, longitude: pLng });
       }
       
-      if (trackedShipment.deliveryLatitude && trackedShipment.deliveryLongitude) {
-        coords.push({
-          latitude: parseFloat(trackedShipment.deliveryLatitude),
-          longitude: parseFloat(trackedShipment.deliveryLongitude),
-        });
+      const dLat = parseFloat(String(trackedShipment.deliveryLatitude));
+      const dLng = parseFloat(String(trackedShipment.deliveryLongitude));
+      if (!isNaN(dLat) && !isNaN(dLng)) {
+        coords.push({ latitude: dLat, longitude: dLng });
       }
 
       if (coords.length > 0) {
@@ -683,7 +682,9 @@ const UserHomePage = ({}: UserHomePageProps) => {
                         return carrier?.profile_picture ? { uri: carrier.profile_picture } : require("../../assets/images/pfp.png");
                       })()}
                       acceptOnPress={async () => {
+                        if (isAccepting) return;
                         try {
+                          setIsAccepting(true);
                           // Try to find the carrier ID in various possible structures
                           const carrierId = 
                             offer.carrier?.id || 
@@ -730,6 +731,8 @@ const UserHomePage = ({}: UserHomePageProps) => {
                         } catch (error: any) {
                           console.error("Error accepting carrier:", error);
                           Alert.alert("Error", error.message || "Failed to accept carrier");
+                        } finally {
+                          setIsAccepting(false);
                         }
                       }}
                       declineOnPress={() => {
@@ -768,7 +771,7 @@ const UserHomePage = ({}: UserHomePageProps) => {
                   snapToInterval={Dimensions.get('window').width - 40 + 12}
                   snapToAlignment="start"
                   showsHorizontalScrollIndicator={false}
-                  keyExtractor={(item) => item.id.toString()}
+                  keyExtractor={(item, index) => item.id?.toString() || index.toString()}
                   contentContainerStyle={{ paddingHorizontal: 20, gap: 12 }}
                   renderItem={({ item }) => (
                     <View style={{ width: Dimensions.get('window').width - 40 }}>
@@ -1275,8 +1278,8 @@ const UserHomePage = ({}: UserHomePageProps) => {
             ref={trackingMapRef}
             style={[tw`flex-1`]}
             region={{
-              latitude: carrierLocation?.latitude || (trackedShipment?.pickupLatitude ? parseFloat(trackedShipment.pickupLatitude) : 6.5244),
-              longitude: carrierLocation?.longitude || (trackedShipment?.pickupLongitude ? parseFloat(trackedShipment.pickupLongitude) : 3.3792),
+              latitude: carrierLocation?.latitude || (trackedShipment?.pickupLatitude ? parseFloat(String(trackedShipment.pickupLatitude)) : 6.5244),
+              longitude: carrierLocation?.longitude || (trackedShipment?.pickupLongitude ? parseFloat(String(trackedShipment.pickupLongitude)) : 3.3792),
               latitudeDelta: 0.01,
               longitudeDelta: 0.01,
             }}
@@ -1292,9 +1295,14 @@ const UserHomePage = ({}: UserHomePageProps) => {
               <Marker
                 coordinate={carrierLocation}
                 title="Carrier"
+                rotation={carrierLocation.heading || 0}
+                anchor={{ x: 0.5, y: 0.5 }}
               >
-                <View style={[tw`bg-[#19488A] p-2 rounded-full`]}>
-                  <Navigation size={18} color="white" fill="white" />
+                <View style={[tw`items-center justify-center`]}>
+                   <Image 
+                    source={require("../../assets/images/IntroImages/icon/Car.png")} 
+                    style={[tw`w-12 h-12`, { resizeMode: "contain" }]} 
+                  />
                 </View>
               </Marker>
             )}
@@ -1326,16 +1334,16 @@ const UserHomePage = ({}: UserHomePageProps) => {
             )}
 
             {/* Route directions (Full Path) */}
-            {trackedShipment?.pickupLatitude && trackedShipment?.pickupLongitude &&
-             trackedShipment?.deliveryLatitude && trackedShipment?.deliveryLongitude && (
+            {trackedShipment?.pickupLatitude != null && 
+             trackedShipment?.deliveryLatitude != null && (
               <MapViewDirections
                 origin={{
-                  latitude: parseFloat(trackedShipment.pickupLatitude),
-                  longitude: parseFloat(trackedShipment.pickupLongitude),
+                  latitude: parseFloat(String(trackedShipment.pickupLatitude)),
+                  longitude: parseFloat(String(trackedShipment.pickupLongitude)),
                 }}
                 destination={{
-                  latitude: parseFloat(trackedShipment.deliveryLatitude),
-                  longitude: parseFloat(trackedShipment.deliveryLongitude),
+                  latitude: parseFloat(String(trackedShipment.deliveryLatitude)),
+                  longitude: parseFloat(String(trackedShipment.deliveryLongitude)),
                 }}
                 apikey={GoogleApiKey || ""}
                 strokeColor={themeColors.primaryColor + "55"} // Faded full route
@@ -1349,8 +1357,8 @@ const UserHomePage = ({}: UserHomePageProps) => {
                 origin={carrierLocation}
                 destination={
                   (trackedShipment.status === "picked" || trackedShipment.status === "in-transit")
-                    ? { latitude: parseFloat(trackedShipment.deliveryLatitude!), longitude: parseFloat(trackedShipment.deliveryLongitude!) }
-                    : { latitude: parseFloat(trackedShipment.pickupLatitude!), longitude: parseFloat(trackedShipment.pickupLongitude!) }
+                    ? { latitude: parseFloat(String(trackedShipment.deliveryLatitude!)), longitude: parseFloat(String(trackedShipment.deliveryLongitude!)) }
+                    : { latitude: parseFloat(String(trackedShipment.pickupLatitude!)), longitude: parseFloat(String(trackedShipment.pickupLongitude!)) }
                 }
                 apikey={GoogleApiKey || ""}
                 strokeColor={themeColors.primaryColor} // Solid active segment
@@ -1428,6 +1436,16 @@ const UserHomePage = ({}: UserHomePageProps) => {
                     fontFamily: fontFamily.MontserratEasyMedium
                   }]} numberOfLines={1}>{trackedShipment.destinationAddress}</Text>
                 </View>
+                <View style={[tw`flex-row items-center gap-2`]}>
+                  <Image style={[tw`h-5 w-5`]} source={require("../../assets/images/IntroImages/LocationMarker2.png")} />
+                  <View style={[tw`h-4 border border-[#19488A33]`]} />
+                  <View style={[tw`flex-row items-center gap-2`]}>
+                    <Text style={[tw`uppercase text-xs flex-1`, {
+                      fontFamily: fontFamily.MontserratEasyMedium
+                    }]}>{trackedShipment.finalPrice}</Text>
+                    <Text>{trackedShipment.paymentMethod}</Text>
+                  </View>
+                </View>
               </View>
 
               {/* Carrier info */}
@@ -1441,9 +1459,12 @@ const UserHomePage = ({}: UserHomePageProps) => {
                     <Text style={[tw`uppercase`, {
                       fontFamily: fontFamily.MontserratEasyBold
                     }]}>{trackedShipment.carrierName || "Carrier"}</Text>
-                    <Text style={[tw`text-xs text-gray-500`, {
-                      fontFamily: fontFamily.MontserratEasyMedium
-                    }]}>{shipmentStatus || "En route"}</Text>
+                    <View style={[tw`flex-row items-center gap-1`]}>
+                      <Star fill={themeColors.primaryColor} size={12} />
+                      <Text style={[tw`text-xs`, {
+                        fontFamily: fontFamily.MontserratEasyLight
+                      }]}>4.5(279)</Text>
+                    </View>
                   </View>
                 </View>
                 <Text style={[tw`text-lg`, {

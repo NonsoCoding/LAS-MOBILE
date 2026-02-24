@@ -12,10 +12,13 @@ import React, { useEffect, useState } from "react";
 import {
   Alert,
   Image,
+  Keyboard,
   KeyboardAvoidingView,
   Platform,
+  ScrollView,
   Text,
   TouchableOpacity,
+  TouchableWithoutFeedback,
   useColorScheme,
   View
 } from "react-native";
@@ -142,18 +145,17 @@ export default function RiderAuthIndex() {
   };
 
   return (
-    <View style={[tw`flex-1 bg-[#19488A]`]}>
+     <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      style={tw`flex-1`}
+    >
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+    <View style={[tw`flex-1 bg-[#19488A] justify-end`]}>
       <Image
               source={require("../../../../assets/images/Intro_logo.png")}
               style={[tw`self-center h-150 w-150 absolute -top-20`]}
               resizeMode="contain"
             />
-      <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        style={[tw`flex-1 justify-end`]}
-        keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
-      >
-     
           <Formik
             initialValues={{
               email: "",
@@ -170,9 +172,11 @@ export default function RiderAuthIndex() {
               errors,
               touched,
             }) => (
-              <View style={[tw`pt-10 pb-15 gap-6 bg-white px-5 rounded-t-2xl`]}>
-              
-                {/* Form Fields */}
+               <View style={[tw`bg-white rounded-t-2xl overflow-hidden`]}>
+                <ScrollView
+                  showsVerticalScrollIndicator={false}
+                  contentContainerStyle={tw`pt-10 pb-15 px-5 gap-5`}
+                >
                 <View style={[tw`gap-6`]}>
                   <View style={[tw`items-center gap-2`]}>
                     <Text style={[tw`text-2xl`, {
@@ -294,11 +298,14 @@ export default function RiderAuthIndex() {
                 </Text>
               </TouchableOpacity>
               </View>
+                </ScrollView>
+                {/* Form Fields */}
               </View>
             )}
           </Formik>
-       
-      </KeyboardAvoidingView>
     </View>
+      </TouchableWithoutFeedback>
+      </KeyboardAvoidingView>
+
   );
 }

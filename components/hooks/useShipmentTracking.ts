@@ -7,6 +7,7 @@ const WS_HOST = "web-production-4a8a5.up.railway.app";
 export interface CarrierLocation {
   latitude: number;
   longitude: number;
+  heading?: number;
 }
 
 /**
@@ -76,17 +77,17 @@ export const useShipmentTracking = () => {
           console.log("[ShipmentTracking] Message received:", data);
 
           // Handle location_update messages from the carrier
-          if (data.type === "location_update" && data.latitude != null && data.longitude != null) {
+          const lat = data.latitude ?? data.lat;
+          const lng = data.longitude ?? data.lng;
+          const head = data.heading ?? data.head ?? data.rotation;
+          const type = data.type ?? data.event;
+
+          if ((type === "location_update" || !type) && lat != null && lng != null) {
+            console.log("[ShipmentTracking] Updating carrier location:", { lat, lng, head });
             setCarrierLocation({
-              latitude: parseFloat(data.latitude),
-              longitude: parseFloat(data.longitude),
-            });
-          }
-          // Some backends send location data at the top level
-          else if (data.latitude != null && data.longitude != null && !data.type) {
-            setCarrierLocation({
-              latitude: parseFloat(data.latitude),
-              longitude: parseFloat(data.longitude),
+              latitude: parseFloat(lat),
+              longitude: parseFloat(lng),
+              heading: head != null ? parseFloat(head) : undefined
             });
           }
 

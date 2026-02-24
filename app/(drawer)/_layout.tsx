@@ -1,3 +1,4 @@
+import LogoutModalTwo from "@/components/Modals/LogoutModal";
 import useAuthStore from "@/components/store/authStore";
 import { useColorScheme } from "@/components/useColorScheme";
 import Colors from "@/constants/Colors";
@@ -8,21 +9,21 @@ import { DrawerContentScrollView, DrawerItemList } from "@react-navigation/drawe
 import { useRouter } from "expo-router";
 import { Drawer } from "expo-router/drawer";
 import { CarFront, ChevronRight, LogOut } from "lucide-react-native";
-import React from "react";
+import React, { useState } from "react";
 import { Image, Text, TouchableOpacity, View } from "react-native";
 
 function CustomDrawerContent(props: any) {
   const { user, logout } = useAuthStore();
   const colorScheme = useColorScheme();
   const themeColors = Colors[colorScheme ?? "light"];
+    const [logoutModalVisible, setLogoutModalVisible] = useState(false);
   const router = useRouter();
 
   const handleLogout = () => {
-    logout();
-    router.replace("/login");
+    setLogoutModalVisible(true);
   };
 
-  return (
+  return (  
     <DrawerContentScrollView {...props} contentContainerStyle={{ paddingTop: 0 }}>
       {/* Custom Profile Header */}
       <View style={[tw`pt-15 pb-5 bg-[${themeColors.background}]`]}>
@@ -69,6 +70,16 @@ function CustomDrawerContent(props: any) {
           </Text>
         </TouchableOpacity>
       </View>
+       <LogoutModalTwo
+        visible={logoutModalVisible}
+        onClose={() => {
+          setLogoutModalVisible(false);
+        }}
+        onLogout={() => {
+          logout();
+          router.replace("/login");
+        }}
+      />
     </DrawerContentScrollView>
   );
 }

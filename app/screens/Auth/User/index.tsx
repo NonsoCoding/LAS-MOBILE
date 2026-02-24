@@ -11,8 +11,13 @@ import React, { useState } from "react";
 import {
   Alert,
   Image,
+  Keyboard,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
   Text,
   TouchableOpacity,
+  TouchableWithoutFeedback,
   useColorScheme,
   View,
 } from "react-native";
@@ -74,10 +79,16 @@ export default function UserAuthIndex() {
   };
 
   return (
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      style={tw`flex-1`}
+    >
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+
     <View style={[tw`flex-1 bg-[#19488A] justify-end`]}>
       <Image
         source={require("../../../../assets/images/Intro_logo.png")}
-        style={[tw`self-center h-160 w-160 absolute z-999 -top-20`]}
+        style={[tw`self-center h-160 w-160 absolute -top-20`]}
         resizeMode="contain"
       />
       <Formik
@@ -93,15 +104,11 @@ export default function UserAuthIndex() {
           errors,
           touched,
         }) => (
-          <View
-            style={[
-              tw`gap-10 py-10 pb-15 px-5 justify-center bg-white`,
-              {
-                borderTopRightRadius: 20,
-                borderTopLeftRadius: 20,
-              },
-            ]}
-          >
+          <View style={[tw`bg-white rounded-t-2xl overflow-hidden`]}>
+                <ScrollView
+                  showsVerticalScrollIndicator={false}
+                  contentContainerStyle={tw`pt-10 pb-15 px-5 gap-5`}
+                >
             <View style={[tw`items-center gap-2`]}>
               <Text
                 style={[
@@ -220,7 +227,7 @@ export default function UserAuthIndex() {
                 </Text>
                 <TouchableOpacity
                   onPress={() => {
-                    router.replace("/screens/Auth/User/SignIn");
+                    router.replace("/login");
                   }}
                 >
                   <Text
@@ -237,9 +244,12 @@ export default function UserAuthIndex() {
                 </TouchableOpacity>
               </View>
             </View>
+                </ScrollView>
           </View>
         )}
       </Formik>
     </View>
+      </TouchableWithoutFeedback>
+      </KeyboardAvoidingView>
   );
 }

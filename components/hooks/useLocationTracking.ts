@@ -71,19 +71,25 @@ export const useLocationTracking = () => {
 
       locationSubscription.current = await Location.watchPositionAsync(
         {
-          accuracy: Location.Accuracy.Balanced,
-          timeInterval: 10000, // Update every 10 seconds
-          distanceInterval: 10, // Or every 10 meters
+          accuracy: Location.Accuracy.High, // Increased accuracy
+          timeInterval: 3000, // Update every 3 seconds
+          distanceInterval: 2, // Or every 2 meters
         },
         async (location) => {
+          console.log("[Rider] watchPositionAsync triggered:", location.coords.latitude, location.coords.longitude);
           if (activeShipmentId.current) {
-            const { latitude, longitude } = location.coords;
+            const { latitude, longitude, heading } = location.coords;
 
             // Try WebSocket first, fall back to REST
             if (useWebSocket.current && wsRef.current?.readyState === WebSocket.OPEN) {
               try {
-                wsRef.current.send(JSON.stringify({ latitude, longitude }));
-                console.log(`[WEBSOCKET] Tracking update sent for shipment ${activeShipmentId.current}: Lat ${latitude}, Lon ${longitude}`);
+                wsRef.current.send(JSON.stringify({ 
+                  type: "location_update",
+                  latitude, 
+                  longitude,
+                  heading: heading ?? 0
+                }));
+                console.log(`[WEBSOCKET] Tracking update sent for shipment ${activeShipmentId.current}: Lat ${latitude}, Lon ${longitude}, Heading ${heading}`);
               } catch (error) {
                 console.error("[WS] Send failed, falling back to REST:", error);
                 useWebSocket.current = false;

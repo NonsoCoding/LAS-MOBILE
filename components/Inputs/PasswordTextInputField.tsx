@@ -1,3 +1,4 @@
+import { fontFamily } from "@/constants/fonts";
 import tw from "@/constants/tailwind";
 import { Eye, EyeOff, LucideIcon } from "lucide-react-native";
 import { useState } from "react";
@@ -63,7 +64,7 @@ const PasswordTextInputFields = ({
         onBlur={onBlur}
         secureTextEntry={secureTextEntry && !isPasswordVisible}
         style={[tw`flex-1 font-light text-black py-3.5`, {
-          fontFamily: "MontserratRegular"
+          fontFamily: fontFamily.MontserratEasyRegular
         }]}
       />
       {secureTextEntry && (

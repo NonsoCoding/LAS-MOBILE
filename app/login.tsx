@@ -12,13 +12,17 @@ import { Formik } from "formik";
 import { AtSign, Lock } from "lucide-react-native";
 import React, { useState } from "react";
 import {
-    Alert,
-    Image,
-    Platform,
-    Text,
-    TouchableOpacity,
-    useColorScheme,
-    View,
+  Alert,
+  Image,
+  Keyboard,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  TouchableWithoutFeedback,
+  useColorScheme,
+  View,
 } from "react-native";
 
 const validationSchema = yup.object().shape({
@@ -129,166 +133,226 @@ export default function UserSignInIndex() {
   };
 
   return (
-    <View style={[tw`flex-1 bg-[#19488A] justify-end`]}>
-       <Image
-              source={require("../assets/images/Intro_logo.png")}
-              style={[tw`self-center h-150 w-150 absolute -top-20`]}
-              resizeMode="contain"
-            />
-      <Formik
-        initialValues={{ email: "", password: "" }}
-        validationSchema={validationSchema}
-        onSubmit={handleLogin}
-      >
-        {({
-          handleChange,
-          handleBlur,
-          handleSubmit,
-          values,
-          errors,
-          touched,
-        }) => (
-          <View style={[tw`pt-10 pb-15 px-5 bg-white rounded-t-2xl gap-5 justify-between`]}>
-            <View style={[tw`gap-5`]}>
-              <View style={[tw`items-center gap-2`]}>
-                <Text style={[tw`text-xl`, {
-                  fontFamily: fontFamily.Bold
-                }]}>Login</Text>
-                <Text style={[tw`text-center`, {
-                  fontFamily: fontFamily.Light,
-                }]}>Welcome back to Africa's Trusted Delivery Network</Text>
-              </View>
-              <View style={[tw`gap-3`]}>
-                <View style={[tw`gap-3`]}>
-                  <View>
-                    <TextInputFields
-                      icon={AtSign}
-                      iconColor={themeColors.primaryColor}
-                      placeholderText="Email"
-                      iconSize={18}
-                             placeholderTextColor={"#19488A"}
-                      value={values.email}
-                      onChangeText={handleChange("email")}
-                      onBlur={handleBlur("email")}
-                      keyboardType="email-address"
-                      autoCapitalize="none"
-                    />
-                    {touched.email && errors.email && (
-                      <Text style={[tw`text-red-500 text-xs mt-1`]}>
-                        {errors.email}
-                      </Text>
-                    )}
-                  </View>
-                  <View>
-                    <PasswordTextInputFields
-                      icon={Lock}
-                      iconColor={themeColors.primaryColor}
-                      placeholderText="Password"
-                      iconSize={18}
-                      placeholderTextColor={"#19488A"}
-                      value={values.password}
-                      onChangeText={handleChange("password")}
-                      onBlur={handleBlur("password")}
-                      secureTextEntry={true}
-                    />
-                    {touched.password && errors.password && (
-                      <Text style={[tw`text-red-500 text-xs mt-1`]}>
-                        {errors.password}
-                      </Text>
-                    )}
-                  </View>
-                </View>
-                <TouchableOpacity
-                  style={[tw`self-end`]}
-                  onPress={() => {
-                    router.push("/screens/forgottenPassword");
-                  }}
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      style={tw`flex-1`}
+    >
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <View style={[tw`flex-1 bg-[#19488A] justify-end`]}>
+          <Image
+            source={require("../assets/images/Intro_logo.png")}
+            style={[tw`self-center h-150 w-150 absolute -top-20`]}
+            resizeMode="contain"
+          />
+          <Formik
+            initialValues={{ email: "", password: "" }}
+            validationSchema={validationSchema}
+            onSubmit={handleLogin}
+          >
+            {({
+              handleChange,
+              handleBlur,
+              handleSubmit,
+              values,
+              errors,
+              touched,
+            }) => (
+              <View style={[tw`bg-white rounded-t-2xl overflow-hidden`]}>
+                <ScrollView
+                  showsVerticalScrollIndicator={false}
+                  contentContainerStyle={tw`pt-10 pb-15 px-5 gap-5`}
                 >
-                  <Text
-                    style={[
-                      tw``,
-                      {
-                        color: themeColors.primaryTextColor,
-                        fontFamily: fontFamily.Light
-                      },
-                    ]}
-                  >
-                    Forgotten Password?
-                  </Text>
-                </TouchableOpacity>
-              </View>
-              <View style={[tw`flex-row items-center gap-3`]}>
-                <View style={[tw`flex-1 h-px bg-gray-300`]} />
-                <Text style={[tw`text-gray-500 text-sm`]}>or</Text>
-                <View style={[tw`flex-1 h-px bg-gray-300`]} />
-              </View>
-                <View style={[tw`gap-2 flex-row`]}>
-                  <TouchableOpacity
-                    onPress={handleGoogleSignIn}
-                    style={[
-                      tw`flex-row items-center justify-center gap-1.5 py-2.5 flex-1 rounded-lg border border-gray-300`,
-                    ]}
-                  >
-                    <Image
-                      style={[tw`h-5 w-5`]}
-                      source={require("../assets/images/IntroImages/icon/google.png")}
-                    />
-                    <Text style={[tw`text-sm`, { fontFamily: fontFamily.Light }]}>Google</Text>
-                  </TouchableOpacity>
-
-                  {Platform.OS === "ios" && (
-                    <TouchableOpacity
-                      onPress={handleAppleSignIn}
+                  <View style={[tw`items-center gap-2`]}>
+                    <Text
                       style={[
-                        tw`flex-row items-center gap-1.5 justify-center py-2.5 flex-1 rounded-lg border border-gray-300`,
+                        tw`text-xl`,
+                        {
+                          fontFamily: fontFamily.MontserratEasyBold,
+                        },
+                      ]}
+                    >
+                      Login
+                    </Text>
+                    <Text
+                      style={[
+                        tw`text-center`,
+                        {
+                          fontFamily: fontFamily.MontserratEasyRegular,
+                        },
+                      ]}
+                    >
+                      Welcome back to Africa's Trusted Delivery Network
+                    </Text>
+                  </View>
+                  <View style={[tw`gap-3`]}>
+                    <View style={[tw`gap-3`]}>
+                      <View>
+                        <TextInputFields
+                          icon={AtSign}
+                          iconColor={themeColors.primaryColor}
+                          placeholderText="Email"
+                          iconSize={18}
+                          placeholderTextColor={"#19488A"}
+                          value={values.email}
+                          onChangeText={handleChange("email")}
+                          onBlur={handleBlur("email")}
+                          keyboardType="email-address"
+                          autoCapitalize="none"
+                        />
+                        {touched.email && errors.email && (
+                          <Text
+                            style={[
+                              tw`text-red-500 text-xs mt-1 ml-3`,
+                              {
+                                fontFamily: fontFamily.MontserratEasyRegular,
+                              },
+                            ]}
+                          >
+                            {errors.email}
+                          </Text>
+                        )}
+                      </View>
+                      <View>
+                        <PasswordTextInputFields
+                          icon={Lock}
+                          iconColor={themeColors.primaryColor}
+                          placeholderText="Password"
+                          iconSize={18}
+                          placeholderTextColor={"#19488A"}
+                          value={values.password}
+                          onChangeText={handleChange("password")}
+                          onBlur={handleBlur("password")}
+                          secureTextEntry={true}
+                        />
+                        {touched.password && errors.password && (
+                          <Text
+                            style={[
+                              tw`text-red-500 text-xs mt-1 ml-3`,
+                              {
+                                fontFamily: fontFamily.MontserratEasyRegular,
+                              },
+                            ]}
+                          >
+                            {errors.password}
+                          </Text>
+                        )}
+                      </View>
+                    </View>
+                    <TouchableOpacity
+                      style={[tw`self-end`]}
+                      onPress={() => {
+                        router.push("/screens/forgottenPassword");
+                      }}
+                    >
+                      <Text
+                        style={[
+                          tw``,
+                          {
+                            color: themeColors.primaryTextColor,
+                            fontFamily: fontFamily.MontserratEasyRegular,
+                          },
+                        ]}
+                      >
+                        Forgotten Password?
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+                  <View style={[tw`flex-row items-center gap-3`]}>
+                    <View style={[tw`flex-1 h-px bg-gray-300`]} />
+                    <Text style={[tw`text-gray-500 text-sm`]}>or</Text>
+                    <View style={[tw`flex-1 h-px bg-gray-300`]} />
+                  </View>
+                  <View style={[tw`gap-2 flex-row`]}>
+                    <TouchableOpacity
+                      onPress={handleGoogleSignIn}
+                      style={[
+                        tw`flex-row items-center justify-center gap-1.5 py-2.5 flex-1 rounded-lg border border-gray-300`,
                       ]}
                     >
                       <Image
                         style={[tw`h-5 w-5`]}
-                        source={require("../assets/images/IntroImages/icon/apple.png")}
+                        source={require("../assets/images/IntroImages/icon/google.png")}
                       />
-                      <Text style={[tw`text-sm`, { fontFamily: fontFamily.Light }]}>Apple</Text>
+                      <Text
+                        style={[tw`text-sm`, { fontFamily: fontFamily.Light }]}
+                      >
+                        Google
+                      </Text>
                     </TouchableOpacity>
-                  )}
-                </View>
-            <View style={[tw`gap-2`]}>
-              <View style={[tw`gap-2`]}>
-                <PrimaryButton
-                  bgColors={themeColors.primaryColor}
-                  height={50}
-                  textColor="white"
-                  onpress={handleSubmit}
-                  text={loading ? "Logging in..." : "Continue"}
-                  disabled={loading}
-                />
+
+                    {Platform.OS === "ios" && (
+                      <TouchableOpacity
+                        onPress={handleAppleSignIn}
+                        style={[
+                          tw`flex-row items-center gap-1.5 justify-center py-2.5 flex-1 rounded-lg border border-gray-300`,
+                        ]}
+                      >
+                        <Image
+                          style={[tw`h-5 w-5`]}
+                          source={require("../assets/images/IntroImages/icon/apple.png")}
+                        />
+                        <Text
+                          style={[
+                            tw`text-sm`,
+                            { fontFamily: fontFamily.Light },
+                          ]}
+                        >
+                          Apple
+                        </Text>
+                      </TouchableOpacity>
+                    )}
+                  </View>
+                  <View style={[tw`gap-2`, {
+                     paddingBottom: Platform.OS === "android" ? 0 : 0
+                  }]}>
+                    <View style={[tw`gap-2`]}>
+                      <PrimaryButton
+                        bgColors={themeColors.primaryColor}
+                        height={50}
+                        textColor="white"
+                        onpress={handleSubmit}
+                        text={loading ? "Logging in..." : "Continue"}
+                        disabled={loading}
+                      />
+                    </View>
+                    <View
+                      style={[tw`flex-row items-center justify-center gap-1`]}
+                    >
+                      <Text
+                        style={[
+                          tw``,
+                          {
+                            fontFamily: fontFamily.Light,
+                          },
+                        ]}
+                      >
+                        Don't have an account?
+                      </Text>
+                      <TouchableOpacity
+                        onPress={() => {
+                          router.push("/PhoneLocation"); // Update to your signup route
+                        }}
+                      >
+                        <Text
+                          style={[
+                            tw`text-center font-semibold`,
+                            {
+                              color: themeColors.primaryTextColor,
+                              fontFamily: fontFamily.Bold,
+                            },
+                          ]}
+                        >
+                          Sign Up
+                        </Text>
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                </ScrollView>
               </View>
-               <View style={[tw`flex-row items-center justify-center gap-1`]}>
-                    <Text style={[tw``, {
-                  fontFamily: fontFamily.Light
-                }]}>Don't have an account?</Text>
-              <TouchableOpacity
-                onPress={() => {
-                   router.push("/RegisterType"); // Update to your signup route
-                }}
-              >
-                <Text
-                  style={[
-                    tw`text-center font-semibold`,
-                    {
-                      color: themeColors.primaryTextColor,
-                      fontFamily: fontFamily.Bold
-                    },
-                  ]}
-                >
-                  Sign Up
-                </Text>
-              </TouchableOpacity>
-              </View>
-            </View>
-            </View>
-          </View>
-        )}
-      </Formik>
-    </View>
+            )}
+          </Formik>
+        </View>
+      </TouchableWithoutFeedback>
+    </KeyboardAvoidingView>
   );
 }

@@ -1,6 +1,6 @@
 import {
-  getUserProfile,
-  refreshAccessToken,
+    getUserProfile,
+    refreshAccessToken,
 } from "@/components/services/api/authApi";
 import * as AsyncStore from "@/components/services/storage/asyncStore";
 import * as SecureStore from "@/components/services/storage/secureStore";
@@ -42,8 +42,11 @@ interface AuthState {
   isAuthenticated: boolean;
   role: "carrier" | "shipper";
   phoneNumber: string | null;
+  country: string | null;
   isOnline: boolean;
   setIsOnline: (isOnline: boolean) => void;
+  setPhoneNumber: (phoneNumber: string) => void;
+  setCountry: (country: string) => void;
   login: (
     accessToken: string,
     refreshToken: string,
@@ -53,6 +56,7 @@ interface AuthState {
   loadAuth: () => Promise<void>;
   fetchUserProfile: () => Promise<void>;
   refreshAuthToken: () => Promise<void>;
+  setRole: (role: "carrier" | "shipper") => void;
 }
 
 const useAuthStore = create<AuthState>((set, get) => ({
@@ -63,6 +67,7 @@ const useAuthStore = create<AuthState>((set, get) => ({
   isOnline: false,
   role: "carrier",
   phoneNumber: null,
+  country: null,
   login: async (accessToken, refreshToken, user) => {
     await SecureStore.setItem(STORAGE_KEYS.ACCESS_TOKEN, accessToken);
     await SecureStore.setItem(STORAGE_KEYS.REFRESH_TOKEN, refreshToken);
@@ -158,6 +163,18 @@ const useAuthStore = create<AuthState>((set, get) => ({
       await get().logout();
       throw error;
     }
+  },
+
+  setRole: (role: "carrier" | "shipper") => {
+    set({ role });
+  },
+
+  setPhoneNumber: (phoneNumber: string) => {
+    set({ phoneNumber });
+  },
+
+  setCountry: (country: string) => {
+    set({ country });
   },
 }));
 
