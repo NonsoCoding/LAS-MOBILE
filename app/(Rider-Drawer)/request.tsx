@@ -49,9 +49,9 @@ const RequestScreen = ({
 
     const edgePadding = {
       top: 50,
-      right: 50,
-      bottom: 300,
-      left: 50,
+      right: 120,
+      bottom: 500,
+      left: 120,
     };
 
     const traceRoute = useCallback((request: any) => {
@@ -293,7 +293,7 @@ const RequestScreen = ({
                     }}
                     apikey={GoogleApiKey || ""}
                     strokeColor={themeColors.primaryColor}
-                    strokeWidth={6}
+                    strokeWidth={3}
                   />
                 </>
               )}
@@ -362,7 +362,7 @@ const RequestScreen = ({
                                         }]}>{request.delivery_address}</Text>
                                         </View>
                               </View>
-                              <View style={[tw`flex-row items-center gap-2`]}>
+                              
                                     <TouchableOpacity
                                       onPress={() => handleAccept(request)}
                                       disabled={acceptingId === request.id}
@@ -378,25 +378,8 @@ const RequestScreen = ({
                                           </>
                                         )}
                                     </TouchableOpacity>
-                                    <TouchableOpacity
-                                  onPress={() => {
-                                    console.log("Reject Shipment...");
                                     
-                                      }}
-                                      disabled={acceptingId === request.id}
-                                      style={[tw`bg-red-400 flex-row items-center w-25 justify-between px-4 py-1.5 rounded-full gap-2`, acceptingId === request.id && tw`opacity-50`]}>
-                                        {acceptingId === request.id ? (
-                                          <ActivityIndicator size="small" color="white" />
-                                        ) : (
-                                          <>
-                                            <Text style={[tw`text-white text-xs`, {
-                                                fontFamily: fontFamily.MontserratEasyBold
-                                            }]}>Reject</Text>
-                                            <ChevronRight size={15} color="white"/>
-                                          </>
-                                        )}
-                                    </TouchableOpacity>
-                              </View>
+                             
                                 </View>
                                 </Animated.View>
                             ))}

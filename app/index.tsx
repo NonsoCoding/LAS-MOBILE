@@ -6,7 +6,6 @@ import { useRouter } from "expo-router";
 import { useState } from "react";
 import { Image, Platform, View } from "react-native";
 import Animated, {
-  FadeIn,
   useAnimatedStyle,
   withTiming
 } from "react-native-reanimated";
@@ -76,7 +75,7 @@ const IntroScreen = ({}: IntroScreenProps) => {
       />
       <View
         style={[
-          tw`relative h-85 justify-center px-5`,
+          tw`relative min-h-[350px] justify-center px-5`,
           {
             backgroundColor: themeColors.background,
             borderTopRightRadius: 20,
@@ -116,7 +115,6 @@ const IntroScreen = ({}: IntroScreenProps) => {
                     fontFamily: fontFamily.MontserratEasyBold,
                     color: themeColors.text
                   }]}
-                  entering={FadeIn.delay(200)}
                   key={`title-${index}`}
                 >
                   {item.title1} 
@@ -126,7 +124,6 @@ const IntroScreen = ({}: IntroScreenProps) => {
                     fontFamily: fontFamily.MontserratEasyRegular,
                              color: themeColors.text
                   }]}
-                  entering={FadeIn.delay(300)}
                   key={`info-${index}`}
                 >
                   {item.info}

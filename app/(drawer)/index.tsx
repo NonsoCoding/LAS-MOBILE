@@ -1,16 +1,17 @@
 import DeliveryButton from "@/components/Buttons/DeliveryButton";
 import SecondaryButton from "@/components/Buttons/SecondaryButons";
 import CarrierCard from "@/components/Cards/CarrierCard";
-import OrderCard from "@/components/Cards/OrderCard";
+import ShipmentOrderCard from "@/components/Cards/ShipmentOrderCard";
 import DropDown from "@/components/DropDown/DropDown";
 import CustomTextInput from "@/components/Inputs/CustomTextinput";
 import RouteNumberTextInput from "@/components/Inputs/RouteNumberTextInput";
 import RouteSearchTextInput from "@/components/Inputs/RouteTextInputs";
 import SearchTextInput from "@/components/Inputs/SearchTextInput";
+import ShipmentDetailsBottomSheet from "@/components/Sheets/ShipmentDetailsBottomSheet";
 import { useShipmentOffers } from "@/components/hooks/useShipmentOffers";
 import { useShipmentTracking } from "@/components/hooks/useShipmentTracking";
 import { createShippment, offerPrice } from "@/components/services/api/authApi";
-import { confirmCarrierAcceptance, getShipmentDetails, getShipperCurrentShipments, updateShipmentStatus } from "@/components/services/api/carriersApi";
+import { cancelShipment as cancelShipmentApi, confirmCarrierAcceptance, getShipmentDetails, getShipperCurrentShipments, updateShipmentStatus } from "@/components/services/api/carriersApi";
 import * as SecureStore from "@/components/services/storage/secureStore";
 import { STORAGE_KEYS } from "@/components/services/storage/storageKeys";
 import useAuthStore from "@/components/store/authStore";
@@ -140,6 +141,49 @@ const UserHomePage = ({}: UserHomePageProps) => {
   );
 
   const mapRef = useRef<MapView>(null);
+
+  // Close other sheets when shipment details sheet is opening and restore them after
+  const { selectedShipment } = useShipmentStore();
+  const [prevUIState, setPrevUIState] = useState<{
+    routeSearch: boolean;
+    orderDetail: boolean;
+    offer: boolean;
+    trackingVisible: boolean;
+  } | null>(null);
+
+  useEffect(() => {
+    if (selectedShipment) {
+      // Capture current state if not already captured
+      if (!prevUIState) {
+        setPrevUIState({
+          routeSearch: RouteSearchSheet,
+          orderDetail: orderDetailSheet,
+          offer: offerSheet,
+          trackingVisible: trackingModalVisible,
+        });
+      }
+      
+      bottomSheetRef.current?.close();
+      setRouteSearchSheet(false);
+      setOrderDetailSheet(false);
+      setOfferSheet(false);
+      setTrackingModalVisible(false);
+    } else if (prevUIState) {
+      // Restore state
+      if (prevUIState.routeSearch) setRouteSearchSheet(true);
+      else if (prevUIState.orderDetail) setOrderDetailSheet(true);
+      else if (prevUIState.offer) setOfferSheet(true);
+      else {
+        // If none of the above were open, return to main view
+        bottomSheetRef.current?.expand();
+      }
+      
+      if (prevUIState.trackingVisible) setTrackingModalVisible(true);
+      
+      setPrevUIState(null);
+    }
+  }, [selectedShipment]);
+
   const moveTo = async (position: LatLng) => {
     const camera = await mapRef.current?.getCamera();
     if (camera) {
@@ -245,7 +289,7 @@ const UserHomePage = ({}: UserHomePageProps) => {
 
     const fetchCurrent = async () => {
       try {
-        console.log("Polling active shipments for shipper...");
+        // console.log("Polling active shipments for shipper...");
         const currentShipments = await getShipperCurrentShipments(accessToken);
         
         if (currentShipments) {
@@ -270,7 +314,11 @@ const UserHomePage = ({}: UserHomePageProps) => {
               deliveryLongitude: s.delivery_longitude,
               isAssigned: s.is_assigned === true || s.is_assigned === "true",
               carrierName: s.driver ? `${s.driver.first_name || ""} ${s.driver.last_name || ""}` : (s.carrier ? `${s.carrier.first_name || ""} ${s.carrier.last_name || ""}` : undefined),
-              carrierImage: s.driver?.profile_picture || s.carrier?.profile_picture
+              carrierImage: s.driver?.profile_picture || s.carrier?.profile_picture,
+              recipient_name: s.recipient_name || s.recipientName || s.receiver_name,
+              recipient_phone: s.recipient_phone || s.recipientPhone || s.receiver_phone,
+              package_type: s.package_type || s.packageType || s.delivery_type || s.deliveryType,
+              item_description: s.item_description || s.itemDescription || s.description,
             }));
 
           setShipmentData({ 
@@ -286,7 +334,7 @@ const UserHomePage = ({}: UserHomePageProps) => {
     };
 
     fetchCurrent();
-    const interval = setInterval(fetchCurrent, 10000);
+    const interval = setInterval(fetchCurrent, 1000);
     return () => clearInterval(interval);
   }, [isAuthenticated, accessToken, setShipmentData]);
   useEffect(() => {
@@ -428,7 +476,7 @@ const UserHomePage = ({}: UserHomePageProps) => {
               // If a shipment was already created, cancel it on the backend
               if (createdShipmentId && accessToken) {
                 try {
-                  await updateShipmentStatus(accessToken, createdShipmentId, "cancelled");
+                  await cancelShipmentApi(accessToken as string, createdShipmentId as string | number, "Shipper cancelled request");
                 } catch (apiError) {
                   console.error("API Error cancelling shipment:", apiError);
                 }
@@ -535,7 +583,7 @@ const UserHomePage = ({}: UserHomePageProps) => {
   // Sync carrier location to store for persistence
   useEffect(() => {
     if (carrierLocation && trackedShipment) {
-      updateCarrierLocation(trackedShipment.id, carrierLocation.latitude, carrierLocation.longitude);
+      updateCarrierLocation(trackedShipment.id, carrierLocation.latitude, carrierLocation.longitude, carrierLocation.heading);
     }
   }, [carrierLocation, trackedShipment, updateCarrierLocation]);
 
@@ -643,11 +691,13 @@ const UserHomePage = ({}: UserHomePageProps) => {
             <Marker
               key={`carrier-${shipment.id}`}
               coordinate={{
-                latitude: shipment.carrierLatitude,
-                longitude: shipment.carrierLongitude
+                latitude: shipment.carrierLatitude!,
+                longitude: shipment.carrierLongitude!
               }}
               title={`Carrier for #${shipment.id}`}
               anchor={{ x: 0.5, y: 0.5 }}
+              rotation={shipment.carrierHeading || 0}
+              flat={true}
             >
                <Image 
                 source={require("../../assets/images/IntroImages/icon/Car.png")} 
@@ -819,7 +869,7 @@ const UserHomePage = ({}: UserHomePageProps) => {
                   contentContainerStyle={{ paddingHorizontal: 20, gap: 12 }}
                   renderItem={({ item }) => (
                     <View style={{ width: Dimensions.get('window').width - 40 }}>
-                      <OrderCard
+                      <ShipmentOrderCard
                         cardTitle="Current Shipping"
                         shippingId={`#${item.id}`}
                         pickupLocation={item.pickupAddress}
@@ -829,22 +879,45 @@ const UserHomePage = ({}: UserHomePageProps) => {
                         trackingStatus={item.trackingStatus}
                         isAssigned={item.isAssigned}
                         onTrackPress={() => handleTrackShipment(item)}
+                        fullData={item}
                       />
                     </View>
                   )}
                 />
               ) : (
-                <View style={tw`px-5`}>
-                  <OrderCard
-                    shippingId={createdShipmentId ? `#${createdShipmentId}` : undefined}
-                    pickupLocation={pickupAddress}
-                    destinationLocation={destinationAddress}
-                    pickupDate={new Date().toLocaleDateString()}
-                    status={createdShipmentId ? "pending" : undefined}
-                    trackingStatus={createdShipmentId ? "waiting" : undefined}
-                    isAssigned={false}
-                  />
-                </View>
+                <View style={tw`px-8 py-5 items-center justify-center`}>
+    {/* Optional: Add an Image or Lottie animation here */}
+    <View style={[tw`w-20 h-20 rounded-full items-center justify-center bg-gray-50 mb-4`]}>
+        <Image 
+          source={require("../../assets/images/IntroImages/icon/pin.png")} // Use a box or package icon
+                        style={[tw`w-12 h-12`, { opacity: 0.3 }]} 
+                        resizeMode="contain"
+        />
+    </View>
+    
+    <Text style={[tw`text-lg text-center`, { 
+        fontFamily: fontFamily.MontserratEasyBold, 
+        color: '#1A1A1A' 
+    }]}>
+      No Active Shipments
+    </Text>
+    
+    <Text style={[tw`text-sm text-center mt-2 text-gray-500`, { 
+        fontFamily: fontFamily.MontserratEasyMedium 
+    }]}>
+      You don't have any shipments running right now. Ready to send something new?
+    </Text>
+    
+    {/* Optional: Small shortcut button specifically for the empty state
+    <TouchableOpacity 
+      style={[tw`mt-6 px-6 py-2 rounded-full`, { backgroundColor: themeColors.primaryColor + '15' }]}
+      onPress={() => setStep(2)}
+    >
+      <Text style={{ color: themeColors.primaryColor, fontFamily: fontFamily.MontserratEasyBold }}>
+        + Create Request
+      </Text>
+    </TouchableOpacity> */}
+  </View>
               )}
             <View style={[tw`flex-row justify-between items-center gap-2 px-5`]}>
               <SecondaryButton
@@ -1344,6 +1417,7 @@ const UserHomePage = ({}: UserHomePageProps) => {
                 title="Carrier"
                 rotation={carrierLocation?.heading || 0}
                 anchor={{ x: 0.5, y: 0.5 }}
+                flat={true}
               >
                 <View style={[tw`items-center justify-center`]}>
                    <Image 
@@ -1486,14 +1560,24 @@ const UserHomePage = ({}: UserHomePageProps) => {
                     fontFamily: fontFamily.MontserratEasyMedium
                   }]} numberOfLines={1}>{trackedShipment.destinationAddress}</Text>
                 </View>
+                <View>
+                  <Text style={[tw`text-xs uppercase`, {
+                      fontFamily: fontFamily.MontserratEasyMedium
+                    }]}>{(() => {
+                      const type = (trackedShipment.delivery_type || "").charAt(0).toUpperCase() + (trackedShipment.delivery_type || "").slice(1);
+                      const str = `${type}, From ${trackedShipment.sender_phone}, to ${trackedShipment.recipient_phone}`;
+                      return str.length > 35 ? str.slice(0, 35) + "..." : str;
+                    })()}</Text>
+                  
+                </View>
                 <View style={[tw`flex-row items-center gap-2`]}>
                   <Image style={[tw`h-5 w-5`]} source={require("../../assets/images/IntroImages/LocationMarker2.png")} />
                   <View style={[tw`h-4 border border-[#19488A33]`]} />
-                  <View style={[tw`flex-row items-center gap-2`]}>
-                    <Text style={[tw`uppercase text-xs flex-1`, {
+                  <View style={[tw`flex-row items-center gap-1`]}>
+                    <Text style={[tw`uppercase text-xs`, {
                       fontFamily: fontFamily.MontserratEasyMedium
-                    }]}>{trackedShipment.finalPrice}</Text>
-                    <Text>{trackedShipment.paymentMethod}</Text>
+                    }]}>{"\u20A6"}{trackedShipment.finalPrice},</Text>
+                    <Text style={[tw`uppercase text-xs`]}>{trackedShipment.paymentMethod}</Text>
                   </View>
                 </View>
               </View>
@@ -1536,6 +1620,7 @@ const UserHomePage = ({}: UserHomePageProps) => {
         </View>
       </Modal>
     
+      <ShipmentDetailsBottomSheet />
     </View>
   );
 };

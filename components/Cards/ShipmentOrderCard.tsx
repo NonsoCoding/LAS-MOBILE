@@ -3,23 +3,25 @@ import { fontFamily } from "@/constants/fonts";
 import tw from "@/constants/tailwind";
 import { useRouter } from "expo-router";
 import { ActivityIndicator, Text, TouchableOpacity, useColorScheme, View } from "react-native";
+import useShipmentStore from "../store/shipmentStore";
 
-interface OrderCardProps {
+interface ShipmentOrderCardProps {
   cardTitle?: string;
   shippingId?: string;
   pickupLocation?: string;
   destinationLocation?: string;
   pickupDate?: string;
-  status?: "pending" | "picked" | "in-transit" | "delivered";
+  status?: "pending" | "picked" | "in-transit" | "delivered" | "searching" | "cancelled";
   trackingStatus?: "waiting" | "trackable";
   isAssigned?: boolean;
   statusBgColor?: string;
   statusTextColor?: string;
   onPress?: () => void;
   onTrackPress?: () => void;
+  fullData?: any;
 }
 
-const OrderCard = ({
+const ShipmentOrderCard = ({
   cardTitle,
   shippingId,
   pickupLocation,
@@ -32,10 +34,12 @@ const OrderCard = ({
   statusTextColor,
   onPress,
   onTrackPress,
-}: OrderCardProps) => {
+  fullData,
+}: ShipmentOrderCardProps) => {
   const router = useRouter();
   const colorScheme = useColorScheme();
   const themeColors = Colors[colorScheme ?? "light"];
+  const { setSelectedShipment } = useShipmentStore();
 
   const statuses = [
     { key: "pending", label: "PENDING" },
@@ -51,8 +55,7 @@ const OrderCard = ({
   const currentStatusIndex = getStatusIndex(status);
 
   return (
-    <TouchableOpacity
-      onPress={onPress}
+    <View
       style={[
         tw` rounded-2xl p-4 mb-4 bg-[#19488A22]`, {
          
@@ -78,7 +81,10 @@ const OrderCard = ({
           {shippingId || "NULL"}
         </Text>
         </View>
-      <TouchableOpacity style={tw`mb-6 bg-white rounded-full px-4 py-1`}>
+      <TouchableOpacity 
+        onPress={() => setSelectedShipment(fullData)}
+        style={tw`mb-6 bg-white rounded-full px-4 py-1.5`}
+      >
         <Text
           style={[
             tw`text-[10px] text-right uppercase`,
@@ -214,12 +220,12 @@ const OrderCard = ({
           onPress={onTrackPress}
           style={[tw`flex-row items-center justify-center gap-2 py-3 mt-3 rounded-full`, { backgroundColor: "#19488A" }]}
         >
-          <View style={[tw`w-2 h-2 rounded-full bg-green-400`]} />
+          <View style={[tw`w-2 h-2 rounded-full bg-green-400` ]} />
           <Text style={[tw`text-xs text-white`, { fontFamily: fontFamily.MontserratEasyBold }]}>Track Now</Text>
         </TouchableOpacity>
       )}
-    </TouchableOpacity>
+    </View>
   );
 };
 
-export default OrderCard;
+export default ShipmentOrderCard;

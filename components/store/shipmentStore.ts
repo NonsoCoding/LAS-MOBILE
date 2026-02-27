@@ -10,7 +10,8 @@ export interface AcceptedShipment {
     calculatedPrice: string | null;
     finalPrice: number;
     paymentMethod: string;
-    status: "pending" | "picked" | "in-transit" | "delivered";
+    status: "pending" | "picked" | "in-transit" | "delivered" | "searching" | "cancelled";
+    package_type?: string;
     trackingStatus: "waiting" | "trackable";
     acceptedAt: string; // ISO date string
     carrierName?: string;
@@ -21,7 +22,13 @@ export interface AcceptedShipment {
     deliveryLongitude?: string;
     carrierLatitude?: number;
     carrierLongitude?: number;
+    carrierHeading?: number;
     isAssigned?: boolean;
+    delivery_type?: string;
+    sender_phone?: string;
+    recipient_phone?: string;
+    recipient_name?: string;
+    item_description?: string;
 }
 
 interface ShipmentState {
@@ -41,11 +48,13 @@ interface ShipmentState {
     itemDescription: string;
     deliveryType: "building" | "door";
     acceptedShipments: AcceptedShipment[];
+    selectedShipment: AcceptedShipment | null;
 
     setShipmentData: (data: Partial<ShipmentState>) => void;
+    setSelectedShipment: (shipment: AcceptedShipment | null) => void;
     addAcceptedShipment: (shipment: AcceptedShipment) => Promise<void>;
     updateShipmentTrackingStatus: (shipmentId: number, trackingStatus: "waiting" | "trackable", isAssigned?: boolean) => Promise<void>;
-    updateCarrierLocation: (shipmentId: number, latitude: number, longitude: number) => Promise<void>;
+    updateCarrierLocation: (shipmentId: number, latitude: number, longitude: number, heading?: number) => Promise<void>;
     cancelShipment: (shipmentId: number) => Promise<void>;
     clearShipment: () => Promise<void>;
     loadShipment: () => Promise<void>;
@@ -68,6 +77,7 @@ const initialState: {
     itemDescription: string;
     deliveryType: "building" | "door";
     acceptedShipments: AcceptedShipment[];
+    selectedShipment: AcceptedShipment | null;
 } = {
     activeShipmentId: null,
     pickupAddress: "",
@@ -85,6 +95,7 @@ const initialState: {
     itemDescription: "",
     deliveryType: "building",
     acceptedShipments: [],
+    selectedShipment: null,
 };
 
 const useShipmentStore = create<ShipmentState>((set, get) => ({
@@ -153,10 +164,10 @@ const useShipmentStore = create<ShipmentState>((set, get) => ({
         await AsyncStore.setItem(STORAGE_KEYS.ACTIVE_SHIPMENT, JSON.stringify(dataOnly));
     },
 
-    updateCarrierLocation: async (shipmentId, latitude, longitude) => {
+    updateCarrierLocation: async (shipmentId, latitude, longitude, heading) => {
         const currentState = get();
         const updatedShipments = currentState.acceptedShipments.map(s =>
-            s.id === shipmentId ? { ...s, carrierLatitude: latitude, carrierLongitude: longitude } : s
+            s.id === shipmentId ? { ...s, carrierLatitude: latitude, carrierLongitude: longitude, carrierHeading: heading } : s
         );
         set({ acceptedShipments: updatedShipments });
         // Persist
@@ -195,6 +206,10 @@ const useShipmentStore = create<ShipmentState>((set, get) => ({
                 console.error("Error parsing stored shipment data:", error);
             }
         }
+    },
+
+    setSelectedShipment: (shipment) => {
+        set({ selectedShipment: shipment });
     },
 }));
 

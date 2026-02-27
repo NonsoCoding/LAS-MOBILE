@@ -82,6 +82,48 @@ export const acceptRequest = async (token: string, id: string) => {
   }
 }
 
+export const cancelShipment = async (token: string, id: string | number, reason?: string) => {
+  try {
+    const res = await fetch(`${apiUrl}/api/shipments/${id}/carrier-cancel/`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
+      },
+      body: JSON.stringify({ cancellation_reason: reason })
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      throw new Error(data.message || data.error || "Failed to cancel shipment");
+    }
+    return data;
+  } catch (error: any) {
+    console.log("Error cancelling shipment:", error);
+    throw error;
+  }
+}
+
+export const cancelShipmentShipper = async (token: string, id: string | number, reason?: string) => {
+  try {
+    const res = await fetch(`${apiUrl}/api/shipments/${id}/cancel/`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
+      },
+      body: JSON.stringify({ cancellation_reason: reason })
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      throw new Error(data.message || data.error || "Failed to cancel shipment");
+    }
+    return data;
+  } catch (error: any) {
+    console.log("Error cancelling shipment (shipper):", error);
+    throw error;
+  }
+}
+
 export const getShipmentDetails = async (token: string) => {
   try {
     const res = await fetch(`${apiUrl}/api/shipments/carrier/current/`, {
@@ -119,26 +161,6 @@ export const getShipperCurrentShipments = async (token: string) => {
     return res.json();
   } catch (error: any) {
     console.log("Error fetching shipper current shipments:", error);
-    throw error;
-  }
-}
-
-export const getShipmentById = async (token: string, shipmentId: number | string) => {
-  try {
-    const res = await fetch(`${apiUrl}/api/shipments/${shipmentId}/`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${token}`
-      }
-    });
-    if (!res.ok) {
-      const errorData = await res.json();
-      throw new Error(`HTTP error! status: ${res.status}, data: ${JSON.stringify(errorData)}`);
-    }
-    return res.json();
-  } catch (error: any) {
-    console.log(`Error fetching shipment ${shipmentId} details:`, error);
     throw error;
   }
 }
@@ -237,7 +259,7 @@ export const updateCarrierStatus = async (token: string, is_online: boolean) => 
   }
 }
 
-export const livetracking = async (token: string, shipmentId: string | number, latitude: number, longitude: number) => {
+export const livetracking = async (token: string, shipmentId: string | number, latitude: number, longitude: number, heading?: number) => {
   if (!shipmentId) {
     console.error("livetracking: shipmentId is required");
     return;
@@ -251,7 +273,7 @@ export const livetracking = async (token: string, shipmentId: string | number, l
         "Content-Type": "application/json",
         "Authorization": `Bearer ${token}`
       },
-      body: JSON.stringify({ latitude, longitude })
+      body: JSON.stringify({ latitude, longitude, heading })
     });
     
     if (!res.ok) {

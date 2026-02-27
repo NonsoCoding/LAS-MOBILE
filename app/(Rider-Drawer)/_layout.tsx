@@ -8,7 +8,7 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { DrawerContentScrollView, DrawerItemList } from "@react-navigation/drawer";
 import { useRouter } from "expo-router";
 import { Drawer } from "expo-router/drawer";
-import { Bell, CarFront, ChevronRight, Gift, Info, LogOut, MessageCircle, SettingsIcon, Shield, Wallet } from "lucide-react-native";
+import { Bell, CarFront, ChevronRight, Gift, Info, LogOut, MessageCircle, Package, SettingsIcon, Shield, Wallet } from "lucide-react-native";
 import React, { useState } from "react";
 import { Image, Text, TouchableOpacity, View } from "react-native";
 
@@ -124,6 +124,14 @@ export default function DrawerLayout() {
           drawerLabel: "Request",
           title: "Request",
           drawerIcon: ({ color, size }) => <CarFront color={color} size={18} />,
+        }}
+      />
+      <Drawer.Screen
+        name="shipments"
+        options={{
+          drawerLabel: "Ongoing Shipments",
+          title: "Shipments",
+          drawerIcon: ({ color, size }) => <Package color={color} size={18} />,
         }}
       />
         <Drawer.Screen
