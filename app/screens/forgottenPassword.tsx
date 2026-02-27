@@ -1,6 +1,7 @@
 import PrimaryButton from "@/components/Buttons/PrimaryButton";
 import TextInputFields from "@/components/Inputs/TextInputFields";
 import { forgottenPassword } from "@/components/services/api/authApi";
+import { useColorScheme } from "@/components/useColorScheme";
 import yup from "@/components/utils/formik";
 import Colors from "@/constants/Colors";
 import { fontFamily } from "@/constants/fonts";
@@ -9,7 +10,7 @@ import { useRouter } from "expo-router";
 import { Formik } from "formik";
 import { AtSign } from "lucide-react-native";
 import React, { useState } from "react";
-import { Alert, Image, Keyboard, KeyboardAvoidingView, Platform, Text, TouchableWithoutFeedback, useColorScheme, View } from "react-native";
+import { Alert, Image, Keyboard, KeyboardAvoidingView, Platform, Text, TouchableWithoutFeedback, View } from "react-native";
 
 const validationShema = yup.object().shape({
   email: yup
@@ -64,7 +65,7 @@ export default function ForgottenPassword() {
       style={tw`flex-1`}
     >
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <View style={[tw`flex-1 bg-[#19488A] justify-end`]}>
+        <View style={[tw`flex-1 justify-end`, { backgroundColor: themeColors.primaryColor }]}>
        <Image
               source={require("../../assets/images/Intro_logo.png")}
               style={[tw`self-center h-150 w-150 absolute -top-10`]}
@@ -83,12 +84,15 @@ export default function ForgottenPassword() {
           errors,
           touched,
         }) => (
-          <View style={[tw`bg-white py-10 pb-15 rounded-t-2xl px-5 gap-5`]}>
+          <View style={[tw`py-10 pb-15 rounded-t-2xl px-5 gap-5`, { backgroundColor: themeColors.background }]}>
              <View style={[tw`items-center gap-2`]}>
                     <Text style={[tw`text-2xl`, {
+                      color: themeColors.text,
                       fontFamily: fontFamily.MontserratEasyBold
                     }]}>Forgotten Password</Text>
                     <Text style={[tw`text-center`, {
+                      color: themeColors.text,
+                      opacity: 0.7,
                       fontFamily: fontFamily.MontserratEasyRegular
                     }]}>A reset code will be sent to your email to reset your password.</Text>
                     </View>

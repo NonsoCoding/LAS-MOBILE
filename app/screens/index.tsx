@@ -3,6 +3,7 @@ import TextInputFields from "@/components/Inputs/TextInputFields";
 import SharedLayout from "@/components/Layout/SharedLayout";
 import { loginUser, resendOtp } from "@/components/services/api/authApi";
 import useAuthStore from "@/components/store/authStore";
+import { useColorScheme } from "@/components/useColorScheme";
 import yup from "@/components/utils/formik";
 import Colors from "@/constants/Colors";
 import tw from "@/constants/tailwind";
@@ -11,11 +12,10 @@ import { Formik } from "formik";
 import { AtSign, Lock } from "lucide-react-native";
 import React, { useState } from "react";
 import {
-  Alert,
-  Text,
-  TouchableOpacity,
-  useColorScheme,
-  View,
+    Alert,
+    Text,
+    TouchableOpacity,
+    View,
 } from "react-native";
 
 const validationSchema = yup.object().shape({
@@ -128,13 +128,13 @@ export default function SignInIndex() {
           <View style={[tw`flex-1 pt-10 gap-10 justify-between`]}>
             <View style={[tw`gap-10`]}>
               <View style={[tw`gap-3`]}>
-                <Text style={[tw`text-3xl font-bold text-[#003C7A]`]}>
+                <Text style={[tw`text-3xl font-bold`, { color: themeColors.primaryColor }]}>
                   Sign into your
                 </Text>
-                <Text style={[tw`text-3xl font-bold text-[#CC1A21]`]}>
+                <Text style={[tw`text-3xl font-bold`, { color: themeColors.text }]}>
                   account
                 </Text>
-                <Text style={[tw`font-light`]}>
+                <Text style={[tw`font-light`, { color: themeColors.text, opacity: 0.7 }]}>
                   Kindly provide your valid email/phone number and password to
                   proceed
                 </Text>
@@ -217,7 +217,8 @@ export default function SignInIndex() {
                   style={[
                     tw`text-center font-light`,
                     {
-                      color: themeColors.primaryTextColor,
+                      color: themeColors.text,
+                      opacity: 0.7
                     },
                   ]}
                 >

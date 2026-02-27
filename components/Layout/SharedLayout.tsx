@@ -1,3 +1,5 @@
+import { useColorScheme } from "@/components/useColorScheme";
+import Colors from "@/constants/Colors";
 import tw from "@/constants/tailwind";
 import React from "react";
 import { View } from "react-native";
@@ -7,7 +9,9 @@ interface SharedLayoutProps {
 }
 
 const SharedLayout = ({ children }: SharedLayoutProps) => {
-  return <View style={[tw`flex-1 py-15 px-5 bg-[#19488A]`]}>{children}</View>;
+  const colorScheme = useColorScheme();
+  const themeColors = Colors[colorScheme ?? "light"];
+  return <View style={[tw`flex-1 py-15 px-5`, { backgroundColor: themeColors.primaryColor }]}>{children}</View>;
 };
 
 export default SharedLayout;

@@ -1,16 +1,16 @@
 import PrimaryButton from "@/components/Buttons/PrimaryButton";
 import useAuthStore from "@/components/store/authStore";
+import { useColorScheme } from "@/components/useColorScheme";
 import Colors from "@/constants/Colors";
 import { fontFamily } from "@/constants/fonts";
 import tw from "@/constants/tailwind";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import {
-  Image,
-  Text,
-  TouchableOpacity,
-  useColorScheme,
-  View,
+    Image,
+    Text,
+    TouchableOpacity,
+    View,
 } from "react-native";
 
 interface RegisterTypePropss {}
@@ -57,21 +57,25 @@ const RegisterType = ({}: RegisterTypePropss) => {
   };
 
   return (
-    <View style={[tw`pt-8 flex-1 justify-end bg-[#19488A]`]}>
+    <View style={[tw`pt-8 flex-1 justify-end`, { backgroundColor: themeColors.primaryColor }]}>
        <Image
                       source={require("../assets/images/Intro_logo.png")}
                       style={[tw`self-center h-150 w-150 absolute z-999 -top-25`]}
                       resizeMode="contain"
             />
-      <View style={[tw`gap-6 bg-white py-10 pb-15 justify-center px-5`, {
+      <View style={[tw`gap-6 py-10 pb-15 justify-center px-5`, {
+        backgroundColor: themeColors.background,
         borderTopRightRadius: 20,
         borderTopLeftRadius: 20
       }]}>
         <View style={[tw`items-center gap-2`]}>
           <Text style={[tw`text-xl`, {
+            color: themeColors.text,
             fontFamily: fontFamily.Bold
           }]}>How will you use LAS?</Text>
           <Text style={[tw``, {
+            color: themeColors.text,
+            opacity: 0.7,
             fontFamily: fontFamily.Light
           }]}>Select your primary role 
 (you can add more later)</Text>
@@ -100,13 +104,16 @@ const RegisterType = ({}: RegisterTypePropss) => {
                   <Image resizeMode="contain" style={[tw`h-15 w-20`]} source={items.image} />
                   </View>
                   <View style={[tw`gap-1.5`]}>
-                    <Text style={[tw`text-[17px] text-[#19488A]`, {
+                    <Text style={[tw`text-[17px]`, {
+                    color: themeColors.primaryColor,
                     fontFamily: fontFamily.Bold
                   }]}>
                     {items.name}
                   </Text>
                   
                     <Text style={[tw`text-xs w-[70%]`, {
+                    color: themeColors.text,
+                    opacity: 0.8,
                     fontFamily: fontFamily.Regular
                   }]}>
                     {items.info}

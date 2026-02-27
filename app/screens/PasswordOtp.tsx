@@ -1,15 +1,15 @@
 import PrimaryButton from "@/components/Buttons/PrimaryButton";
 import SharedLayout from "@/components/Layout/SharedLayout";
+import { useColorScheme } from "@/components/useColorScheme";
 import Colors from "@/constants/Colors";
 import tw from "@/constants/tailwind";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import {
-  Alert,
-  Text,
-  TouchableOpacity,
-  useColorScheme,
-  View,
+    Alert,
+    Text,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import { OtpInput } from "react-native-otp-entry";
 
@@ -97,7 +97,7 @@ const PasswordOtp = () => {
 
           {/* RESEND CODE LINK */}
           <View style={tw`flex-row gap-1 items-center justify-center`}>
-            <Text>Didn't receive the code?</Text>
+            <Text style={{ color: themeColors.text, opacity: 0.7 }}>Didn't receive the code?</Text>
             <TouchableOpacity onPress={handleResendCode}>
               <Text
                 style={[tw`underline`, { color: themeColors.primaryColor }]}

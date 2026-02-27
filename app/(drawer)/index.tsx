@@ -7,15 +7,19 @@ import CustomTextInput from "@/components/Inputs/CustomTextinput";
 import RouteNumberTextInput from "@/components/Inputs/RouteNumberTextInput";
 import RouteSearchTextInput from "@/components/Inputs/RouteTextInputs";
 import SearchTextInput from "@/components/Inputs/SearchTextInput";
+import { useShipmentOffers } from "@/components/hooks/useShipmentOffers";
 import { useShipmentTracking } from "@/components/hooks/useShipmentTracking";
 import { createShippment, offerPrice } from "@/components/services/api/authApi";
-import { confirmCarrierAcceptance, getShipmentDetails, getShipperCurrentShipments, requestOfferPrice } from "@/components/services/api/carriersApi";
+import { confirmCarrierAcceptance, getShipmentDetails, getShipperCurrentShipments, updateShipmentStatus } from "@/components/services/api/carriersApi";
+import * as SecureStore from "@/components/services/storage/secureStore";
+import { STORAGE_KEYS } from "@/components/services/storage/storageKeys";
 import useAuthStore from "@/components/store/authStore";
 import useShipmentStore, { AcceptedShipment } from "@/components/store/shipmentStore";
+import { useColorScheme } from "@/components/useColorScheme";
 import Colors from "@/constants/Colors";
 import { fontFamily } from "@/constants/fonts";
 import tw from "@/constants/tailwind";
-import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
+import BottomSheet, { BottomSheetScrollView, BottomSheetView } from "@gorhom/bottom-sheet";
 import { DrawerActions } from "@react-navigation/native";
 import * as Location from "expo-location";
 import { useNavigation, useRouter } from "expo-router";
@@ -31,7 +35,6 @@ import {
   Platform,
   Text,
   TouchableOpacity,
-  useColorScheme,
   View
 } from "react-native";
 import { TextInput } from "react-native-gesture-handler";
@@ -70,6 +73,8 @@ const UserHomePage = ({}: UserHomePageProps) => {
     setShipmentData,
     addAcceptedShipment,
     updateShipmentTrackingStatus,
+    updateCarrierLocation,
+    cancelShipment,
     clearShipment,
     loadShipment
   } = useShipmentStore();
@@ -78,6 +83,7 @@ const UserHomePage = ({}: UserHomePageProps) => {
   const [trackingModalVisible, setTrackingModalVisible] = useState(false);
   const [trackedShipment, setTrackedShipment] = useState<AcceptedShipment | null>(null);
   const { carrierLocation, shipmentStatus, isConnected, connect: connectTracking, disconnect: disconnectTracking } = useShipmentTracking();
+  const { offers, loading: loadingOffers, connect: connectOffers, disconnect: disconnectOffers } = useShipmentOffers();
   const trackingMapRef = useRef<MapView>(null);
 
   const setStep = (step: 1 | 2) => setShipmentData({ step });
@@ -102,8 +108,6 @@ const UserHomePage = ({}: UserHomePageProps) => {
   const [offerSheet, setOfferSheet] = useState<boolean>(false);
   const [itemValue, setItemValue] = useState<number>(1500);
 
-  const [offers, setOffers] = useState<any[]>([]);
-  const [loadingOffers, setLoadingOffers] = useState(false);
   const [isAccepting, setIsAccepting] = useState(false);
   const routeSearchSheetRef = useRef<BottomSheet>(null);
   const bottomSheetRef = useRef<BottomSheet>(null);
@@ -146,11 +150,11 @@ const UserHomePage = ({}: UserHomePageProps) => {
   const { user, fetchUserProfile, isAuthenticated, accessToken } = useAuthStore();
   const GoogleApiKey = process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY;
 
-  const edgePaddingValue = 50;
+  const edgePaddingValue = 120;
 
   const edgePadding = {
     top: 100, // Reduced from 300 to show more map
-    bottom: 400, // Increased to account for bottom sheet
+    bottom: 500, // Increased to account for bottom sheet
     left: edgePaddingValue,
     right: edgePaddingValue
   }
@@ -364,6 +368,9 @@ const UserHomePage = ({}: UserHomePageProps) => {
       if (response && response.id) {
         setCreatedShipmentId(response.id);
         setCalculatedPrice(response.calculated_price);
+        if (response.calculated_price) {
+          setFinalPrice(parseInt(response.calculated_price));
+        }
         setOrderDetailSheet(false);
         setStep(2);
         bottomSheetRef.current?.expand();
@@ -394,6 +401,7 @@ const UserHomePage = ({}: UserHomePageProps) => {
       };
       const response = await offerPrice(createdShipmentId, data, accessToken);
       console.log("Offer price successful:", response);
+      setchooseCarrierModal(true);
       // setOfferSheet(false);
       // bottomSheetRef.current?.expand();
       // Alert.alert("Success", "Your offer has been sent to riders!");
@@ -403,7 +411,7 @@ const UserHomePage = ({}: UserHomePageProps) => {
     }
   }
 
-  const handleCancelShipment = async () => {
+  const handleCancelRequest = async () => {
     Alert.alert(
       "Cancel Request",
       "Are you sure you want to cancel this delivery request?",
@@ -417,13 +425,20 @@ const UserHomePage = ({}: UserHomePageProps) => {
           style: "destructive",
           onPress: async () => {
             try {
+              // If a shipment was already created, cancel it on the backend
+              if (createdShipmentId && accessToken) {
+                try {
+                  await updateShipmentStatus(accessToken, createdShipmentId, "cancelled");
+                } catch (apiError) {
+                  console.error("API Error cancelling shipment:", apiError);
+                }
+              }
+
               // Clear the store and local states as requested
               await clearShipment();
               setchooseCarrierModal(false);
               setStep(1);
               setShowDirection(false);
-              setOffers([]);
-              // If there was an API to call, it would go here
               Alert.alert("Cancelled", "Your delivery request has been cancelled.");
             } catch (error) {
               console.error("Error cancelling shipment:", error);
@@ -434,46 +449,16 @@ const UserHomePage = ({}: UserHomePageProps) => {
     );
   };
 
-  const fetchOffers = useCallback(async (silent: boolean = false) => {
-    const { activeShipmentId: createdShipmentId } = useShipmentStore.getState();
-    const { accessToken } = useAuthStore.getState();
-    if (!createdShipmentId || !accessToken) return;
-    try {
-      if (!silent) setLoadingOffers(true);
-      const data = await requestOfferPrice(accessToken, createdShipmentId);
-      console.log("RAW OFFERS DATA:", JSON.stringify(data, null, 2));
-      
-      // Handle various response formats
-      let offersList = [];
-      if (data && data.results) {
-        offersList = data.results;
-      } else if (Array.isArray(data)) {
-        offersList = data;
-      } else if (data && data.data && Array.isArray(data.data)) {
-        offersList = data.data;
-      }
-
-      console.log(`Parsed ${offersList.length} offers`);
-      setOffers(offersList);
-    } catch (error) {
-      console.error("Error fetching offers:", error);
-    } finally {
-      if (!silent) setLoadingOffers(false);
-    }
-  }, [createdShipmentId, accessToken]);
-
   useEffect(() => {
-    let interval: any;
+    console.log(`[DEBUG index.tsx] chooseCarrierModal: ${chooseCarrierModal}, createdShipmentId: ${createdShipmentId} (type: ${typeof createdShipmentId})`);
     if (chooseCarrierModal && createdShipmentId) {
-      fetchOffers(); // Initial fetch
-      interval = setInterval(() => {
-        fetchOffers(true); // Silent background poll
-      }, 5000);
+      console.log(`[DEBUG index.tsx] Calling connectOffers with: ${createdShipmentId}`);
+      connectOffers(createdShipmentId);
+    } else {
+      disconnectOffers();
     }
-    return () => {
-      if (interval) clearInterval(interval);
-    };
-  }, [chooseCarrierModal, createdShipmentId, fetchOffers]);
+    return () => disconnectOffers();
+  }, [chooseCarrierModal, createdShipmentId, connectOffers, disconnectOffers]);
 
   // Check shipment status for accepted shipments that are still "waiting"
   useEffect(() => {
@@ -504,19 +489,55 @@ const UserHomePage = ({}: UserHomePageProps) => {
     return () => clearInterval(interval);
   }, [acceptedShipments]);
 
-  // Handle opening live tracking
-  const handleTrackShipment = useCallback((shipment: AcceptedShipment) => {
-    setTrackedShipment(shipment);
-    setTrackingModalVisible(true);
-    connectTracking(shipment.id, shipment.status);
-  }, [connectTracking]);
-
   // Handle closing live tracking
   const handleCloseTracking = useCallback(() => {
     disconnectTracking();
     setTrackingModalVisible(false);
     setTrackedShipment(null);
   }, [disconnectTracking]);
+
+  const handleCancelShipment = useCallback(async () => {
+    if (!trackedShipment) return;
+    
+    Alert.alert(
+      "Cancel Shipment",
+      "Are you sure you want to cancel this shipment?",
+      [
+        { text: "No", style: "cancel" },
+        { 
+          text: "Yes, Cancel", 
+          style: "destructive",
+          onPress: async () => {
+            try {
+              const token = await SecureStore.getItem(STORAGE_KEYS.ACCESS_TOKEN);
+              if (token) {
+                await updateShipmentStatus(token, trackedShipment.id, "cancelled");
+                await cancelShipment(trackedShipment.id);
+                handleCloseTracking();
+              }
+            } catch (error) {
+              console.log("Error cancelling shipment:", error);
+              Alert.alert("Error", "Failed to cancel shipment. Please try again.");
+            }
+          }
+        }
+      ]
+    );
+  }, [trackedShipment, cancelShipment, handleCloseTracking]);
+
+  // Handle opening live tracking
+  const handleTrackShipment = useCallback((shipment: AcceptedShipment) => {
+    setTrackedShipment(shipment);
+    setTrackingModalVisible(true);
+    connectTracking(shipment.id, shipment.status);
+  }, [connectTracking]);
+  
+  // Sync carrier location to store for persistence
+  useEffect(() => {
+    if (carrierLocation && trackedShipment) {
+      updateCarrierLocation(trackedShipment.id, carrierLocation.latitude, carrierLocation.longitude);
+    }
+  }, [carrierLocation, trackedShipment, updateCarrierLocation]);
 
   // Fit map to carrier + route when carrier location updates or modal opens
   useEffect(() => {
@@ -613,10 +634,28 @@ const UserHomePage = ({}: UserHomePageProps) => {
         destination={destination}
         apikey={GoogleApiKey || ""}
         strokeColor={themeColors.primaryColor}
-          strokeWidth={6}
+          strokeWidth={3}
           onReady={trackRouteOnReady}
        />
         }
+        {acceptedShipments.map((shipment) => (
+          (shipment.carrierLatitude && shipment.carrierLongitude) ? (
+            <Marker
+              key={`carrier-${shipment.id}`}
+              coordinate={{
+                latitude: shipment.carrierLatitude,
+                longitude: shipment.carrierLongitude
+              }}
+              title={`Carrier for #${shipment.id}`}
+              anchor={{ x: 0.5, y: 0.5 }}
+            >
+               <Image 
+                source={require("../../assets/images/IntroImages/icon/Car.png")} 
+                style={[tw`w-10 h-10`, { resizeMode: "contain" }]} 
+              />
+            </Marker>
+          ) : null
+        ))}
       </MapView>
          <TouchableOpacity
                 style={[
@@ -638,7 +677,7 @@ const UserHomePage = ({}: UserHomePageProps) => {
           visible={chooseCarrierModal}
         >
           <View style={[tw`flex-1 px-5 pt-15 bg-black/80 gap-6`]}>
-            <TouchableOpacity onPress={handleCancelShipment} style={[tw`bg-[#D37A0F88] flex-row items-center gap-2 px-3 py-2 self-start rounded-full`]}>
+            <TouchableOpacity onPress={handleCancelRequest} style={[tw`bg-[#D37A0F88] flex-row items-center gap-2 px-3 py-2 self-start rounded-full`]}>
               <XIcon color={"white"} size={17}/>
               <Text style={[tw`text-white text-xs`, {
                   fontFamily: fontFamily.MontserratEasyBold
@@ -662,25 +701,33 @@ const UserHomePage = ({}: UserHomePageProps) => {
                 </View>
               ) : (
                 offers.map((offer, index) => {
+  const carrierName = offer.carrier?.first_name
+    ? `${offer.carrier.first_name} ${offer.carrier.last_name || ""}`
+    : offer.carrier_first_name
+    ? `${offer.carrier_first_name} ${offer.carrier_last_name || ""}`
+    : "Carrier";
+
+  const carrierImage = offer.carrier?.profile_picture
+    ? { uri: offer.carrier.profile_picture }
+    : require("../../assets/images/pfp.png");
+
+  const vehicleType = offer.carrier?.vehicle_type?.name
+    || offer.vehicle_type_display
+    || "Rider";
+
                   return (
                     <Animated.View 
                       entering={SlideInRight.delay(index * 100)}
                       key={offer.id || index}
                     >
                     <CarrierCard
-                      name={(() => {
-                        const carrier = offer.carrier || offer.acceptance_sender || offer.user;
-                        return carrier?.first_name ? `${carrier.first_name} ${carrier.last_name || ""}` : "Carrier";
-                      })()}
+                      name={carrierName}
                       amount={offer.final_price || offer.offered_price || finalPrice}
-                      carrierType={(() => {
-                        const carrier = offer.carrier || offer.acceptance_sender || offer.user;
-                        return carrier?.vehicle_type?.name || "Rider";
-                      })() as any}
-                      image={(() => {
-                        const carrier = offer.carrier || offer.acceptance_sender || offer.user;
-                        return carrier?.profile_picture ? { uri: carrier.profile_picture } : require("../../assets/images/pfp.png");
-                      })()}
+        carrierType={vehicleType as any}
+        image={carrierImage}
+        rating={offer.rating || 4.5}
+        time={offer.distance_display || "Nearby"}
+        totalRides={offer.carrier?.total_trips || 0}
                       acceptOnPress={async () => {
                         if (isAccepting) return;
                         try {
@@ -738,9 +785,6 @@ const UserHomePage = ({}: UserHomePageProps) => {
                       declineOnPress={() => {
                         // Optional: ignore this offer
                       }}
-                      rating={4.5} // Backend needs to provide this
-                      time="Nearby" // Backend needs to provide this
-                      totalRides={offer.carrier?.total_trips || 0}
                     />
                     </Animated.View>
                   )
@@ -823,7 +867,6 @@ const UserHomePage = ({}: UserHomePageProps) => {
                 onpress={async () => {
                   await clearShipment();
                   setShowDirection(false);
-                  setOffers([]);
                   setStep(2);
                 }}
               />
@@ -1064,7 +1107,8 @@ const UserHomePage = ({}: UserHomePageProps) => {
         ref={OrderDetailSheetRef}
         onClose={() => setOrderDetailSheet(false)}
       >
-          <BottomSheetView style={[tw`flex-1 px-5 justify-between pb-15`]}
+          <BottomSheetScrollView style={[tw`flex-1 px-5 pb-15`]}
+            contentContainerStyle={[tw`pb-10`]}
           >
             <View style={[tw`gap-5`]}>
             <View style={[tw`flex-row justify-between items-center`]}>
@@ -1181,7 +1225,7 @@ const UserHomePage = ({}: UserHomePageProps) => {
                 onpress={handleCreateEvent}
               />
             </View>
-        </BottomSheetView>
+        </BottomSheetScrollView>
   
       </BottomSheet>
       )}
@@ -1277,9 +1321,9 @@ const UserHomePage = ({}: UserHomePageProps) => {
             provider={PROVIDER_GOOGLE}
             ref={trackingMapRef}
             style={[tw`flex-1`]}
-            region={{
-              latitude: carrierLocation?.latitude || (trackedShipment?.pickupLatitude ? parseFloat(String(trackedShipment.pickupLatitude)) : 6.5244),
-              longitude: carrierLocation?.longitude || (trackedShipment?.pickupLongitude ? parseFloat(String(trackedShipment.pickupLongitude)) : 3.3792),
+            initialRegion={{
+              latitude: carrierLocation?.latitude || trackedShipment?.carrierLatitude || (trackedShipment?.pickupLatitude ? parseFloat(String(trackedShipment.pickupLatitude)) : 6.5244),
+              longitude: carrierLocation?.longitude || trackedShipment?.carrierLongitude || (trackedShipment?.pickupLongitude ? parseFloat(String(trackedShipment.pickupLongitude)) : 3.3792),
               latitudeDelta: 0.01,
               longitudeDelta: 0.01,
             }}
@@ -1291,11 +1335,14 @@ const UserHomePage = ({}: UserHomePageProps) => {
             mapType="standard"
           >
             {/* Carrier live marker */}
-            {carrierLocation && (
+            {(carrierLocation || (trackedShipment?.carrierLatitude && trackedShipment?.carrierLongitude)) && (
               <Marker
-                coordinate={carrierLocation}
+                coordinate={{
+                  latitude: carrierLocation?.latitude || trackedShipment!.carrierLatitude!,
+                  longitude: carrierLocation?.longitude || trackedShipment!.carrierLongitude!
+                }}
                 title="Carrier"
-                rotation={carrierLocation.heading || 0}
+                rotation={carrierLocation?.heading || 0}
                 anchor={{ x: 0.5, y: 0.5 }}
               >
                 <View style={[tw`items-center justify-center`]}>
@@ -1352,9 +1399,12 @@ const UserHomePage = ({}: UserHomePageProps) => {
             )}
 
             {/* Live Carrier Directions (Current segment) */}
-            {carrierLocation && trackedShipment && (
+            {(carrierLocation || (trackedShipment?.carrierLatitude && trackedShipment?.carrierLongitude)) && trackedShipment && (
               <MapViewDirections
-                origin={carrierLocation}
+                origin={{
+                  latitude: carrierLocation?.latitude || trackedShipment.carrierLatitude!,
+                  longitude: carrierLocation?.longitude || trackedShipment.carrierLongitude!
+                }}
                 destination={
                   (trackedShipment.status === "picked" || trackedShipment.status === "in-transit")
                     ? { latitude: parseFloat(String(trackedShipment.deliveryLatitude!)), longitude: parseFloat(String(trackedShipment.deliveryLongitude!)) }
@@ -1472,6 +1522,15 @@ const UserHomePage = ({}: UserHomePageProps) => {
                   color: themeColors.primaryColor
                 }]}>{"\u20A6"}{trackedShipment.finalPrice}</Text>
               </View>
+
+              <TouchableOpacity
+                onPress={handleCancelShipment}
+                style={[tw`mt-6 w-full h-[50px] bg-red-500 rounded-xl items-center justify-center`]}
+              >
+                <Text style={[tw`text-white`, {
+                  fontFamily: fontFamily.MontserratEasyBold
+                }]}>Cancel Shipment</Text>
+              </TouchableOpacity>
             </View>
           )}
         </View>

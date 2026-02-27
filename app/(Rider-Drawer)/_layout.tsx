@@ -34,7 +34,7 @@ function CustomDrawerContent(props: any) {
                 style={[tw`h-14 w-14 rounded-full bg-gray-200`]}
             />
             <View>
-                <Text style={[tw`text-lg uppercase`, { fontFamily: fontFamily.MontserratEasyBold }]}>
+                <Text style={[tw`text-lg uppercase`, { color: themeColors.text, fontFamily: fontFamily.MontserratEasyBold }]}>
                     {user?.full_name || "Rider Name"}
               </Text>
               <View style={[tw`flex-row items-center gap-1`]}>
@@ -42,6 +42,7 @@ function CustomDrawerContent(props: any) {
                   17
                 } color={"#F9C806"}/>
                 <Text style={[tw`text-xs`, {
+                  color: themeColors.text,
                   fontFamily: fontFamily.MontserratEasyRegular
                 }]}>4.97(270)</Text>
               </View>
@@ -103,7 +104,7 @@ export default function DrawerLayout() {
           fontFamily: fontFamily.MontserratEasyRegular,
           fontSize: 13
         },
-        drawerActiveTintColor: "black",
+        drawerActiveTintColor: themeColors.primaryColor,
         drawerItemStyle: {
           borderRadius: 0,
         },

@@ -2,6 +2,7 @@ import PrimaryButton from "@/components/Buttons/PrimaryButton";
 import PasswordTextInputFields from "@/components/Inputs/PasswordTextInputField";
 import TextInputFields from "@/components/Inputs/TextInputFields";
 import { checkCarrierExists } from "@/components/services/api/authApi";
+import { useColorScheme } from "@/components/useColorScheme";
 import Colors from "@/constants/Colors";
 import { fontFamily } from "@/constants/fonts";
 import tw from "@/constants/tailwind";
@@ -19,7 +20,6 @@ import {
   Text,
   TouchableOpacity,
   TouchableWithoutFeedback,
-  useColorScheme,
   View
 } from "react-native";
 import * as Yup from "yup";
@@ -172,17 +172,19 @@ export default function RiderAuthIndex() {
               errors,
               touched,
             }) => (
-               <View style={[tw`bg-white rounded-t-2xl overflow-hidden`]}>
+               <View style={[tw`rounded-t-2xl overflow-hidden`, { backgroundColor: themeColors.background }]}>
                 <ScrollView
                   showsVerticalScrollIndicator={false}
                   contentContainerStyle={tw`pt-10 pb-15 px-5 gap-5`}
                 >
                 <View style={[tw`gap-6`]}>
                   <View style={[tw`items-center gap-2`]}>
-                    <Text style={[tw`text-2xl`, {
+                      <Text style={[tw`text-2xl`, {
+                      color: themeColors.text,
                       fontFamily: fontFamily.Bold
                     }]}>Create an account</Text>
-                    <Text style={[tw`text-center`, {
+                      <Text style={[tw`text-center`, {
+                      color: themeColors.text,
                       fontFamily: fontFamily.Light
                     }]}>Welcome back to Africa's Trusted Delivery Network.</Text>
                 </View>
@@ -194,7 +196,7 @@ export default function RiderAuthIndex() {
                       placeholderText="email"
                       iconSize={18}
                       value={values.email}
-                      placeholderTextColor={"#19488A"}
+                      placeholderTextColor={themeColors.text}
                       onChangeText={handleChange("email")}
                       onBlur={handleBlur("email")}
                       keyboardType="email-address"
@@ -213,7 +215,7 @@ export default function RiderAuthIndex() {
                       iconColor={themeColors.primaryColor}
                       placeholderText="password"
                       iconSize={18}
-                       placeholderTextColor={"#19488A"}
+                       placeholderTextColor={themeColors.text}
                       value={values.password}
                       onChangeText={handleChange("password")}
                       onBlur={handleBlur("password")}
@@ -246,7 +248,7 @@ export default function RiderAuthIndex() {
                       style={[tw`h-5 w-5`]}
                       source={require("../../../../assets/images/IntroImages/icon/google.png")}
                     />
-                    <Text style={[tw`text-sm`, { fontFamily: fontFamily.Light }]}>Google</Text>
+                    <Text style={[tw`text-sm`, { color: themeColors.text, fontFamily: fontFamily.Light }]}>Google</Text>
                   </TouchableOpacity>
 
                   {Platform.OS === "ios" && (
@@ -260,7 +262,7 @@ export default function RiderAuthIndex() {
                         style={[tw`h-5 w-5`]}
                         source={require("../../../../assets/images/IntroImages/icon/apple.png")}
                       />
-                      <Text style={[tw`text-sm`, { fontFamily: fontFamily.Light }]}>Apple</Text>
+                      <Text style={[tw`text-sm`, { color: themeColors.text, fontFamily: fontFamily.Light }]}>Apple</Text>
                     </TouchableOpacity>
                   )}
               </View>
@@ -278,6 +280,7 @@ export default function RiderAuthIndex() {
               </View>
                <View style={[tw`flex-row items-center justify-center gap-1`]}>
                     <Text style={[tw``, {
+                  color: themeColors.text,
                   fontFamily: fontFamily.Light
                 }]}>Already have an account?</Text>
               <TouchableOpacity

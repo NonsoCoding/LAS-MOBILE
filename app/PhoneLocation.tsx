@@ -1,13 +1,14 @@
 import PrimaryButton from "@/components/Buttons/PrimaryButton";
 import TextInputFields from "@/components/Inputs/TextInputFields";
 import useAuthStore from "@/components/store/authStore";
+import { useColorScheme } from "@/components/useColorScheme";
 import Colors from "@/constants/Colors";
 import { fontFamily } from "@/constants/fonts";
 import tw from "@/constants/tailwind";
 import { useRouter } from "expo-router";
 import { Formik } from "formik";
 import { useState } from "react";
-import { Image, Keyboard, KeyboardAvoidingView, Platform, Text, TouchableOpacity, TouchableWithoutFeedback, useColorScheme, View } from "react-native";
+import { Image, Keyboard, KeyboardAvoidingView, Platform, Text, TouchableOpacity, TouchableWithoutFeedback, View } from "react-native";
 import * as yup from "yup";
 
 interface PhoneLoactionProps {
@@ -21,7 +22,7 @@ const formSchema = yup.object().shape({
 const PhoneLocation = ({ }: PhoneLoactionProps) => {
 
     const [selected, setSelected] = useState<number>(0);
-  const colorSheme = useColorScheme();
+    const colorSheme = useColorScheme();
   const { setPhoneNumber, setCountry } = useAuthStore();
     const themeColors = Colors[colorSheme ?? "light"];
     const router = useRouter();
@@ -45,7 +46,7 @@ const PhoneLocation = ({ }: PhoneLoactionProps) => {
       style={tw`flex-1`}
     >
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-          <View style={tw`bg-[#19488A] flex-1 justify-end`}>
+          <View style={[tw`flex-1 justify-end`, { backgroundColor: themeColors.primaryColor }]}>
             <Image
               source={require("../assets/images/Intro_logo.png")}
               style={[tw`self-center h-140 w-140 absolute -top-15`]}
@@ -57,20 +58,25 @@ const PhoneLocation = ({ }: PhoneLoactionProps) => {
               onSubmit={handleNext}
             >
               {({ handleChange, handleBlur, handleSubmit, values, errors, touched }) => (
-                <View style={[tw`bg-white px-5 py-5 pb-5 gap-7 justify-center`, {
+                <View style={[tw`px-5 py-5 pb-5 gap-7 justify-center`, {
+                  backgroundColor: themeColors.background,
                   borderTopRightRadius: 20,
                   borderTopLeftRadius: 20
                 }]}>  
                   <View style={[tw`items-center gap-3 `]}>
                     <Text style={[tw`text-2xl`, {
+                      color: themeColors.text,
                       fontFamily: fontFamily.Bold
                     }]}>Welcome to LAS Mobile</Text>
                     <Text style={[tw`w-[80%] text-center`, {
+                      color: themeColors.text,
+                      opacity: 0.7,
                       fontFamily: fontFamily.Light
                     }]}>Enter your phone number to continue</Text>
                   </View>
                   <View style={[tw`gap-5`]}>
                     <Text style={[tw``, {
+                      color: themeColors.text,
                       fontFamily: fontFamily.Medium
                     }]}>Select your country</Text>
                     <View style={[tw`flex-row gap-2`]}>
@@ -95,6 +101,7 @@ const PhoneLocation = ({ }: PhoneLoactionProps) => {
                           >
                             <Image source={items.name} style={[tw`h-10 w-10`]} />
                             <Text style={[tw``, {
+                              color: themeColors.text,
                               fontFamily: fontFamily.Light
                             }]}>{items.country}</Text>
                           </TouchableOpacity>

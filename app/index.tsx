@@ -1,9 +1,10 @@
 import PrimaryButton from "@/components/Buttons/PrimaryButton";
+import { useColorScheme } from "@/components/useColorScheme";
 import { fontFamily } from "@/constants/fonts";
 import tw from "@/constants/tailwind";
 import { useRouter } from "expo-router";
 import { useState } from "react";
-import { Image, Platform, useColorScheme, View } from "react-native";
+import { Image, Platform, View } from "react-native";
 import Animated, {
   FadeIn,
   useAnimatedStyle,
@@ -75,8 +76,9 @@ const IntroScreen = ({}: IntroScreenProps) => {
       />
       <View
         style={[
-          tw`relative bg-white h-85 justify-center px-5`,
+          tw`relative h-85 justify-center px-5`,
           {
+            backgroundColor: themeColors.background,
             borderTopRightRadius: 20,
             borderTopLeftRadius: 20,
             ...Platform.select({
@@ -111,7 +113,8 @@ const IntroScreen = ({}: IntroScreenProps) => {
               >
                 <Animated.Text
                   style={[tw`text-2xl text-center mb-3`, {
-                    fontFamily: fontFamily.MontserratEasyBold
+                    fontFamily: fontFamily.MontserratEasyBold,
+                    color: themeColors.text
                   }]}
                   entering={FadeIn.delay(200)}
                   key={`title-${index}`}
@@ -120,7 +123,8 @@ const IntroScreen = ({}: IntroScreenProps) => {
                 </Animated.Text>
                 <Animated.Text
                   style={[tw`text-center text-gray-600`, {
-                    fontFamily: fontFamily.MontserratEasyRegular
+                    fontFamily: fontFamily.MontserratEasyRegular,
+                             color: themeColors.text
                   }]}
                   entering={FadeIn.delay(300)}
                   key={`info-${index}`}

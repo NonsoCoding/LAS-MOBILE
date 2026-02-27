@@ -1,7 +1,7 @@
 import {
-  DarkTheme,
-  DefaultTheme,
-  ThemeProvider,
+    DarkTheme,
+    DefaultTheme,
+    ThemeProvider,
 } from "@react-navigation/native";
 import { Stack, useRouter } from "expo-router";
 import "react-native-reanimated";
@@ -13,6 +13,7 @@ import * as SecureStore from "@/components/services/storage/secureStore";
 import { STORAGE_KEYS } from "@/components/services/storage/storageKeys";
 import useAuthStore from "@/components/store/authStore";
 import { useColorScheme } from "@/components/useColorScheme";
+import Colors from "@/constants/Colors";
 import { fontFamily } from "@/constants/fonts";
 import { useFonts } from "expo-font";
 import * as SplashScreen from "expo-splash-screen";
@@ -22,8 +23,8 @@ import { useEffect, useState } from "react";
 SplashScreen.preventAutoHideAsync();
 
 export {
-  // Catch any errors thrown by the Layout component.
-  ErrorBoundary
+    // Catch any errors thrown by the Layout component.
+    ErrorBoundary
 } from "expo-router";
 
 export const unstable_settings = {
@@ -33,6 +34,7 @@ export const unstable_settings = {
 
 function RootLayoutNav() {
   const colorScheme = useColorScheme();
+  const themeColors = Colors[colorScheme ?? "light"];
   const { mode, setMode } = useAppMode();
   const router = useRouter();
   const [appIsReady, setAppIsReady] = useState(false);
@@ -100,7 +102,7 @@ function RootLayoutNav() {
         <Stack
           screenOptions={{
             headerShown: false,
-            contentStyle: { backgroundColor: "#FFFFFF" },
+            contentStyle: { backgroundColor: themeColors.background },
           }}
           initialRouteName="index"
         >
@@ -125,7 +127,7 @@ function RootLayoutNav() {
         <Stack
           screenOptions={{
             headerShown: false,
-            contentStyle: { backgroundColor: "#FFFFFF" },
+            contentStyle: { backgroundColor: themeColors.background },
           }}
           initialRouteName="(Rider-Drawer)"
         >

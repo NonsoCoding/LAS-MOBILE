@@ -2,6 +2,7 @@ import PrimaryButton from "@/components/Buttons/PrimaryButton";
 import TextInputFields from "@/components/Inputs/TextInputFields";
 import SharedLayout from "@/components/Layout/SharedLayout";
 import { ConfirmPasswordReset } from "@/components/services/api/authApi";
+import { useColorScheme } from "@/components/useColorScheme";
 import yup from "@/components/utils/formik";
 import Colors from "@/constants/Colors";
 import tw from "@/constants/tailwind";
@@ -9,7 +10,7 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { Formik } from "formik";
 import { Lock } from "lucide-react-native";
 import React, { useState } from "react";
-import { Alert, Text, useColorScheme, View } from "react-native";
+import { Alert, Text, View } from "react-native";
 
 const validationSchema = yup.object().shape({
   password: yup
@@ -124,10 +125,10 @@ export default function ChangePassword() {
           <View style={[tw`flex-1 pt-10 gap-10 justify-between`]}>
             <View style={[tw`gap-5`]}>
               <View style={[tw`gap-3`]}>
-                <Text style={[tw`text-4xl font-semibold text-[#003C7A]`]}>
+                <Text style={[tw`text-4xl font-semibold`, { color: themeColors.primaryColor }]}>
                   Change Password
                 </Text>
-                <Text style={[tw`font-light`]}>
+                <Text style={[tw`font-light`, { color: themeColors.text, opacity: 0.7 }]}>
                   Kindly fill in both details to change your password
                 </Text>
               </View>

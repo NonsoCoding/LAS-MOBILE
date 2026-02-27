@@ -4,6 +4,7 @@ import { acceptRequest, getShipmentDetails, requestShippments } from "@/componen
 import * as SecureStore from "@/components/services/storage/secureStore";
 import { STORAGE_KEYS } from "@/components/services/storage/storageKeys";
 import useAuthStore from "@/components/store/authStore";
+import { useColorScheme } from "@/components/useColorScheme";
 import Colors from "@/constants/Colors";
 import { fontFamily } from "@/constants/fonts";
 import tw from "@/constants/tailwind";
@@ -11,7 +12,7 @@ import BottomSheet, { BottomSheetScrollView, BottomSheetView } from "@gorhom/bot
 import { useRouter } from "expo-router";
 import { ChevronRight, Gift, MessageCircle, MoreVertical, PhoneCall, Star } from "lucide-react-native";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { ActivityIndicator, Alert, Image, Text, TouchableOpacity, useColorScheme, View } from "react-native";
+import { ActivityIndicator, Alert, Image, Text, TouchableOpacity, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
 import MapViewDirections from "react-native-maps-directions";
@@ -135,7 +136,7 @@ const RequestScreen = ({
         const token = await SecureStore.getItem(STORAGE_KEYS.ACCESS_TOKEN);
         if (!token) return;
         
-        console.log(`Rider accepting shipment ${request.id}...`);
+        // console.log(`Rider accepting shipment ${request.id}...`);
         await acceptRequest(token, request.id);
         
         // Remove from local list immediately to prevent double-rendering/animations
@@ -335,7 +336,6 @@ const RequestScreen = ({
                                         <Text style={[tw`text-[11px]`, {
                                                 fontFamily: fontFamily.MontserratEasyRegular
                                             }]}>{request.recipient_name || "Shipper"}</Text>
-                                            
                                         </View>
                                     </View>
                                     <View style={[tw`gap-2 flex-1`]}>
@@ -361,7 +361,8 @@ const RequestScreen = ({
                                             fontFamily: fontFamily.MontserratEasyMedium
                                         }]}>{request.delivery_address}</Text>
                                         </View>
-                                    </View>
+                              </View>
+                              <View style={[tw`flex-row items-center gap-2`]}>
                                     <TouchableOpacity
                                       onPress={() => handleAccept(request)}
                                       disabled={acceptingId === request.id}
@@ -377,6 +378,25 @@ const RequestScreen = ({
                                           </>
                                         )}
                                     </TouchableOpacity>
+                                    <TouchableOpacity
+                                  onPress={() => {
+                                    console.log("Reject Shipment...");
+                                    
+                                      }}
+                                      disabled={acceptingId === request.id}
+                                      style={[tw`bg-red-400 flex-row items-center w-25 justify-between px-4 py-1.5 rounded-full gap-2`, acceptingId === request.id && tw`opacity-50`]}>
+                                        {acceptingId === request.id ? (
+                                          <ActivityIndicator size="small" color="white" />
+                                        ) : (
+                                          <>
+                                            <Text style={[tw`text-white text-xs`, {
+                                                fontFamily: fontFamily.MontserratEasyBold
+                                            }]}>Reject</Text>
+                                            <ChevronRight size={15} color="white"/>
+                                          </>
+                                        )}
+                                    </TouchableOpacity>
+                              </View>
                                 </View>
                                 </Animated.View>
                             ))}

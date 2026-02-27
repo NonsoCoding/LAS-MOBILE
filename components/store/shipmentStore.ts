@@ -19,6 +19,8 @@ export interface AcceptedShipment {
     pickupLongitude?: string;
     deliveryLatitude?: string;
     deliveryLongitude?: string;
+    carrierLatitude?: number;
+    carrierLongitude?: number;
     isAssigned?: boolean;
 }
 
@@ -43,6 +45,8 @@ interface ShipmentState {
     setShipmentData: (data: Partial<ShipmentState>) => void;
     addAcceptedShipment: (shipment: AcceptedShipment) => Promise<void>;
     updateShipmentTrackingStatus: (shipmentId: number, trackingStatus: "waiting" | "trackable", isAssigned?: boolean) => Promise<void>;
+    updateCarrierLocation: (shipmentId: number, latitude: number, longitude: number) => Promise<void>;
+    cancelShipment: (shipmentId: number) => Promise<void>;
     clearShipment: () => Promise<void>;
     loadShipment: () => Promise<void>;
 }
@@ -134,7 +138,7 @@ const useShipmentStore = create<ShipmentState>((set, get) => ({
             acceptedShipments: updatedShipments,
         };
         // Remove functions before persisting
-        const { setShipmentData, clearShipment, loadShipment, addAcceptedShipment: _a, updateShipmentTrackingStatus: _u, ...dataOnly } = persistentData as any;
+        const { setShipmentData, clearShipment, loadShipment, addAcceptedShipment: _a, updateShipmentTrackingStatus: _u, updateCarrierLocation: _l, cancelShipment: _c, ...dataOnly } = persistentData as any;
         await AsyncStore.setItem(STORAGE_KEYS.ACTIVE_SHIPMENT, JSON.stringify(dataOnly));
     },
 
@@ -145,7 +149,27 @@ const useShipmentStore = create<ShipmentState>((set, get) => ({
         );
         set({ acceptedShipments: updatedShipments });
         // Persist
-        const { setShipmentData, clearShipment, loadShipment, addAcceptedShipment: _a, updateShipmentTrackingStatus: _u, ...dataOnly } = { ...currentState, acceptedShipments: updatedShipments } as any;
+        const { setShipmentData, clearShipment, loadShipment, addAcceptedShipment: _a, updateShipmentTrackingStatus: _u, updateCarrierLocation: _l, cancelShipment: _c, ...dataOnly } = { ...currentState, acceptedShipments: updatedShipments } as any;
+        await AsyncStore.setItem(STORAGE_KEYS.ACTIVE_SHIPMENT, JSON.stringify(dataOnly));
+    },
+
+    updateCarrierLocation: async (shipmentId, latitude, longitude) => {
+        const currentState = get();
+        const updatedShipments = currentState.acceptedShipments.map(s =>
+            s.id === shipmentId ? { ...s, carrierLatitude: latitude, carrierLongitude: longitude } : s
+        );
+        set({ acceptedShipments: updatedShipments });
+        // Persist
+        const { setShipmentData, clearShipment, loadShipment, addAcceptedShipment: _a, updateShipmentTrackingStatus: _u, updateCarrierLocation: _l, cancelShipment: _c, ...dataOnly } = { ...currentState, acceptedShipments: updatedShipments } as any;
+        await AsyncStore.setItem(STORAGE_KEYS.ACTIVE_SHIPMENT, JSON.stringify(dataOnly));
+    },
+
+    cancelShipment: async (shipmentId) => {
+        const currentState = get();
+        const updatedShipments = currentState.acceptedShipments.filter(s => s.id !== shipmentId);
+        set({ acceptedShipments: updatedShipments });
+        // Persist
+        const { setShipmentData, clearShipment, loadShipment, addAcceptedShipment: _a, updateShipmentTrackingStatus: _u, updateCarrierLocation: _l, cancelShipment: _c, ...dataOnly } = { ...currentState, acceptedShipments: updatedShipments } as any;
         await AsyncStore.setItem(STORAGE_KEYS.ACTIVE_SHIPMENT, JSON.stringify(dataOnly));
     },
 

@@ -1,7 +1,9 @@
+import Colors from "@/constants/Colors";
 import { fontFamily } from "@/constants/fonts";
 import tw from "@/constants/tailwind";
 import { LucideIcon } from "lucide-react-native";
 import { KeyboardTypeOptions, TextInput, View } from "react-native";
+import { useColorScheme } from "../useColorScheme";
 
 interface TextInputFieldsProps {
   placeholderText?: string;
@@ -30,6 +32,12 @@ const TextInputFields = ({
   placeholderTextColor = "#999",
   secureTextEntry = false,
 }: TextInputFieldsProps) => {
+
+
+  const colorScheme = useColorScheme();
+    const themeColors = Colors[colorScheme ?? "light"];
+  
+
   return (
     <View
       style={[
@@ -52,6 +60,7 @@ const TextInputFields = ({
         onBlur={onBlur}
         secureTextEntry={secureTextEntry}
         style={[tw`w-full text-black py-3.5`, {
+          color: themeColors.text,
           fontFamily: fontFamily.MontserratEasyRegular
         }]}
       />

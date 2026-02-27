@@ -3,6 +3,7 @@ import PasswordTextInputFields from "@/components/Inputs/PasswordTextInputField"
 import TextInputFields from "@/components/Inputs/TextInputFields";
 import { getUserProfile, loginUser, resendOtp } from "@/components/services/api/authApi";
 import useAuthStore from "@/components/store/authStore";
+import { useColorScheme } from "@/components/useColorScheme";
 import yup from "@/components/utils/formik";
 import Colors from "@/constants/Colors";
 import { fontFamily } from "@/constants/fonts";
@@ -21,7 +22,6 @@ import {
   Text,
   TouchableOpacity,
   TouchableWithoutFeedback,
-  useColorScheme,
   View,
 } from "react-native";
 
@@ -38,8 +38,8 @@ const validationSchema = yup.object().shape({
 
 export default function UserSignInIndex() {
   const router = useRouter();
-  const colorScheme = useColorScheme();
   const [loading, setLoading] = useState(false);
+  const colorScheme = useColorScheme();
   const themeColors = Colors[colorScheme ?? "light"];
 
   const handleLogin = async (values: { email: string; password: string }) => {
@@ -138,7 +138,7 @@ export default function UserSignInIndex() {
       style={tw`flex-1`}
     >
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <View style={[tw`flex-1 bg-[#19488A] justify-end`]}>
+        <View style={[tw`flex-1 justify-end`, { backgroundColor: themeColors.primaryColor }]}>
           <Image
             source={require("../assets/images/Intro_logo.png")}
             style={[tw`self-center h-150 w-150 absolute -top-20`]}
@@ -157,7 +157,7 @@ export default function UserSignInIndex() {
               errors,
               touched,
             }) => (
-              <View style={[tw`bg-white rounded-t-2xl overflow-hidden`]}>
+              <View style={[tw`rounded-t-2xl overflow-hidden`, { backgroundColor: themeColors.background }]}>
                 <ScrollView
                   showsVerticalScrollIndicator={false}
                   contentContainerStyle={tw`pt-10 pb-15 px-5 gap-5`}
@@ -167,6 +167,7 @@ export default function UserSignInIndex() {
                       style={[
                         tw`text-xl`,
                         {
+                          color: themeColors.text,
                           fontFamily: fontFamily.MontserratEasyBold,
                         },
                       ]}
@@ -177,6 +178,8 @@ export default function UserSignInIndex() {
                       style={[
                         tw`text-center`,
                         {
+                          color: themeColors.text,
+                          opacity: 0.7,
                           fontFamily: fontFamily.MontserratEasyRegular,
                         },
                       ]}
@@ -189,10 +192,10 @@ export default function UserSignInIndex() {
                       <View>
                         <TextInputFields
                           icon={AtSign}
-                          iconColor={themeColors.primaryColor}
+                          iconColor={themeColors.iconColor}
                           placeholderText="Email"
                           iconSize={18}
-                          placeholderTextColor={"#19488A"}
+                          placeholderTextColor={themeColors.text}
                           value={values.email}
                           onChangeText={handleChange("email")}
                           onBlur={handleBlur("email")}
@@ -215,10 +218,10 @@ export default function UserSignInIndex() {
                       <View>
                         <PasswordTextInputFields
                           icon={Lock}
-                          iconColor={themeColors.primaryColor}
+                          iconColor={themeColors.iconColor}
                           placeholderText="Password"
                           iconSize={18}
-                          placeholderTextColor={"#19488A"}
+                          placeholderTextColor={themeColors.text}
                           value={values.password}
                           onChangeText={handleChange("password")}
                           onBlur={handleBlur("password")}
@@ -248,7 +251,7 @@ export default function UserSignInIndex() {
                         style={[
                           tw``,
                           {
-                            color: themeColors.primaryTextColor,
+                            color: themeColors.text,
                             fontFamily: fontFamily.MontserratEasyRegular,
                           },
                         ]}
@@ -274,7 +277,7 @@ export default function UserSignInIndex() {
                         source={require("../assets/images/IntroImages/icon/google.png")}
                       />
                       <Text
-                        style={[tw`text-sm`, { fontFamily: fontFamily.Light }]}
+                        style={[tw`text-sm`, { color: themeColors.text, fontFamily: fontFamily.Light }]}
                       >
                         Google
                       </Text>
@@ -286,6 +289,7 @@ export default function UserSignInIndex() {
                         style={[
                           tw`flex-row items-center gap-1.5 justify-center py-2.5 flex-1 rounded-lg border border-gray-300`,
                         ]}
+
                       >
                         <Image
                           style={[tw`h-5 w-5`]}
@@ -294,7 +298,7 @@ export default function UserSignInIndex() {
                         <Text
                           style={[
                             tw`text-sm`,
-                            { fontFamily: fontFamily.Light },
+                            { color: themeColors.text, fontFamily: fontFamily.Light },
                           ]}
                         >
                           Apple
@@ -323,6 +327,7 @@ export default function UserSignInIndex() {
                           tw``,
                           {
                             fontFamily: fontFamily.Light,
+                            color: themeColors.text,
                           },
                         ]}
                       >
@@ -337,7 +342,7 @@ export default function UserSignInIndex() {
                           style={[
                             tw`text-center font-semibold`,
                             {
-                              color: themeColors.primaryTextColor,
+                              color: themeColors.iconColor,
                               fontFamily: fontFamily.Bold,
                             },
                           ]}

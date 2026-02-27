@@ -1,9 +1,10 @@
+import { useColorScheme } from "@/components/useColorScheme";
 import Colors from "@/constants/Colors";
 import tw from "@/constants/tailwind";
 import { DrawerActions } from "@react-navigation/native";
 import { useNavigation } from "expo-router";
 import { AlignCenter } from "lucide-react-native";
-import { TouchableOpacity, useColorScheme, View } from "react-native";
+import { TouchableOpacity, View } from "react-native";
 
 interface NotificationProps {
     

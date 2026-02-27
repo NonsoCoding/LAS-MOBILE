@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import * as SecureStore from "../services/storage/secureStore";
 import { STORAGE_KEYS } from "../services/storage/storageKeys";
 
-const WS_HOST = "web-production-4a8a5.up.railway.app";
+const WS_HOST = "web-production-60428.up.railway.app";
 
 export interface CarrierLocation {
   latitude: number;
@@ -77,17 +77,19 @@ export const useShipmentTracking = () => {
           console.log("[ShipmentTracking] Message received:", data);
 
           // Handle location_update messages from the carrier
+          // Backend might not send "type" for raw location pushes
           const lat = data.latitude ?? data.lat;
           const lng = data.longitude ?? data.lng;
           const head = data.heading ?? data.head ?? data.rotation;
           const type = data.type ?? data.event;
 
-          if ((type === "location_update" || !type) && lat != null && lng != null) {
+          // If it has lat/lng and (type is location_update OR no type is provided), it's a location update
+          if (lat != null && lng != null && (type === "location_update" || !type)) {
             console.log("[ShipmentTracking] Updating carrier location:", { lat, lng, head });
             setCarrierLocation({
-              latitude: parseFloat(lat),
-              longitude: parseFloat(lng),
-              heading: head != null ? parseFloat(head) : undefined
+              latitude: typeof lat === "string" ? parseFloat(lat) : lat,
+              longitude: typeof lng === "string" ? parseFloat(lng) : lng,
+              heading: head != null ? (typeof head === "string" ? parseFloat(head) : head) : undefined
             });
           }
 
