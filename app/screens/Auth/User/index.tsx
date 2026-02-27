@@ -2,6 +2,7 @@ import PrimaryButton from "@/components/Buttons/PrimaryButton";
 import PasswordTextInputFields from "@/components/Inputs/PasswordTextInputField";
 import TextInputFields from "@/components/Inputs/TextInputFields";
 import { checkCarrierExists } from "@/components/services/api/authApi";
+import { useColorScheme } from "@/components/useColorScheme";
 import Colors from "@/constants/Colors";
 import { fontFamily } from "@/constants/fonts";
 import tw from "@/constants/tailwind";
@@ -18,7 +19,6 @@ import {
   Text,
   TouchableOpacity,
   TouchableWithoutFeedback,
-  useColorScheme,
   View,
 } from "react-native";
 import * as Yup from "yup";
@@ -104,7 +104,9 @@ export default function UserAuthIndex() {
           errors,
           touched,
         }) => (
-          <View style={[tw`bg-white rounded-t-2xl overflow-hidden`]}>
+              <View style={[tw`rounded-t-2xl overflow-hidden`, {
+            backgroundColor: themeColors.background
+          }]}>
                 <ScrollView
                   showsVerticalScrollIndicator={false}
                   contentContainerStyle={tw`pt-10 pb-15 px-5 gap-5`}
@@ -113,22 +115,24 @@ export default function UserAuthIndex() {
               <Text
                 style={[
                   tw`text-xl`,
-                  {
-                    fontFamily: fontFamily.Bold,
+                        {
+                    color: themeColors.text,
+                    fontFamily: fontFamily.MontserratEasyBold,
                   },
                 ]}
               >
-                Complete Your Profile
+                Sign Up
               </Text>
               <Text
                 style={[
-                  tw``,
+                  tw`text-center w-[90%]`,
                   {
-                    fontFamily: fontFamily.Light,
+                    fontFamily: fontFamily.MontserratEasyLight,
+                    color: themeColors.text
                   },
                 ]}
               >
-                Complete your profile to start your journey!
+                Welcome back to Africa's Trusted Delivery Network.
               </Text>
             </View>
             <View style={[tw`gap-2`]}>
@@ -136,7 +140,7 @@ export default function UserAuthIndex() {
                 <View>
                   <TextInputFields
                     placeholderText="Email"
-                    placeholderTextColor="#19488A"
+                    placeholderTextColor={themeColors.text}
                     value={values.email}
                     onChangeText={handleChange("email")}
                     onBlur={handleBlur("email")}
@@ -152,11 +156,12 @@ export default function UserAuthIndex() {
                 <View>
                   <PasswordTextInputFields
                     placeholderText="Password"
-                    placeholderTextColor="#19488A"
+                    placeholderTextColor={themeColors.text}
                     value={values.password}
                     onChangeText={handleChange("password")}
                     onBlur={handleBlur("password")}
-                    secureTextEntry={true}
+                          secureTextEntry={true}
+                          iconColor={themeColors.text}
                   />
                   {touched.password && errors.password && (
                     <Text style={[tw`text-red-500 text-xs mt-1 ml-4`]}>
@@ -220,6 +225,7 @@ export default function UserAuthIndex() {
                     tw``,
                     {
                       fontFamily: fontFamily.Light,
+                      color: themeColors.text
                     },
                   ]}
                 >
@@ -234,7 +240,7 @@ export default function UserAuthIndex() {
                     style={[
                       tw`text-center`,
                       {
-                        color: themeColors.primaryTextColor,
+                        color: themeColors.text,
                         fontFamily: fontFamily.Bold,
                       },
                     ]}

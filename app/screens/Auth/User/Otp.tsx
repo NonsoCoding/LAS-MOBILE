@@ -2,6 +2,7 @@ import PrimaryButton from "@/components/Buttons/PrimaryButton";
 import CompleteModal from "@/components/Modals/CompleteModal";
 import { verifyOtp } from "@/components/services/api/authApi";
 import useAuthStore from "@/components/store/authStore";
+import { useColorScheme } from "@/components/useColorScheme";
 import Colors from "@/constants/Colors";
 import { fontFamily } from "@/constants/fonts";
 import tw from "@/constants/tailwind";
@@ -12,7 +13,6 @@ import {
   Image,
   Text,
   TouchableOpacity,
-  useColorScheme,
   View,
 } from "react-native";
 import { OtpInput } from "react-native-otp-entry";
@@ -76,13 +76,17 @@ const UserOtpScreen = () => {
               style={[tw`self-center h-150 w-150 absolute -top-20`]}
               resizeMode="contain"
             />
-      <View style={tw`bg-white py-10 pb-15 px-5 gap-5 rounded-t-2xl`}>
+      <View style={[tw`py-10 pb-15 px-5 gap-5 rounded-t-2xl`, {
+        backgroundColor: themeColors.background
+      }]}>
         <View style={[tw`items-center gap-1`]}>
           <Text style={[tw`text-2xl`, {
+            color: themeColors.text,
             fontFamily: fontFamily.Bold,
           }]}>Verify your Email</Text>
           <Text style={[tw`text-sm`, {
             fontFamily: fontFamily.Regular,
+            color: themeColors.text
           }]}>Enter the 6-digit code sent to your email</Text>
           <Text style={[tw`text-sm text-[#CC1A21]`, {
             fontFamily: fontFamily.Regular,
@@ -99,7 +103,7 @@ const UserOtpScreen = () => {
                 justifyContent: "center",
               },
               pinCodeContainerStyle: {
-                backgroundColor: colorScheme === "dark" ? "#1F1F1F" : "#19488A22",
+                backgroundColor: colorScheme === "dark" ? "#1F1F1F" : themeColors.background,
                 borderWidth: 1,
                 borderColor: colorScheme === "dark" ? "#2A2A2A" : "transparent",
                 borderRadius: 10,
@@ -108,24 +112,24 @@ const UserOtpScreen = () => {
                 elevation: 5,
               },
               focusedPinCodeContainerStyle: {
-                borderColor: themeColors.tint,
+                borderColor: themeColors.text,
                 borderWidth: 1,
               },
               pinCodeTextStyle: {
-                color: themeColors.primaryTextColor,
+                color: themeColors.text,
                 fontSize: 26,
                 fontWeight: "700",
               },
               // Add this to ensure the text is visible
               filledPinCodeContainerStyle: {
-                borderColor: themeColors.tint,
+                borderColor: themeColors.text,
               },
             }}
             textInputProps={{
               // Add these props to ensure text input works properly
               accessibilityLabel: "One-Time Password",
             }}
-            focusColor={themeColors.tint}
+            focusColor={themeColors.text}
           />
         </View>
 
@@ -143,7 +147,8 @@ const UserOtpScreen = () => {
                 <Text
                   style={[
                     tw``,
-                    {
+              {
+                      color: themeColors.text,
                       fontFamily: fontFamily.Light,
                     },
                   ]}
@@ -159,7 +164,7 @@ const UserOtpScreen = () => {
                     style={[
                       tw`text-center`,
                       {
-                        color: themeColors.primaryTextColor,
+                        color: themeColors.text,
                         fontFamily: fontFamily.Bold,
                       },
                     ]}

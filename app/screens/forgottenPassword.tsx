@@ -100,10 +100,10 @@ export default function ForgottenPassword() {
               <View style={[tw`gap-3`]}>
                 <TextInputFields
                   icon={AtSign}
-                  iconColor={themeColors.primaryColor}
+                  iconColor={themeColors.iconColor}
                   placeholderText="Email"
                   iconSize={18}
-                  placeholderTextColor="black"
+                  placeholderTextColor={themeColors.text}
                   value={values.email}
                   onChangeText={handleChange("email")}
                   onBlur={handleBlur("email")}

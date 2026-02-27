@@ -7,10 +7,10 @@ import tw from "@/constants/tailwind";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import {
-    Image,
-    Text,
-    TouchableOpacity,
-    View,
+  Image,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 
 interface RegisterTypePropss {}
@@ -92,10 +92,10 @@ const RegisterType = ({}: RegisterTypePropss) => {
                   style={[
                     tw`bg-[#003C7A0D] flex-row p-3  gap-2 rounded-lg items-center`,
                     {
-                      borderWidth: isSelected ? 1 : 1,
+                      borderWidth: isSelected ? 1 : 0.4,
                       borderColor: isSelected
-                        ? themeColors.tint
-                        : "#19488A22",
+                        ? themeColors.iconColor
+                        : themeColors.iconColor,
                       backgroundColor: isSelected ? "#003C7A15" : "transparent",
                     },
                   ]}
@@ -105,7 +105,7 @@ const RegisterType = ({}: RegisterTypePropss) => {
                   </View>
                   <View style={[tw`gap-1.5`]}>
                     <Text style={[tw`text-[17px]`, {
-                    color: themeColors.primaryColor,
+                    color: themeColors.iconColor,
                     fontFamily: fontFamily.Bold
                   }]}>
                     {items.name}

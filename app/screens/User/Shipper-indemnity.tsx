@@ -59,7 +59,7 @@ export default function CarrierIndemnityScreen() {
         style={[
           styles.header,
           {
-            backgroundColor: themeColors.primaryColor,
+            backgroundColor: themeColors.background,
           },
         ]}
       >

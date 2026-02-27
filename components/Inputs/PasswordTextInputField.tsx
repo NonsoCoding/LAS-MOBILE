@@ -1,3 +1,4 @@
+import Colors from "@/constants/Colors";
 import { fontFamily } from "@/constants/fonts";
 import tw from "@/constants/tailwind";
 import { Eye, EyeOff, LucideIcon } from "lucide-react-native";
@@ -8,6 +9,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { useColorScheme } from "../useColorScheme";
 
 interface TextInputFieldsProps {
   placeholderText?: string;
@@ -37,6 +39,8 @@ const PasswordTextInputFields = ({
   secureTextEntry = false,
 }: TextInputFieldsProps) => {
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+  const colorScheme = useColorScheme();
+  const themeColors = Colors[colorScheme ?? "light"];
 
   const togglePasswordVisibility = () => {
     setIsPasswordVisible(!isPasswordVisible);
@@ -64,6 +68,7 @@ const PasswordTextInputFields = ({
         onBlur={onBlur}
         secureTextEntry={secureTextEntry && !isPasswordVisible}
         style={[tw`flex-1 font-light text-black py-3.5`, {
+          color: themeColors.text,
           fontFamily: fontFamily.MontserratEasyRegular
         }]}
       />

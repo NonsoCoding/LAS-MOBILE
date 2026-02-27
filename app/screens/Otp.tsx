@@ -9,15 +9,15 @@ import tw from "@/constants/tailwind";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useState } from "react";
 import {
-    Alert,
-    Image,
-    Keyboard,
-    KeyboardAvoidingView,
-    Platform,
-    Text,
-    TouchableOpacity,
-    TouchableWithoutFeedback,
-    View,
+  Alert,
+  Image,
+  Keyboard,
+  KeyboardAvoidingView,
+  Platform,
+  Text,
+  TouchableOpacity,
+  TouchableWithoutFeedback,
+  View,
 } from "react-native";
 import { OtpInput } from "react-native-otp-entry";
 
@@ -113,7 +113,7 @@ const OtpScreen = () => {
                 justifyContent: "center",
               },
               pinCodeContainerStyle: {
-                backgroundColor: colorScheme === "dark" ? "#1F1F1F" : "#19488A22",
+                backgroundColor: colorScheme === "dark" ? "#transparent" : "#19488A22",
                 borderWidth: 1,
                 borderColor: colorScheme === "dark" ? "#2A2A2A" : "transparent",
                 borderRadius: 10,
@@ -122,30 +122,30 @@ const OtpScreen = () => {
                 elevation: 5,
               },
               focusedPinCodeContainerStyle: {
-                borderColor: themeColors.tint,
+                borderColor: themeColors.iconColor,
                 borderWidth: 1,
               },
               pinCodeTextStyle: {
-                color: themeColors.primaryTextColor,
+                color: themeColors.iconColor,
                 fontSize: 26,
                 fontWeight: "700",
               },
               // Add this to ensure the text is visible
               filledPinCodeContainerStyle: {
-                borderColor: themeColors.tint,
+                borderColor: themeColors.iconColor,
               },
             }}
             textInputProps={{
               // Add these props to ensure text input works properly
               accessibilityLabel: "One-Time Password",
             }}
-            focusColor={themeColors.tint}
+            focusColor={themeColors.iconColor}
           />
         </View>
 
         {/* CONTINUE BUTTON */}
         <PrimaryButton
-          bgColors={otp.length !== 6 ? "#19488A44" : themeColors.primaryColor}
+          bgColors={otp.length !== 6 ? "#19488A33" : themeColors.primaryColor}
           height={50}
           onpress={() => {
             router.push("/RegisterType")
@@ -177,7 +177,7 @@ const OtpScreen = () => {
                     style={[
                       tw`text-center`,
                       {
-                        color: themeColors.primaryTextColor,
+                        color: themeColors.text,
                         fontFamily: fontFamily.Bold,
                       },
                     ]}

@@ -63,7 +63,7 @@ const PhoneLocation = ({ }: PhoneLoactionProps) => {
                   borderTopRightRadius: 20,
                   borderTopLeftRadius: 20
                 }]}>  
-                  <View style={[tw`items-center gap-3 `]}>
+                  <View style={[tw`items-center gap-1 `]}>
                     <Text style={[tw`text-2xl`, {
                       color: themeColors.text,
                       fontFamily: fontFamily.Bold
@@ -91,10 +91,10 @@ const PhoneLocation = ({ }: PhoneLoactionProps) => {
                             style={[
                               tw`bg-[#003C7A0D] h-25 flex-1 p-3  gap-2 rounded-lg items-center justify-center`,
                               {
-                                borderWidth: isSelected ? 1 : 1,
+                                borderWidth: isSelected ? 2 : 0.5,
                                 borderColor: isSelected
-                                  ? themeColors.tint
-                                  : "#19488A22",
+                                  ? themeColors.iconColor
+                                  : themeColors.iconColor,
                                 backgroundColor: isSelected ? "#003C7A15" : "transparent",
                               },
                             ]}

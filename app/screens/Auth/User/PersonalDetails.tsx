@@ -2,6 +2,7 @@ import PrimaryButton from "@/components/Buttons/PrimaryButton";
 import TextInputFields from "@/components/Inputs/TextInputFields";
 import { registeredUser } from "@/components/services/api/authApi";
 import useAuthStore from "@/components/store/authStore";
+import { useColorScheme } from "@/components/useColorScheme";
 import Colors from "@/constants/Colors";
 import { fontFamily } from "@/constants/fonts";
 import tw from "@/constants/tailwind";
@@ -12,13 +13,12 @@ import { Formik } from "formik";
 import { CheckCircle2, Eye, FileText, Trash2, Upload, User, X } from "lucide-react-native";
 import React, { useState } from "react";
 import {
-    Alert,
-    Image,
-    Modal,
-    Text,
-    TouchableOpacity,
-    useColorScheme,
-    View
+  Alert,
+  Image,
+  Modal,
+  Text,
+  TouchableOpacity,
+  View
 } from "react-native";
 import * as Yup from "yup";
 
@@ -216,7 +216,8 @@ export default function UserPersonalDetailsIndex() {
                                         style={[tw`self-center h-140 w-140 absolute -top-15`]}
                                         resizeMode="contain"
                   />
-                  <View style={[tw`px-5 bg-white py-10 pb-15 gap-10 justify-center`, {
+            <View style={[tw`px-5 py-10 pb-15 gap-10 justify-center`, {
+                    backgroundColor: themeColors.background,
                     borderTopRightRadius: 20,
                     borderTopLeftRadius: 20,
                   }]}>
@@ -226,6 +227,7 @@ export default function UserPersonalDetailsIndex() {
                   tw`text-xl`,
                   {
                     fontFamily: fontFamily.Bold,
+                    color: themeColors.text,
                   },
                 ]}
               >
@@ -234,7 +236,8 @@ export default function UserPersonalDetailsIndex() {
               <Text
                 style={[
                   tw``,
-                  {
+                    {
+                    color: themeColors.text,
                     fontFamily: fontFamily.Light,
                   },
                 ]}
@@ -247,7 +250,7 @@ export default function UserPersonalDetailsIndex() {
                     <View>
                       <TextInputFields
                         icon={User}
-                        iconColor={themeColors.primaryTextColor}
+                        iconColor={themeColors.text}
                         iconSize={18}
                         value={values.firstName}
                         onChangeText={handleChange("firstName")}
@@ -263,7 +266,7 @@ export default function UserPersonalDetailsIndex() {
                     <View>
                       <TextInputFields
                         icon={User}
-                        iconColor={themeColors.primaryColor}
+                        iconColor={themeColors.text}
                         iconSize={18}
                         value={values.lastName}
                         onChangeText={handleChange("lastName")}
@@ -303,9 +306,11 @@ export default function UserPersonalDetailsIndex() {
                     <View key={field.key} style={[tw`mb-0`]}>
                       <TouchableOpacity
                         style={[
-                          tw`p-4 bg-white rounded-xl border border-gray-100`,
+                          tw`p-4 rounded-xl border border-gray-100`,
                           isSelected ? tw`border-blue-500 bg-blue-50/10` : tw`border-gray-200`,
-                        ]}
+                          , {
+                          backgroundColor: themeColors.background,
+                        }]}
                         onPress={() => {
                           if (!isSelected) {
                             pickDocument(field.key);
@@ -341,7 +346,7 @@ export default function UserPersonalDetailsIndex() {
                               <Text
                                 style={[
                                   tw`text-base text-gray-900`,
-                                  { fontFamily: fontFamily.Bold },
+                                  { color: themeColors.text, fontFamily: fontFamily.Bold },
                                 ]}
                               >
                                 {field.label}
