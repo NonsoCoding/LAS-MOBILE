@@ -172,7 +172,7 @@ const IntroScreen = ({}: IntroScreenProps) => {
               currentSlide === slides.length - 1 ? "#19488A" : "transparent"
             }
             textColor={
-              currentSlide === slides.length - 1 ? "white" : "#19488A"
+              currentSlide === slides.length - 1 ? "white" : themeColors.skipText
             }
             onpress={() => {
               if (currentSlide === slides.length - 1) {

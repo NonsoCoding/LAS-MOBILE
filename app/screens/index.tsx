@@ -12,10 +12,10 @@ import { Formik } from "formik";
 import { AtSign, Lock } from "lucide-react-native";
 import React, { useState } from "react";
 import {
-    Alert,
-    Text,
-    TouchableOpacity,
-    View,
+  Alert,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 
 const validationSchema = yup.object().shape({

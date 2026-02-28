@@ -1,3 +1,4 @@
+import AuthBackButton from "@/components/Buttons/AuthBackButton";
 import PrimaryButton from "@/components/Buttons/PrimaryButton";
 import CompleteModal from "@/components/Modals/CompleteModal";
 import { verifyOtp } from "@/components/services/api/authApi";
@@ -81,7 +82,17 @@ const OtpScreen = () => {
       style={tw`flex-1`}
     >
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <View style={[tw`flex-1 justify-end`, { backgroundColor: themeColors.primaryColor }]}>
+        <View style={[tw`flex-1 justify-between`, { backgroundColor: themeColors.primaryColor }]}>
+          <View style={[tw`z-999`, {
+            paddingLeft: 20,
+            paddingTop: Platform.OS === "android" ? 20 : 70
+          }]}>
+          <AuthBackButton
+            onPress={() => {
+              router.back();
+            }}
+          />
+          </View>
       <Image
               source={require("../../assets/images/Intro_logo.png")}
               style={[tw`self-center h-150 w-150 absolute -top-20`]}
@@ -115,7 +126,7 @@ const OtpScreen = () => {
               pinCodeContainerStyle: {
                 backgroundColor: colorScheme === "dark" ? "#transparent" : "#19488A22",
                 borderWidth: 1,
-                borderColor: colorScheme === "dark" ? "#2A2A2A" : "transparent",
+                borderColor: colorScheme === "dark" ? themeColors.iconColor : "transparent",
                 borderRadius: 10,
                 width: 50,
                 height: 40,

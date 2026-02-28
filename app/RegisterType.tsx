@@ -1,3 +1,4 @@
+import AuthBackButton from "@/components/Buttons/AuthBackButton";
 import PrimaryButton from "@/components/Buttons/PrimaryButton";
 import useAuthStore from "@/components/store/authStore";
 import { useColorScheme } from "@/components/useColorScheme";
@@ -8,6 +9,7 @@ import { useRouter } from "expo-router";
 import { useState } from "react";
 import {
   Image,
+  Platform,
   Text,
   TouchableOpacity,
   View,
@@ -57,7 +59,17 @@ const RegisterType = ({}: RegisterTypePropss) => {
   };
 
   return (
-    <View style={[tw`pt-8 flex-1 justify-end`, { backgroundColor: themeColors.primaryColor }]}>
+    <View style={[tw`flex-1 justify-between`, { backgroundColor: themeColors.primaryColor }]}>
+      <View style={[tw`z-999`, {
+            paddingLeft: 20,
+            paddingTop: Platform.OS === "android" ? 20 : 70
+          }]}>
+          <AuthBackButton
+            onPress={() => {
+              router.back();
+            }}
+          />
+          </View>
        <Image
                       source={require("../assets/images/Intro_logo.png")}
                       style={[tw`self-center h-150 w-150 absolute z-999 -top-25`]}

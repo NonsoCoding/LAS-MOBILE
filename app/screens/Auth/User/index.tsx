@@ -1,3 +1,4 @@
+import AuthBackButton from "@/components/Buttons/AuthBackButton";
 import PrimaryButton from "@/components/Buttons/PrimaryButton";
 import PasswordTextInputFields from "@/components/Inputs/PasswordTextInputField";
 import TextInputFields from "@/components/Inputs/TextInputFields";
@@ -8,6 +9,7 @@ import { fontFamily } from "@/constants/fonts";
 import tw from "@/constants/tailwind";
 import { useRouter } from "expo-router";
 import { Formik } from "formik";
+import { AtSign, Lock } from "lucide-react-native";
 import React, { useState } from "react";
 import {
   Alert,
@@ -85,7 +87,17 @@ export default function UserAuthIndex() {
     >
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
 
-    <View style={[tw`flex-1 bg-[#19488A] justify-end`]}>
+        <View style={[tw`flex-1 bg-[#19488A] justify-between`]}>
+          <View style={[tw`z-999`, {
+            paddingLeft: 20,
+            paddingTop: Platform.OS === "android" ? 20 : 70
+          }]}>
+          <AuthBackButton
+            onPress={() => {
+              router.back();
+            }}
+          />
+          </View>
       <Image
         source={require("../../../../assets/images/Intro_logo.png")}
         style={[tw`self-center h-160 w-160 absolute -top-20`]}
@@ -138,7 +150,9 @@ export default function UserAuthIndex() {
             <View style={[tw`gap-2`]}>
               <View style={[tw`gap-3`]}>
                 <View>
-                  <TextInputFields
+                        <TextInputFields
+                          icon={AtSign}
+                          iconColor={themeColors.iconColor}
                     placeholderText="Email"
                     placeholderTextColor={themeColors.text}
                     value={values.email}
@@ -154,14 +168,15 @@ export default function UserAuthIndex() {
                   )}
                 </View>
                 <View>
-                  <PasswordTextInputFields
+                        <PasswordTextInputFields
+                          icon={Lock}
                     placeholderText="Password"
                     placeholderTextColor={themeColors.text}
                     value={values.password}
                     onChangeText={handleChange("password")}
                     onBlur={handleBlur("password")}
                           secureTextEntry={true}
-                          iconColor={themeColors.text}
+                          iconColor={themeColors.iconColor}
                   />
                   {touched.password && errors.password && (
                     <Text style={[tw`text-red-500 text-xs mt-1 ml-4`]}>

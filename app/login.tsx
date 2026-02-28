@@ -1,3 +1,4 @@
+import AuthBackButton from "@/components/Buttons/AuthBackButton";
 import PrimaryButton from "@/components/Buttons/PrimaryButton";
 import PasswordTextInputFields from "@/components/Inputs/PasswordTextInputField";
 import TextInputFields from "@/components/Inputs/TextInputFields";
@@ -138,7 +139,17 @@ export default function UserSignInIndex() {
       style={tw`flex-1`}
     >
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <View style={[tw`flex-1 justify-end`, { backgroundColor: themeColors.primaryColor }]}>
+        <View style={[tw`flex-1 justify-between`, { backgroundColor: themeColors.primaryColor }]}>
+          <View style={[tw`z-999`, {
+            paddingLeft: 20,
+            paddingTop: Platform.OS === "android" ? 20 : 70
+          }]}>
+          <AuthBackButton
+            onPress={() => {
+              router.back();
+            }}
+          />
+          </View>
           <Image
             source={require("../assets/images/Intro_logo.png")}
             style={[tw`self-center h-150 w-150 absolute -top-20`]}
@@ -262,7 +273,9 @@ export default function UserSignInIndex() {
                   </View>
                   <View style={[tw`flex-row items-center gap-3`]}>
                     <View style={[tw`flex-1 h-px bg-gray-300`]} />
-                    <Text style={[tw`text-gray-500 text-sm`]}>or</Text>
+                    <Text style={[tw`text-sm`, {
+                      color: themeColors.text
+                    }]}>or</Text>
                     <View style={[tw`flex-1 h-px bg-gray-300`]} />
                   </View>
                   <View style={[tw`gap-2 flex-row`]}>

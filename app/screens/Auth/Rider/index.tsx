@@ -1,3 +1,4 @@
+import AuthBackButton from "@/components/Buttons/AuthBackButton";
 import PrimaryButton from "@/components/Buttons/PrimaryButton";
 import PasswordTextInputFields from "@/components/Inputs/PasswordTextInputField";
 import TextInputFields from "@/components/Inputs/TextInputFields";
@@ -150,7 +151,17 @@ export default function RiderAuthIndex() {
       style={tw`flex-1`}
     >
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-    <View style={[tw`flex-1 bg-[#19488A] justify-end`]}>
+        <View style={[tw`flex-1 bg-[#19488A] justify-between`]}>
+          <View style={[tw`z-999`, {
+            paddingLeft: 20,
+            paddingTop: Platform.OS === "android" ? 20 : 70
+          }]}>
+          <AuthBackButton
+            onPress={() => {
+              router.back();
+            }}
+          />
+          </View>
       <Image
               source={require("../../../../assets/images/Intro_logo.png")}
               style={[tw`self-center h-150 w-150 absolute -top-20`]}
@@ -192,7 +203,7 @@ export default function RiderAuthIndex() {
                   <View>
                     <TextInputFields
                       icon={AtSign}
-                      iconColor={themeColors.primaryColor}
+                      iconColor={themeColors.iconColor}
                       placeholderText="email"
                       iconSize={18}
                       value={values.email}
@@ -212,7 +223,7 @@ export default function RiderAuthIndex() {
                   <View>
                     <PasswordTextInputFields
                       icon={Lock}
-                      iconColor={themeColors.primaryColor}
+                      iconColor={themeColors.iconColor}
                       placeholderText="password"
                       iconSize={18}
                        placeholderTextColor={themeColors.text}
@@ -232,7 +243,7 @@ export default function RiderAuthIndex() {
 
                 <View style={[tw`flex-row items-center gap-3`]}>
                   <View style={[tw`flex-1 h-px bg-gray-300`]} />
-                  <Text style={[tw`text-gray-500 text-xs`, { fontFamily: fontFamily.Regular }]}>or</Text>
+                  <Text style={[tw`text-xs`, { color: themeColors.text, fontFamily: fontFamily.Regular }]}>or</Text>
                   <View style={[tw`flex-1 h-px bg-gray-300`]} />
                 </View>
 
@@ -292,7 +303,7 @@ export default function RiderAuthIndex() {
                   style={[
                     tw`text-center`,
                     {
-                      color: themeColors.primaryTextColor,
+                      color: themeColors.text,
                       fontFamily: fontFamily.Bold
                     },
                   ]}

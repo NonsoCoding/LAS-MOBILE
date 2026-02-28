@@ -1,3 +1,4 @@
+import AuthBackButton from "@/components/Buttons/AuthBackButton";
 import PrimaryButton from "@/components/Buttons/PrimaryButton";
 import TextInputFields from "@/components/Inputs/TextInputFields";
 import { forgottenPassword } from "@/components/services/api/authApi";
@@ -65,7 +66,17 @@ export default function ForgottenPassword() {
       style={tw`flex-1`}
     >
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <View style={[tw`flex-1 justify-end`, { backgroundColor: themeColors.primaryColor }]}>
+        <View style={[tw`flex-1 justify-between`, { backgroundColor: themeColors.primaryColor }]}>
+          <View style={[tw`z-999`, {
+            paddingLeft: 20,
+            paddingTop: Platform.OS === "android" ? 20 : 70
+          }]}>
+          <AuthBackButton
+            onPress={() => {
+              router.back();
+            }}
+          />
+          </View>
        <Image
               source={require("../../assets/images/Intro_logo.png")}
               style={[tw`self-center h-150 w-150 absolute -top-10`]}
