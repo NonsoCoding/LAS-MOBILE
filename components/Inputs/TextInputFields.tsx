@@ -25,7 +25,7 @@ const TextInputFields = ({
   icon: Icon,
   value,
   iconColor,
-  iconSize = 20,
+  iconSize = 18,
   keyboardType = "default",
   autoCapitalize = "none",
   onBlur,
@@ -41,8 +41,10 @@ const TextInputFields = ({
   return (
     <View
       style={[
-        tw`bg-[#19488A11] text-[17px] gap-2 flex-row items-center rounded-full border border-gray-200 px-3`,
-        {},
+        tw`text-[17px] gap-2 flex-row items-center rounded-full border border-gray-200 px-3`,
+        {
+          backgroundColor: themeColors.textInputBg,
+        },
       ]}
     >
       {Icon && (
@@ -60,7 +62,7 @@ const TextInputFields = ({
         onBlur={onBlur}
         secureTextEntry={secureTextEntry}
         style={[tw`w-full text-black py-3.5`, {
-          color: themeColors.text,
+          color: themeColors.placeholderColor,
           fontFamily: fontFamily.MontserratEasyRegular
         }]}
       />

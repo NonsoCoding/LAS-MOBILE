@@ -477,6 +477,7 @@ const UserHomePage = ({}: UserHomePageProps) => {
               if (createdShipmentId && accessToken) {
                 try {
                   await cancelShipmentApi(accessToken as string, createdShipmentId as string | number, "Shipper cancelled request");
+                  bottomSheetRef.current?.expand();
                 } catch (apiError) {
                   console.error("API Error cancelling shipment:", apiError);
                 }
@@ -579,47 +580,49 @@ const UserHomePage = ({}: UserHomePageProps) => {
     setTrackingModalVisible(true);
     connectTracking(shipment.id, shipment.status);
   }, [connectTracking]);
+
+  useEffect(() => {
+  if (!carrierLocation || !carrierMarkerRef.current) return;
   
-  // Sync carrier location to store for persistence
-  useEffect(() => {
-    if (carrierLocation && trackedShipment) {
-      updateCarrierLocation(trackedShipment.id, carrierLocation.latitude, carrierLocation.longitude, carrierLocation.heading);
-    }
-  }, [carrierLocation, trackedShipment, updateCarrierLocation]);
+  // This smoothly moves just the marker pin, no map jumping
+  carrierMarkerRef.current.animateMarkerToCoordinate(
+    { latitude: carrierLocation.latitude, longitude: carrierLocation.longitude },
+    1000 // 1 second smooth animation
+  );
+}, [carrierLocation]);
 
-  // Fit map to carrier + route when carrier location updates or modal opens
-  useEffect(() => {
-    if (trackingModalVisible && trackedShipment && trackingMapRef.current) {
-      const coords: LatLng[] = [];
-      
-      if (carrierLocation) {
-        coords.push(carrierLocation);
-      }
-      
-      const pLat = parseFloat(String(trackedShipment.pickupLatitude));
-      const pLng = parseFloat(String(trackedShipment.pickupLongitude));
-      if (!isNaN(pLat) && !isNaN(pLng)) {
-        coords.push({ latitude: pLat, longitude: pLng });
-      }
-      
-      const dLat = parseFloat(String(trackedShipment.deliveryLatitude));
-      const dLng = parseFloat(String(trackedShipment.deliveryLongitude));
-      if (!isNaN(dLat) && !isNaN(dLng)) {
-        coords.push({ latitude: dLat, longitude: dLng });
-      }
+  // Replace your existing tracking useEffect with these two:
 
-      if (coords.length > 0) {
-        // Use a small timeout to ensure map is ready if modal just opened
-        const timeout = setTimeout(() => {
-          trackingMapRef.current?.fitToCoordinates(coords, {
-            edgePadding: { top: 100, right: 70, bottom: 450, left: 70 },
-            animated: true,
-          });
-        }, 500);
-        return () => clearTimeout(timeout);
-      }
-    }
-  }, [carrierLocation, trackingModalVisible, trackedShipment]);
+// 1. Only fit map when modal OPENS (not on every carrier location update)
+useEffect(() => {
+  if (!trackingModalVisible || !trackedShipment || !trackingMapRef.current) return;
+
+  const coords: LatLng[] = [];
+  
+  const pLat = parseFloat(String(trackedShipment.pickupLatitude));
+  const pLng = parseFloat(String(trackedShipment.pickupLongitude));
+  if (!isNaN(pLat) && !isNaN(pLng)) coords.push({ latitude: pLat, longitude: pLng });
+  
+  const dLat = parseFloat(String(trackedShipment.deliveryLatitude));
+  const dLng = parseFloat(String(trackedShipment.deliveryLongitude));
+  if (!isNaN(dLat) && !isNaN(dLng)) coords.push({ latitude: dLat, longitude: dLng });
+
+  if (coords.length > 0) {
+    const timeout = setTimeout(() => {
+      trackingMapRef.current?.fitToCoordinates(coords, {
+        edgePadding: { top: 100, right: 70, bottom: 450, left: 70 },
+        animated: true,
+      });
+    }, 500);
+    return () => clearTimeout(timeout);
+  }
+}, [trackingModalVisible]); // <-- Only depends on modal open/close
+
+// 2. Smoothly animate ONLY the carrier marker (not the whole map)
+const carrierMarkerRef = useRef<any>(null); // add this ref near your other refs
+
+// Then in your carrier Marker, add the ref:
+// <Marker ref={carrierMarkerRef} coordinate={...} ...>
 
   return (
     <View style={[tw`flex-1 justify-end`, {
@@ -689,6 +692,7 @@ const UserHomePage = ({}: UserHomePageProps) => {
         {acceptedShipments.map((shipment) => (
           (shipment.carrierLatitude && shipment.carrierLongitude) ? (
             <Marker
+              ref={carrierMarkerRef}
               key={`carrier-${shipment.id}`}
               coordinate={{
                 latitude: shipment.carrierLatitude!,

@@ -203,10 +203,10 @@ export default function UserSignInIndex() {
                       <View>
                         <TextInputFields
                           icon={AtSign}
-                          iconColor={themeColors.iconColor}
+                          iconColor={themeColors.textInputIconColor}
                           placeholderText="Email"
-                          iconSize={18}
-                          placeholderTextColor={themeColors.text}
+                          iconSize={15}
+                          placeholderTextColor={themeColors.placeholderColor}
                           value={values.email}
                           onChangeText={handleChange("email")}
                           onBlur={handleBlur("email")}
@@ -229,10 +229,10 @@ export default function UserSignInIndex() {
                       <View>
                         <PasswordTextInputFields
                           icon={Lock}
-                          iconColor={themeColors.iconColor}
+                          iconColor={themeColors.textInputIconColor}
                           placeholderText="Password"
-                          iconSize={18}
-                          placeholderTextColor={themeColors.text}
+                          iconSize={15}
+                          placeholderTextColor={themeColors.placeholderColor}
                           value={values.password}
                           onChangeText={handleChange("password")}
                           onBlur={handleBlur("password")}

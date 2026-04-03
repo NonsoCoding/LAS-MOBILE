@@ -84,7 +84,7 @@ export const acceptRequest = async (token: string, id: string) => {
 
 export const cancelShipment = async (token: string, id: string | number, reason?: string) => {
   try {
-    const res = await fetch(`${apiUrl}/api/shipments/${id}/carrier-cancel/`, {
+    const res = await fetch(`${apiUrl}/api/shipments/${id}/cancel/`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
