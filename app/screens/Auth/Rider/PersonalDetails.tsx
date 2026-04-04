@@ -1,5 +1,6 @@
 import PrimaryButton from "@/components/Buttons/PrimaryButton";
 import TextInputFields from "@/components/Inputs/TextInputFields";
+import { useColorScheme } from "@/components/useColorScheme";
 import Colors from "@/constants/Colors";
 import { fontFamily } from "@/constants/fonts";
 import tw from "@/constants/tailwind";
@@ -7,7 +8,7 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { Formik } from "formik";
 import { Car, User } from "lucide-react-native";
 import { useState } from "react";
-import { Alert, Image, KeyboardAvoidingView, Platform, Text, useColorScheme, View } from "react-native";
+import { Alert, Image, KeyboardAvoidingView, Platform, Text, View } from "react-native";
 import * as Yup from "yup";
 
 interface PersonalDetailsScreenProps {
@@ -98,14 +99,18 @@ const PersonalDetailsScreen = ({
               touched,
                     }) => (
 
-            <View style={[tw`bg-white py-10 pb-15 px-5 rounded-t-2xl`]}>
+              <View style={[tw`py-10 pb-15 px-5 rounded-t-2xl`, {
+              backgroundColor: themeColors.background
+            }]}>
                 <View style={[tw`gap-6`]}>
                      <View style={[tw`items-center gap-2`]}>
                     <Text style={[tw`text-2xl`, {
-                      fontFamily: fontFamily.Bold
+                      fontFamily: fontFamily.Bold,
+                      color: themeColors.text
                     }]}>Create an account</Text>
                     <Text style={[tw`text-center`, {
-                      fontFamily: fontFamily.Light
+                      fontFamily: fontFamily.Light,
+                      color: themeColors.text
                     }]}>Welcome back to Africa's Trusted Delivery Network.</Text>
                     </View>
                     <View style={[tw`gap-3`]}>

@@ -62,7 +62,7 @@ const IntroScreen = ({}: IntroScreenProps) => {
                     paddingTop: 0
                   },
                   android: {
-                    paddingTop: 20
+                    paddingTop: 20,
                   }
                 })
         },
@@ -85,7 +85,7 @@ const IntroScreen = ({}: IntroScreenProps) => {
                     paddingBottom: 40
                   },
                   android: {
-                    paddingBottom: 40
+                    paddingBottom: 55
                   }
                 })
           },

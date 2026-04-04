@@ -2,6 +2,7 @@ import PrimaryButton from "@/components/Buttons/PrimaryButton";
 import CompleteModal from "@/components/Modals/CompleteModal";
 import { registeredUser } from "@/components/services/api/authApi";
 import useAuthStore from "@/components/store/authStore";
+import { useColorScheme } from "@/components/useColorScheme";
 import Colors from "@/constants/Colors";
 import { fontFamily } from "@/constants/fonts";
 import tw from "@/constants/tailwind";
@@ -11,14 +12,13 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { CheckCircle2, Eye, FileText, Trash2, Upload, X } from "lucide-react-native";
 import { useState } from "react";
 import {
-    Alert,
-    Image,
-    Modal,
-    ScrollView,
-    Text,
-    TouchableOpacity,
-    useColorScheme,
-    View
+  Alert,
+  Image,
+  Modal,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View
 } from "react-native";
 
 interface DocumentState {
@@ -239,14 +239,18 @@ const Verification = () => {
           contentContainerStyle={[tw`pt-10 flex-1 justify-end`]} // Add pb-10 to push content up
           showsVerticalScrollIndicator={false}
         >
-          <View style={[tw`px-5 bg-white py-10 pb-15 rounded-t-2xl`]}>
+        <View style={[tw`px-5 py-10 pb-15 rounded-t-2xl`, {
+            backgroundColor: themeColors.background
+          }]}>
               <View style={[tw`gap-8`]}>
                 <View style={[tw`items-center gap-2`]}>
                     <Text style={[tw`text-2xl`, {
-                      fontFamily: fontFamily.Bold
+                      fontFamily: fontFamily.Bold,
+                      color: themeColors.text
                     }]}>Verify your Identity</Text>
                     <Text style={[tw`text-center`, {
-                      fontFamily: fontFamily.Light
+                      fontFamily: fontFamily.Light,
+                      color: themeColors.text
                     }]}>Add all the required documents it will be reviewed by our team.</Text>
                 </View>
               <View style={[tw`gap-4`]}>
@@ -296,16 +300,20 @@ const Verification = () => {
                             <View style={[tw`flex-1`]}>
                               <Text
                                 style={[
-                                  tw`text-base text-gray-900`,
-                                  { fontFamily: fontFamily.Bold },
+                                  tw`text-base`,
+                                  { fontFamily: fontFamily.Bold,
+                                    color: isSelected ? themeColors.text : "#A7A7A7"
+                                  },
                                 ]}
                               >
                                 {field.label}
                               </Text>
                               <Text
                                 style={[
-                                  tw`text-xs text-gray-500 mt-0.5`,
-                                  { fontFamily: fontFamily.Regular },
+                                  tw`text-xs mt-0.5`, { 
+                                    fontFamily: fontFamily.Regular,
+                                      color: isSelected ? themeColors.text : "#A7A7A7"
+                                  },
                                 ]}
                                 numberOfLines={1}
                               >

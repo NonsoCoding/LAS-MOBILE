@@ -8,6 +8,7 @@ import { useState } from "react";
 import {
   ActivityIndicator,
   Alert,
+  Platform,
   ScrollView,
   StyleSheet,
   Text,
@@ -58,19 +59,22 @@ export default function CarrierIndemnityScreen() {
     <View style={[tw`flex-1 justify-end`, {
       backgroundColor: themeColors.primaryColor
     }]}>
-      <View style={[tw`pb-10 px-5 pt-20 flex-row items-center gap-4`]}>
+      <View style={[tw`pb-5 px-5 flex-row items-center gap-4`, {
+        paddingTop: Platform.OS === "android" ? 60 : 70
+      }]}>
          <BackButton
           onPress={() => {
             router.back();
           }}
         />
-        <Text style={[tw`uppercase  text-xl text-white`, {
-          fontFamily: fontFamily.Bold
+        <Text style={[tw`uppercase  text-xl text-white w-[90%]`, {
+          fontFamily: fontFamily.MontserratEasyBold
         }]}>Carrier Indemnity Agreement</Text>
       </View>
-      <View style={tw`flex-1 bg-white rounded-t-3xl pb-10`}>
+      <View style={[tw`flex-1 bg-white rounded-t-3xl`, {
+        paddingBottom: Platform.OS === "android" ? 70 : 50
+      }]}>
         
-      {/* Important Notice */}
       <View style={styles.notice}>
         <Ionicons name="warning" size={24} color="#D37A0F" />
         <View style={styles.noticeTextContainer}>

@@ -2,6 +2,7 @@ import PrimaryButton from "@/components/Buttons/PrimaryButton";
 import CompleteModal from "@/components/Modals/CompleteModal";
 import { verifyOtp } from "@/components/services/api/authApi";
 import useAuthStore from "@/components/store/authStore";
+import { useColorScheme } from "@/components/useColorScheme";
 import Colors from "@/constants/Colors";
 import { fontFamily } from "@/constants/fonts";
 import tw from "@/constants/tailwind";
@@ -16,7 +17,6 @@ import {
   Text,
   TouchableOpacity,
   TouchableWithoutFeedback,
-  useColorScheme,
   View,
 } from "react-native";
 import { OtpInput } from "react-native-otp-entry";
@@ -86,13 +86,17 @@ const UserOtpScreen = () => {
               style={[tw`self-center h-150 w-150 absolute -top-20`]}
               resizeMode="contain"
             />
-      <View style={tw`bg-white py-10 pb-15 px-5 gap-5 rounded-t-2xl`}>
+          <View style={[tw`py-10 pb-15 px-5 gap-5 rounded-t-2xl`, {
+        backgroundColor: themeColors.background
+      }]}>
         <View style={[tw`items-center gap-1`]}>
           <Text style={[tw`text-2xl`, {
             fontFamily: fontFamily.Bold,
+            color: themeColors.text
           }]}>Verify your Email</Text>
           <Text style={[tw`text-sm`, {
             fontFamily: fontFamily.Regular,
+             color: themeColors.text
           }]}>Enter the 6-digit code sent to your email</Text>
           <Text style={[tw`text-sm text-[#CC1A21]`, {
             fontFamily: fontFamily.Regular,
@@ -155,6 +159,7 @@ const UserOtpScreen = () => {
                     tw``,
                     {
                       fontFamily: fontFamily.Light,
+                       color: themeColors.text
                     },
                   ]}
                 >
@@ -169,7 +174,7 @@ const UserOtpScreen = () => {
                     style={[
                       tw`text-center`,
                       {
-                        color: themeColors.primaryTextColor,
+                        color: themeColors.text,
                         fontFamily: fontFamily.Bold,
                       },
                     ]}

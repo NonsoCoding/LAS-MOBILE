@@ -82,10 +82,11 @@ const RouteSearchTextInput = ({
 
   return (
     <View style={tw`z-50`}>
-      <View style={[tw`flex-row items-center border px-4 py-2 rounded-full bg-white h-12`, {
-        borderColor: themeColors.primaryColor,
+      <View style={[tw`flex-row items-center px-4 py-2 rounded-full bg-white h-12`, {
+        borderColor: themeColors.buttonBorder,
+        borderWidth: 1
       }]}>
-        <SearchIcon size={18} color={themeColors.primaryColor} />
+        <SearchIcon size={18} color={themeColors.iconColor} />
         <View style={[tw`h-6 border-l border-gray-300 mx-3`]} />
         <View style={tw`flex-1 justify-center`}>
           <Text style={[tw`text-[10px] text-gray-400 uppercase`, { fontFamily: fontFamily.MontserratEasyMedium }]}>

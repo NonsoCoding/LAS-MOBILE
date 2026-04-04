@@ -152,9 +152,9 @@ export default function UserAuthIndex() {
                 <View>
                         <TextInputFields
                           icon={AtSign}
-                          iconColor={themeColors.iconColor}
+                          iconColor={themeColors.textInputIconColor}
                     placeholderText="Email"
-                    placeholderTextColor={themeColors.text}
+                    placeholderTextColor={themeColors.placeholderColor}
                     value={values.email}
                     onChangeText={handleChange("email")}
                     onBlur={handleBlur("email")}
@@ -171,12 +171,12 @@ export default function UserAuthIndex() {
                         <PasswordTextInputFields
                           icon={Lock}
                     placeholderText="Password"
-                    placeholderTextColor={themeColors.text}
+                    placeholderTextColor={themeColors.placeholderColor}
                     value={values.password}
                     onChangeText={handleChange("password")}
                     onBlur={handleBlur("password")}
                           secureTextEntry={true}
-                          iconColor={themeColors.iconColor}
+                          iconColor={themeColors.textInputIconColor}
                   />
                   {touched.password && errors.password && (
                     <Text style={[tw`text-red-500 text-xs mt-1 ml-4`]}>

@@ -36,7 +36,7 @@ const SecondaryButton = ({
         { backgroundColor: bgColors, height: height, width: width, borderColor: borderColor, borderWidth: borderWidth },
       ]}
       >
-          <Image source={icon} style={[tw`h-3.5 w-3.5`]}/>
+          {icon && <Image source={icon} style={[tw`h-3.5 w-3.5`]}/>}
       <Text style={[tw`text-center text-xs`, { color: textColor, fontFamily: "MontserratBold" }]}>{text}</Text>
     </TouchableOpacity>
   );

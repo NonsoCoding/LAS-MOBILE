@@ -50,7 +50,7 @@ const PhoneLocation = ({ }: PhoneLoactionProps) => {
           <View style={[tw`flex-1 justify-between`, { backgroundColor: themeColors.primaryColor }]}>
             <View style={[tw`z-999`, {
             paddingLeft: 20,
-            paddingTop: Platform.OS === "android" ? 20 : 70
+              paddingTop: Platform.OS === "android" ? 60 : 70,
           }]}>
           <AuthBackButton
             onPress={() => {
@@ -69,10 +69,18 @@ const PhoneLocation = ({ }: PhoneLoactionProps) => {
               onSubmit={handleNext}
             >
               {({ handleChange, handleBlur, handleSubmit, values, errors, touched }) => (
-                <View style={[tw`px-5 py-5 pb-5 gap-7 justify-center`, {
+                <View style={[tw`px-5 py-5 gap-7 justify-center`, {
                   backgroundColor: themeColors.background,
                   borderTopRightRadius: 20,
-                  borderTopLeftRadius: 20
+                  borderTopLeftRadius: 20,
+                   ...Platform.select({
+                  ios: {
+                    paddingBottom: 40
+                  },
+                  android: {
+                    paddingBottom: 55
+                  }
+                })
                 }]}>  
                   <View style={[tw`items-center gap-1 `]}>
                     <Text style={[tw`text-2xl`, {

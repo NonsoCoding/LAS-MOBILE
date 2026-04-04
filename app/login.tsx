@@ -142,7 +142,7 @@ export default function UserSignInIndex() {
         <View style={[tw`flex-1 justify-between`, { backgroundColor: themeColors.primaryColor }]}>
           <View style={[tw`z-999`, {
             paddingLeft: 20,
-            paddingTop: Platform.OS === "android" ? 20 : 70
+            paddingTop: Platform.OS === "android" ? 60 : 70
           }]}>
           <AuthBackButton
             onPress={() => {

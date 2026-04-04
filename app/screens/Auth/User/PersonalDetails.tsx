@@ -250,8 +250,9 @@ export default function UserPersonalDetailsIndex() {
                     <View>
                       <TextInputFields
                         icon={User}
-                        iconColor={themeColors.text}
-                        iconSize={18}
+                        iconColor={themeColors.textInputIconColor}
+                      iconSize={18}
+                      placeholderTextColor={themeColors.placeholderColor}
                         value={values.firstName}
                         onChangeText={handleChange("firstName")}
                         onBlur={handleBlur("firstName")}
@@ -266,8 +267,9 @@ export default function UserPersonalDetailsIndex() {
                     <View>
                       <TextInputFields
                         icon={User}
-                        iconColor={themeColors.text}
-                        iconSize={18}
+                        iconColor={themeColors.textInputIconColor}
+                      iconSize={18}
+                      placeholderTextColor={themeColors.placeholderColor}
                         value={values.lastName}
                         onChangeText={handleChange("lastName")}
                         onBlur={handleBlur("lastName")}

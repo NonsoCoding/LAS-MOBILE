@@ -1,18 +1,19 @@
+import RiderStatsCard from "@/components/Cards/RiderStatsCard";
 import Colors from "@/constants/Colors";
 import { fontFamily } from "@/constants/fonts";
-import { Entypo, FontAwesome, Ionicons } from "@expo/vector-icons";
+import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
 import { DrawerActions } from "@react-navigation/native";
 import { useNavigation } from "expo-router";
 import { AlignCenter } from "lucide-react-native";
-import React, { useState } from "react";
+import React, { useMemo, useRef, useState } from "react";
 import {
-  ScrollView,
-  StatusBar,
+  Image,
   Text,
   TouchableOpacity,
   useColorScheme,
-  View,
+  View
 } from "react-native";
+import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
 import tw from "twrnc";
 
 const WalletScreen = () => {
@@ -20,291 +21,140 @@ const WalletScreen = () => {
   const colorScheme = useColorScheme();
   const themeColors = Colors[colorScheme ?? "light"];
   const navigation = useNavigation();
-
-  const Transaction = ({ type, title, subtitle, amount, date }: any) => (
-    <View
-      style={tw`flex-row justify-between items-center py-3 border-b border-gray-100`}
-    >
-      <View style={tw`flex-row items-center flex-1`}>
-        <View
-          style={tw`w-10 h-10 rounded-xl justify-center items-center mr-3 ${
-            type === "credit" ? "bg-green-100" : "bg-red-100"
-          }`}
-        >
-          <Text style={tw`text-xl text-gray-900`}>
-            {type === "credit" ? "↓" : "↑"}
-          </Text>
-        </View>
-        <View style={tw`flex-1`}>
-          <Text style={[tw`text-sm text-gray-900 mb-0.5`, { fontFamily: fontFamily.Bold }]}>
-            {title}
-          </Text>
-          <Text style={[tw`text-xs text-gray-600 mb-0.5`, { fontFamily: fontFamily.Medium }]}>{subtitle}</Text>
-          <Text style={[tw`text-xs text-gray-400`, { fontFamily: fontFamily.Regular }]}>{date}</Text>
-        </View>
-      </View>
-      <Text
-        style={[tw`text-base ml-3`, {
-          color: type === "credit" ? "#16a34a" : "#ef4444",
-          fontFamily: fontFamily.Bold
-        }]}
-      >
-        {amount}
-      </Text>
-    </View>
-  );
+  const mapRef = useRef<MapView>(null);
+    const snapPoints = useMemo(() => ["10%", "45%"], []);
+  const bottomSheetRef = useRef<BottomSheet>(null);
+  const [step, setStep] = useState(1);
 
   return (
-    <View
-      style={[
-        tw`flex-1`,
-        {
-          backgroundColor: themeColors.primaryColor,
-        },
-      ]}
-    >
-      <StatusBar barStyle="light-content" />
-
-      <View
-        style={[
-          tw`flex-row items-center pt-15 px-6 pb-5 gap-3 justify-between`,
-          {},
-        ]}
+   <View style={[tw`flex-1 justify-end`, {
+         backgroundColor: themeColors.background
+       }]}>
+         <MapView
+           provider={PROVIDER_GOOGLE}
+     ref={mapRef}
+     style={[tw`flex-1`]}
+     region={{
+       latitude: 37.78825,
+       longitude: -122.4324,
+       latitudeDelta: 0.0922,
+       longitudeDelta: 0.0421,
+     }}
+     showsUserLocation={true}
+     showsMyLocationButton={false} // Custom button looks better
+     showsPointsOfInterest={false} // Cleaner for logistics
+     showsBuildings={false} // Less visual clutter
+     showsIndoors={false}
+     showsCompass={false} // Use custom compass
+     showsScale={false}
+     mapType="standard"
+     rotateEnabled={true}
+     pitchEnabled={false} // Keep 2D for logistics clarity
+     toolbarEnabled={false}
+     loadingEnabled={true}
+     loadingIndicatorColor="#yourBrandColor"
+     loadingBackgroundColor="#ffffff"
+           >
+           <Marker
+           coordinate={{
+             latitude: 37.78825,
+             longitude: -122.4324
+           }}
+           >
+           </Marker>
+      </MapView>
+        <TouchableOpacity
+                style={[
+                  tw`p-2.5 absolute rounded-full self-start ml-5 top-15`,
+                  {
+                    backgroundColor: themeColors.background,
+                  },
+                ]}
+                onPress={() => navigation.dispatch(DrawerActions.openDrawer())}
+              >
+                <AlignCenter color={"black"} />
+      </TouchableOpacity>
+       <BottomSheet
+        snapPoints={snapPoints}
+        ref={bottomSheetRef}
+        enablePanDownToClose={false}
       >
-        <View style={[tw`flex-row  gap-3 items-center`]}>
-          <TouchableOpacity
-            style={[
-              tw`p-2.5 rounded-full self-start`,
-              {
-                backgroundColor: themeColors.tintLight,
-              },
-            ]}
-            onPress={() => navigation.dispatch(DrawerActions.openDrawer())}
-          >
-            <AlignCenter color={"white"} />
-          </TouchableOpacity>
-        </View>
-        <View
-          style={[
-            tw`px-3.5 flex-row items-center gap-2 py-1 rounded-full`,
-            {
-              backgroundColor: themeColors.tintLight,
-            },
-          ]}
+          <BottomSheetView style={[tw`px-5 justify-center pb-10`]}
         >
-          <Text style={[tw`text-white text-xs`, { fontFamily: fontFamily.Bold }]}>
-            {" "}
-            {isOnline ? "ONLINE" : "OFFLINE"}
-          </Text>
-          <FontAwesome name="circle" size={14} color={"white"} />
-        </View>
-      </View>
+          {step === 1 && (
+            <View style={[tw`gap-4`]}> 
+                {/* <View style={[tw`flex-row rounded-lg gap-3 p-4 py-6 justify-between items-center bg-[#D37A0F22]`, {
+                  borderLeftWidth: 3,
+                  borderColor: user?.profile_review_status === "under_review" ? "#10B981" : "#D37A0F",
+                  backgroundColor: user?.profile_review_status === "under_review" ? "#10B98122" : "#D37A0F22"
+                }]}>
+                  <View style={[tw`flex-row items-center w-[70%] gap-2`]}>
+                  <InfoIcon color={user?.profile_review_status === "under_review" ? "#10B981" : "#D37A0F"}  />
+                  <Text style={[tw`uppercase text-[11px]`, {
+                    fontFamily: fontFamily.MontserratEasyMedium,
+                    color: user?.profile_review_status === "under_review" ? "#10B981" : "#D37A0F"
+                  }]}>
+                    {user?.profile_review_status === "under_review" ? "Submitted Documents Under Review" : "Visit your profile to complete your registration"}
+                  </Text>
+                  </View>
+                  <TouchableOpacity 
+                    onPress={() => router.navigate("/screens/Rider/CompleteProfile")}
+                    style={[tw`h-9 w-9 rounded-full flex-row items-center justify-center`, {
+                      backgroundColor: user?.profile_review_status === "under_review" ? "#10B98199" : "#D37A0F99"
+                    }]}>
+                    <ChevronRight size={16} color={"white"}/>
+                  </TouchableOpacity>
+                </View> */}
+              <View style={[tw`h-35 rounded-lg bg-[#003B95] p-4 justify-between`]}>
+                <View style={[tw`flex-row items-center justify-between gap-2`]}>
+                  <Image source={require("../../assets/images/LasIconpng.png")} style={[tw`h-10 w-10`]} />
+                  <Text style={[tw`text-white uppercase`, {
+                    fontFamily: fontFamily.MontserratEasyBold
+                  }]}>Godson Ogundare</Text>
+                </View>
+                <View>
+                  <Text style={[tw`text-white text-[10px] uppercase`, {
+                    fontFamily: fontFamily.MontserratEasyLight
+                  }]}>Available Balance</Text>
+                  <View style={[tw`flex-row items-end`]}>
+                    <Text style={[tw`text-white text-xl uppercase`, {
+                    fontFamily: fontFamily.MontserratEasyBold
+                  }]}>N</Text>
+                  <Text style={[tw`text-white text-3xl uppercase`, {
+                    fontFamily: fontFamily.MontserratEasyBold
+                  }]}>4000</Text>
+                  </View>
+                </View>
+                </View>
+              <View style={[tw`flex-row gap-3`]}>
+                <RiderStatsCard
+                  statsTitle="Total Earnings"
+                  amount={4000}
+                  onPress={() => {
+                    
+                  }}
+                />
+                <RiderStatsCard
+                  statsTitle="Total Request"
+                  amount={254}
+                  onPress={() => {
 
-      {/* Wallet Header */}
-      <View style={tw`px-6 pb-6`}>
-        <Text style={[tw`text-3xl text-white mb-1`, { fontFamily: fontFamily.Bold }]}>My Wallet</Text>
-        <Text style={[tw`text-base text-white/80`, { fontFamily: fontFamily.Medium }]}>Track your earnings</Text>
-      </View>
-
-      {/* Content */}
-      <ScrollView
-        style={tw`flex-1 bg-gray-100 rounded-t-3xl`}
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={tw`p-6`}
-      >
-        {/* Balance Card */}
-        <View style={tw`bg-white rounded-2xl p-6 mb-4 shadow-sm`}>
-          <Text style={[tw`text-sm text-gray-600 mb-2`, { fontFamily: fontFamily.Medium }]}>Available Balance</Text>
-          <Text style={[tw`text-4xl text-gray-900 mb-6`, { fontFamily: fontFamily.Bold }]}>
-            ₦45,280.00
-          </Text>
-
-          <View style={tw`flex-row gap-3`}>
-            <TouchableOpacity
-              style={[
-                tw`flex-1 flex-row items-center justify-center py-2 rounded-xl`,
-                {
-                  backgroundColor: themeColors.primaryColor,
-                },
-              ]}
-            >
-              <Text style={tw`text-lg text-white mr-2`}>↗</Text>
-              <Text style={[tw`text-md text-white`, { fontFamily: fontFamily.Bold }]}>Withdraw</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[
-                tw`flex-1 flex-row items-center justify-center py-2 rounded-xl`,
-                {
-                  backgroundColor: themeColors.tintLight,
-                },
-              ]}
-            >
-              <Text
-                style={[
-                  tw`text-lg mr-2 bottom-0.4`,
-                  {
-                    color: themeColors.primaryColor,
-                  },
-                ]}
-              >
-                +
-              </Text>
-              <Text
-                style={[
-                  tw`text-md`,
-                  {
-                    color: themeColors.primaryColor,
-                    fontFamily: fontFamily.Bold
-                  },
-                ]}
-              >
-                Add Card
-              </Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-        {/* Quick Stats */}
-        <View style={tw`flex-row gap-3 mb-4`}>
-          <View
-            style={tw`flex-1 bg-white rounded-2xl p-4 flex-row items-center shadow-sm`}
-          >
-            <View
-              style={[
-                tw`w-10 h-10 rounded-xl justify-center items-center mr-3`,
-                {
-                  backgroundColor: themeColors.tintLight,
-                },
-              ]}
-            >
-              <Ionicons
-                name="bar-chart-sharp"
-                color={themeColors.primaryColor}
-                size={20}
-              />
-            </View>
-            <View style={tw`flex-1`}>
-              <Text style={[tw`text-lg text-gray-900 mb-0.5`, { fontFamily: fontFamily.Bold }]}>
-                +₦12,450
-              </Text>
-              <Text style={[tw`text-xs text-gray-600`, { fontFamily: fontFamily.Medium }]}>This Week</Text>
-            </View>
-          </View>
-
-          <View
-            style={tw`flex-1 bg-white rounded-2xl p-4 flex-row items-center shadow-sm`}
-          >
-            <View
-              style={tw`w-10 h-10 bg-green-50 rounded-xl justify-center items-center mr-3`}
-            >
-              <View
-                style={[
-                  tw`w-10 h-10 rounded-xl justify-center items-center mr-3`,
-                  {
-                    backgroundColor: themeColors.tintLight,
-                  },
-                ]}
-              >
-                <Entypo name="pin" color={themeColors.primaryColor} size={20} />
+                  }}
+                />
               </View>
+              {/* <TertiaryButton
+                text={isOnline ? "You are online" : "You are offline"}
+                onpress={handleToggleStatus}
+                height={50}
+                disabled={false}
+                bgColors={isOnline ? "#10B98122" : "#D37A0F22"}
+                textColor={isOnline ? "#10B981" : "#D37A0F"}
+              /> */}
             </View>
-            <View style={tw`flex-1`}>
-              <Text style={[tw`text-lg text-gray-900 mb-0.5`, { fontFamily: fontFamily.Bold }]}>
-                ₦89,200
-              </Text>
-              <Text style={[tw`text-xs text-gray-600`, { fontFamily: fontFamily.Medium }]}>This Month</Text>
-            </View>
-          </View>
+          )}
+        </BottomSheetView>
+        </BottomSheet>
         </View>
-        {/* Transactions */}
-        <View style={tw`bg-white rounded-2xl p-5 mb-4 shadow-sm`}>
-          <View style={tw`flex-row justify-between items-center mb-5`}>
-            <Text style={[tw`text-lg text-gray-900`, { fontFamily: fontFamily.Bold }]}>
-              Recent Transactions
-            </Text>
-            <TouchableOpacity>
-              <Text style={[tw`text-sm text-blue-500`, { fontFamily: fontFamily.Bold }]}>
-                View All
-              </Text>
-            </TouchableOpacity>
-          </View>
-
-          <Transaction
-            type="credit"
-            title="Delivery Payment"
-            subtitle="Johnson Chike • Order #1234"
-            amount="+₦2,500"
-            date="Today, 02:45 PM"
-          />
-          <Transaction
-            type="credit"
-            title="Delivery Payment"
-            subtitle="Sarah Williams • Order #1233"
-            amount="+₦3,200"
-            date="Today, 11:30 AM"
-          />
-          <Transaction
-            type="debit"
-            title="Withdrawal"
-            subtitle="Bank Transfer to GTBank"
-            amount="-₦15,000"
-            date="Yesterday, 05:20 PM"
-          />
-          <Transaction
-            type="credit"
-            title="Delivery Payment"
-            subtitle="Michael Chen • Order #1232"
-            amount="+₦1,800"
-            date="Yesterday, 02:15 PM"
-          />
-          <Transaction
-            type="credit"
-            title="Bonus Reward"
-            subtitle="Weekly Performance Bonus"
-            amount="+₦5,000"
-            date="2 days ago"
-          />
-        </View>
-        Payment Methods
-        {/* <View style={tw`bg-white rounded-2xl p-5 shadow-sm`}>
-          <Text style={tw`text-lg font-bold text-gray-900 mb-4`}>
-            Payment Methods
-          </Text>
-
-          <View
-            style={tw`flex-row justify-between items-center p-4 bg-gray-50 rounded-xl mb-3`}
-          >
-            <View style={tw`flex-row items-center`}>
-              <View
-                style={tw`w-10 h-10 bg-blue-100 rounded-xl justify-center items-center mr-3`}
-              >
-                <Text style={tw`text-xl`}>💳</Text>
-              </View>
-              <View>
-                <Text style={tw`text-sm font-semibold text-gray-900 mb-0.5`}>
-                  GTBank •••• 4532
-                </Text>
-                <Text style={tw`text-xs text-gray-600`}>Primary Account</Text>
-              </View>
-            </View>
-            <View style={tw`bg-blue-100 px-3 py-1 rounded-lg`}>
-              <Text style={tw`text-xs font-semibold text-blue-500`}>
-                Primary
-              </Text>
-            </View>
-          </View>
-
-          <TouchableOpacity
-            style={tw`flex-row items-center justify-center py-3.5 border-2 border-dashed border-gray-300 rounded-xl`}
-          >
-            <Text style={tw`text-lg text-gray-600 mr-2`}>+</Text>
-            <Text style={tw`text-sm font-semibold text-gray-600`}>
-              Add Payment Method
-            </Text>
-          </TouchableOpacity>
-        </View> */}
-        <View style={tw`h-5`} />
-      </ScrollView>
-    </View>
   );
 };
 

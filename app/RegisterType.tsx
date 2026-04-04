@@ -62,7 +62,7 @@ const RegisterType = ({}: RegisterTypePropss) => {
     <View style={[tw`flex-1 justify-between`, { backgroundColor: themeColors.primaryColor }]}>
       <View style={[tw`z-999`, {
             paddingLeft: 20,
-            paddingTop: Platform.OS === "android" ? 20 : 70
+            paddingTop: Platform.OS === "android" ? 60 : 70
           }]}>
           <AuthBackButton
             onPress={() => {
@@ -75,10 +75,18 @@ const RegisterType = ({}: RegisterTypePropss) => {
                       style={[tw`self-center h-150 w-150 absolute z-999 -top-25`]}
                       resizeMode="contain"
             />
-      <View style={[tw`gap-6 py-10 pb-15 justify-center px-5`, {
+      <View style={[tw`gap-6 py-10 justify-center px-5`, {
         backgroundColor: themeColors.background,
         borderTopRightRadius: 20,
-        borderTopLeftRadius: 20
+        borderTopLeftRadius: 20,
+         ...Platform.select({
+                  ios: {
+                    paddingBottom: 40
+                  },
+                  android: {
+                    paddingBottom: 70
+                  }
+                })  
       }]}>
         <View style={[tw`items-center gap-2`]}>
           <Text style={[tw`text-xl`, {

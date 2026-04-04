@@ -16,9 +16,8 @@ import {
   KeyboardAvoidingView,
   Platform,
   Text,
-  TouchableOpacity,
   TouchableWithoutFeedback,
-  View,
+  View
 } from "react-native";
 import { OtpInput } from "react-native-otp-entry";
 
@@ -85,7 +84,7 @@ const OtpScreen = () => {
         <View style={[tw`flex-1 justify-between`, { backgroundColor: themeColors.primaryColor }]}>
           <View style={[tw`z-999`, {
             paddingLeft: 20,
-            paddingTop: Platform.OS === "android" ? 20 : 70
+            paddingTop: Platform.OS === "android" ? 60 : 70
           }]}>
           <AuthBackButton
             onPress={() => {
@@ -98,7 +97,14 @@ const OtpScreen = () => {
               style={[tw`self-center h-150 w-150 absolute -top-20`]}
               resizeMode="contain"
             />
-      <View style={[tw`py-10 pb-15 px-5 gap-5 rounded-t-2xl`, { backgroundColor: themeColors.background }]}>
+      <View style={[tw`py-10 px-5 gap-5 rounded-t-2xl`, { backgroundColor: themeColors.background,  ...Platform.select({
+                  ios: {
+                    paddingBottom: 40
+                  },
+                  android: {
+                    paddingBottom: 70
+                  }
+                }) }]}>
         <View style={[tw`items-center gap-1`]}>
           <Text style={[tw`text-2xl`, {
             color: themeColors.text,
@@ -130,7 +136,6 @@ const OtpScreen = () => {
                 borderRadius: 10,
                 width: 50,
                 height: 40,
-                elevation: 5,
               },
               focusedPinCodeContainerStyle: {
                 borderColor: themeColors.iconColor,
@@ -157,7 +162,7 @@ const OtpScreen = () => {
         {/* CONTINUE BUTTON */}
         <PrimaryButton
           bgColors={otp.length !== 6 ? "#19488A33" : themeColors.primaryColor}
-          height={50}
+              height={50}
           onpress={() => {
             router.push("/RegisterType")
           }}
@@ -165,38 +170,6 @@ const OtpScreen = () => {
           text={loading ? "Verifying..." : "Continue"}
           disabled={otp.length !== 6 || loading}
         />
-           {/* LOGIN LINK */}
-         <View style={[tw`flex-row items-center justify-center gap-1`]}>
-                <Text
-                  style={[
-                    tw``,
-                    {
-                      color: themeColors.text,
-                      opacity: 0.7,
-                      fontFamily: fontFamily.Light,
-                    },
-                  ]}
-                >
-                  Already have an account?
-                </Text>
-                <TouchableOpacity
-                  onPress={() => {
-                    router.replace("/screens");
-                  }}
-                >
-                  <Text
-                    style={[
-                      tw`text-center`,
-                      {
-                        color: themeColors.text,
-                        fontFamily: fontFamily.Bold,
-                      },
-                    ]}
-                  >
-                    Sign In
-                  </Text>
-                </TouchableOpacity>
-              </View>
         <CompleteModal
           visible={completeModalVisible}
           onClose={() => {

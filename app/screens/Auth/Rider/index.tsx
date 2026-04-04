@@ -154,7 +154,7 @@ export default function RiderAuthIndex() {
         <View style={[tw`flex-1 bg-[#19488A] justify-between`]}>
           <View style={[tw`z-999`, {
             paddingLeft: 20,
-            paddingTop: Platform.OS === "android" ? 20 : 70
+            paddingTop: Platform.OS === "android" ? 60 : 70
           }]}>
           <AuthBackButton
             onPress={() => {
@@ -203,11 +203,11 @@ export default function RiderAuthIndex() {
                   <View>
                     <TextInputFields
                       icon={AtSign}
-                      iconColor={themeColors.iconColor}
+                      iconColor={themeColors.textInputIconColor}
                       placeholderText="email"
                       iconSize={18}
                       value={values.email}
-                      placeholderTextColor={themeColors.text}
+                      placeholderTextColor={themeColors.placeholderColor}
                       onChangeText={handleChange("email")}
                       onBlur={handleBlur("email")}
                       keyboardType="email-address"
@@ -223,10 +223,10 @@ export default function RiderAuthIndex() {
                   <View>
                     <PasswordTextInputFields
                       icon={Lock}
-                      iconColor={themeColors.iconColor}
+                      iconColor={themeColors.textInputIconColor}
                       placeholderText="password"
                       iconSize={18}
-                       placeholderTextColor={themeColors.text}
+                       placeholderTextColor={themeColors.placeholderColor}
                       value={values.password}
                       onChangeText={handleChange("password")}
                       onBlur={handleBlur("password")}

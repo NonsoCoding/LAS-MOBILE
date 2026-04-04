@@ -1,8 +1,9 @@
 import Colors from "@/constants/Colors";
 import { fontFamily } from "@/constants/fonts";
 import tw from "@/constants/tailwind";
-import { Modal, Text, useColorScheme, View } from "react-native";
+import { Modal, Text, View } from "react-native";
 import PrimaryButton from "../Buttons/PrimaryButton";
+import { useColorScheme } from "../useColorScheme";
 
 interface LogoutModalProps {
     visible: boolean;
@@ -22,12 +23,16 @@ const LogoutModalTwo = ({ visible, onClose, onLogout }: LogoutModalProps) => {
         onRequestClose={onClose}
         >
             <View style={[tw`bg-[rgba(0,0,0,0.5)] flex-1 justify-end items-center`]}>
-                <View style={[tw`bg-white p-4 rounded-lg w-full gap-4 pb-10`]}>
+                <View style={[tw`p-4 rounded-lg w-full gap-4 pb-10`, {
+                    backgroundColor: themeColors.background
+                }]}>
                     <Text style={[tw`text-center font-bold text-lg`, {
-                        fontFamily: fontFamily.Bold
+                        fontFamily: fontFamily.Bold,
+                        color: themeColors.text
                     }]}>Logout</Text>
                     <Text style={[tw`text-center`, {
-                        fontFamily: fontFamily.MontserratEasyMedium
+                        fontFamily: fontFamily.MontserratEasyMedium,
+                        color: themeColors.text
                     }]}>Are you sure you want to logout?</Text>
                     <View style={[tw`gap-2`]}>
                         <PrimaryButton

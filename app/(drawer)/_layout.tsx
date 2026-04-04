@@ -27,8 +27,8 @@ function CustomDrawerContent(props: any) {
     <DrawerContentScrollView {...props} contentContainerStyle={{ paddingTop: 0 }}>
       {/* Custom Profile Header */}
       <View style={[tw`pt-15 pb-5 bg-[${themeColors.background}]`]}>
-        <View style={[tw`flex-row items-center justify-between pr-10`]}>
-          <View style={[tw`flex-row items-center gap-4`]}>
+        <View style={[tw`flex-row items-center justify-between pr-0`]}>
+          <View style={[tw`flex-row items-center gap-2`]}>
             <Image 
                 source={require("../../assets/images/pfp.png")}
                 style={[tw`h-14 w-14 rounded-full bg-gray-200`]}
@@ -49,7 +49,7 @@ function CustomDrawerContent(props: any) {
             </View>
           </View>
                 <TouchableOpacity onPress={() => props.navigation.navigate("profile")}>
-                    <ChevronRight/>
+                    <ChevronRight color={themeColors.text}/>
                 </TouchableOpacity>
         </View>
       </View>
@@ -104,7 +104,7 @@ export default function DrawerLayout() {
           fontFamily: fontFamily.MontserratEasyRegular,
           fontSize: 13
         },
-        drawerActiveTintColor: themeColors.primaryColor,
+        drawerActiveTintColor: themeColors.drawerColor,
         drawerItemStyle: {
           borderRadius: 0,
         },

@@ -55,7 +55,7 @@ const CustomTextInput = ({
 
     const animatedInputStyle = useAnimatedStyle(() => {
         return {
-            paddingTop: animatedValue.value === 1 ? 12 : 0,
+            paddingTop: animatedValue.value === 1 ? 8 : 0,
         };
     });
 
@@ -74,7 +74,10 @@ const CustomTextInput = ({
 
     return (
         <View style={tw`relative`}>
-            <View style={tw`border-1 border rounded-full items-center flex-row px-4 py-2 gap-3 border-[#19488A] h-12`}>
+            <View style={[tw`border-1 border rounded-full items-center flex-row px-4 py-2 gap-3 h-12`, {
+                borderColor: themeColors.buttonBorder,
+                backgroundColor: themeColors.textInputBg,
+            }]}>
                 <View style={[tw`w-9 items-center justify-center`]}>
                     <FontAwesome5 name="address-book" size={15} color={themeColors.primaryColor} />
                </View>
@@ -102,11 +105,18 @@ const CustomTextInput = ({
                                 setIsFocusedInternal(false);
                                 onBlur?.(e);
                             }}
-                            style={[tw`text-xs`, {
-                                fontFamily: fontFamily.MontserratEasyRegular,
-                                color: "black",
-                                height: 30,
-                            }]}
+                            style={[
+        tw`text-[12px] uppercase`, 
+        {
+            fontFamily: fontFamily.MontserratEasyRegular,
+            color: "black",
+            top: 3,
+            height: 34, // Increased slightly
+            textAlignVertical: 'center', // Crucial for Android
+            paddingVertical: 0, // Remove default padding
+            includeFontPadding: false, // Remove extra space at top/bottom of font
+        }
+    ]}
                         />
                     </Animated.View>
                 </View>

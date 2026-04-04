@@ -632,7 +632,7 @@ const carrierMarkerRef = useRef<any>(null); // add this ref near your other refs
           paddingTop: 0
         },
         android: {
-          paddingTop: 20
+          paddingTop: 0,
         }
       })
     }]}>
@@ -662,22 +662,18 @@ const carrierMarkerRef = useRef<any>(null); // add this ref near your other refs
   loadingBackgroundColor="#ffffff"
 >
         {origin &&
-          <Marker
-            coordinate={origin}
-          >
-            <Image style={[tw`w-15 h-15`, {
-              resizeMode: "contain"
-            }]} source={require("../../assets/images/IntroImages/icon/pin.png")}/>
-          </Marker>
+         <Marker
+  coordinate={origin}
+  anchor={{ x: 0.5, y: 1.0 }}
+  icon={require("../../assets/images/IntroImages/icon/pin.png")}
+/>
         }
         {destination &&
-          <Marker
-            coordinate={destination}
-          >
-            <Image style={[tw`w-15 h-15`, {
-              resizeMode: "contain"
-            }]} source={require("../../assets/images/IntroImages/icon/pin.png")}/>
-          </Marker>
+         <Marker
+  coordinate={destination}
+  anchor={{ x: 0.5, y: 0.5 }}
+  icon={require("../../assets/images/IntroImages/icon/pin.png")}
+/>
         }
         {showDirection && origin && destination &&
        <MapViewDirections 
@@ -720,7 +716,7 @@ const carrierMarkerRef = useRef<any>(null); // add this ref near your other refs
                 ]}
                 onPress={() => navigation.dispatch(DrawerActions.openDrawer())}
               >
-                <AlignCenter color={themeColors.primaryColor} />
+                <AlignCenter color={themeColors.text} />
         </TouchableOpacity>
       <Modal
           transparent={true}
@@ -852,14 +848,21 @@ const carrierMarkerRef = useRef<any>(null); // add this ref near your other refs
         snapPoints={snapPoints}
         ref={bottomSheetRef}
         enablePanDownToClose={false}
+        backgroundStyle={{
+          backgroundColor: themeColors.background
+        }}
       >
-          <BottomSheetView style={[tw`justify-center pb-10`]}
+        <BottomSheetView style={[tw`justify-center`, {
+        
+          }]}
           >
             
           {step === 1 && (
-          <View style={[tw`gap-5`]}>
+            <View style={[tw`gap-5`, {
+            paddingBottom: Platform.OS === "android" ? 60 : 50
+          }]}>
             <View style={tw`px-5`}>
-              <SearchTextInput placeholderText="Track your shipment" />
+              <SearchTextInput placeholderText="TRACK YOUR SHIPMENT" />
             </View>
               {acceptedShipments.length > 0 ? (
                 <FlatList
@@ -901,13 +904,14 @@ const carrierMarkerRef = useRef<any>(null); // add this ref near your other refs
     
     <Text style={[tw`text-lg text-center`, { 
         fontFamily: fontFamily.MontserratEasyBold, 
-        color: '#1A1A1A' 
+        color: themeColors.text
     }]}>
       No Active Shipments
     </Text>
     
     <Text style={[tw`text-sm text-center mt-2 text-gray-500`, { 
-        fontFamily: fontFamily.MontserratEasyMedium 
+      fontFamily: fontFamily.MontserratEasyMedium,
+      color: themeColors.text
     }]}>
       You don't have any shipments running right now. Ready to send something new?
     </Text>
@@ -925,11 +929,12 @@ const carrierMarkerRef = useRef<any>(null); // add this ref near your other refs
               )}
             <View style={[tw`flex-row justify-between items-center gap-2 px-5`]}>
               <SecondaryButton
-                borderColor={themeColors.primaryColor}
+                borderColor={themeColors.buttonBorder}
                 borderWidth={1}
                   text="View History"
                   icon={require("../../assets/images/IntroImages/icon/Clock.png")}
-                height={50}
+                  height={50}
+                  bgColors={themeColors.textInputBg}
                 textColor={themeColors.primaryColor}
                 onpress={() => {
 
@@ -951,11 +956,13 @@ const carrierMarkerRef = useRef<any>(null); // add this ref near your other refs
           </View>
           )}
           {step === 2 && (
-            <View style={[tw`gap-5 px-5`]}>
+            <View style={[tw`gap-5 px-5`, {
+              paddingBottom: Platform.OS === "android" ? 60 : 50
+            }]}>
               <View style={[tw`flex-row items-center justify-between`]}>
                   <Text style={[tw`text-2xl uppercase`, {
                     fontFamily: fontFamily.MontserratEasyBold,
-                    color: themeColors.primaryColor
+                    color: themeColors.text
                   }]}>Delivery Request</Text>
                      <TouchableOpacity 
                     onPress={() => {
@@ -973,7 +980,8 @@ const carrierMarkerRef = useRef<any>(null); // add this ref near your other refs
                   }}>
                     <Image style={[tw`h-3.5 w-3.5`]} source={require("../../assets/images/IntroImages/LocationMarker.png")}/>
                     <Text style={[tw`uppercase text-xs`, {
-                      fontFamily: fontFamily.MontserratEasyMedium
+                      fontFamily: fontFamily.MontserratEasyMedium,
+                          color: themeColors.text
                     }]} numberOfLines={1}>{pickupAddress.length > 20 ? pickupAddress.slice(0, 35) + "..." : pickupAddress || "Pickup location"}</Text>
                   </TouchableOpacity>
               <View style={[tw`gap-3`]}>
@@ -984,7 +992,8 @@ const carrierMarkerRef = useRef<any>(null); // add this ref near your other refs
                     }}>
                     <Image style={[tw`h-3.5 w-3.5`]} source={require("../../assets/images/IntroImages/LocationMarker2.png")}/>
                     <Text style={[tw`uppercase text-xs`, {
-                      fontFamily: fontFamily.MontserratEasyMedium
+                      fontFamily: fontFamily.MontserratEasyMedium,
+                          color: themeColors.text
                     }]} numberOfLines={1}>{destinationAddress.length > 20 ? destinationAddress.slice(0, 35) + "..." : destinationAddress || "Package destination"}</Text>
                   </TouchableOpacity>
                 ) : (
@@ -1044,7 +1053,7 @@ const carrierMarkerRef = useRef<any>(null); // add this ref near your other refs
                 }]}>Recommended price: ₦{calculatedPrice || "0"}</Text>
               </View>
               <SecondaryButton
-                bgColors={isFormValid ? themeColors.primaryColor : "#ccc"}
+                bgColors={isFormValid ? "#19488A" : "#D3D3D344"}
                 text="Find Rider"
                 height={50}
                 textColor={"white"}
@@ -1065,14 +1074,17 @@ const carrierMarkerRef = useRef<any>(null); // add this ref near your other refs
       <BottomSheet
         snapPoints={routeSearchSnapPoints}
         ref={routeSearchSheetRef}
-        onClose={() => setRouteSearchSheet(false)}
+          onClose={() => setRouteSearchSheet(false)}
+          backgroundStyle={{
+            backgroundColor: themeColors.background
+          }}
       >
           <BottomSheetView style={[tw`flex-1 px-5 justify-between pb-15`]}
           >
             <View style={[tw`gap-5`]}>
             <View style={[tw`flex-row justify-between items-center`]}>
                   <Text style={[tw`text-2xl`, {
-                    color: themeColors.primaryColor,
+                    color: themeColors.text,
                     fontFamily: fontFamily.MontserratEasyBold
                   }]}>Enter Your Route</Text>
                   <TouchableOpacity 
@@ -1153,10 +1165,10 @@ const carrierMarkerRef = useRef<any>(null); // add this ref near your other refs
                     traceRoute();
                   }}
                 >
-                <MapPin size={18} color={themeColors.primaryColor} />
+                <MapPin size={18} color={themeColors.text} />
                 <Text style={[tw`uppercase text-xs`, {
                   fontFamily: fontFamily.MontserratEasyBold,
-                  color: themeColors.primaryColor
+                  color: themeColors.text
                 }]}>Show in map</Text>
                 </TouchableOpacity>
               </View>
@@ -1182,16 +1194,22 @@ const carrierMarkerRef = useRef<any>(null); // add this ref near your other refs
       <BottomSheet
         snapPoints={orderDetailSearchSnapPoints}
         ref={OrderDetailSheetRef}
-        onClose={() => setOrderDetailSheet(false)}
+          onClose={() => setOrderDetailSheet(false)}
+          backgroundStyle={{
+            backgroundColor: themeColors.background
+          }}
       >
-          <BottomSheetScrollView style={[tw`flex-1 px-5 pb-15`]}
-            contentContainerStyle={[tw`pb-10`]}
+          <BottomSheetScrollView style={[tw`flex-1 px-5`]}
+            contentContainerStyle={[tw``, {
+              paddingBottom: Platform.OS === "android" ? 60 : 50
+            }]}
           >
             <View style={[tw`gap-5`]}>
             <View style={[tw`flex-row justify-between items-center`]}>
                  <Text style={[tw`uppercase text-2xl`, {
-                   color: themeColors.primaryColor,
-                   fontFamily: fontFamily.MontserratEasyBold
+                   color: themeColors.text,
+                   fontFamily: fontFamily.MontserratEasyBold,
+                   
                   }]}>Order Detail</Text>
                   <TouchableOpacity 
                     onPress={() => {
@@ -1203,7 +1221,9 @@ const carrierMarkerRef = useRef<any>(null); // add this ref near your other refs
                     <X size={20} color={themeColors.primaryColor} />
                   </TouchableOpacity>
               </View>
-              <View style={[tw`flex-row justify-between items-center bg-[#19488A11] rounded-lg p-1`]}>
+              <View style={[tw`flex-row justify-between items-center bg-[#19488A11] rounded-lg p-1`, {
+                backgroundColor: themeColors.textInputBg
+              }]}>
                 <TouchableOpacity 
                   style={[tw`flex-1 py-4 rounded-md items-center`, {
                     backgroundColor: deliveryType === "building" ? "#19488A" : "transparent"
@@ -1246,8 +1266,9 @@ const carrierMarkerRef = useRef<any>(null); // add this ref near your other refs
               </View>
               <View style={[tw`gap-4`]}>
                 <View style={[tw`justify-between flex-row items-center`]}>
-                <Text style={[tw`text-lg text-[#19488A]`, {
-                  fontFamily: fontFamily.MontserratEasyBold
+                <Text style={[tw`text-lg`, {
+                  fontFamily: fontFamily.MontserratEasyBold,
+                  color: themeColors.text
                   }]}>What to deliver</Text>
                   <TouchableOpacity>
                   <InfoIcon size={14} color={themeColors.primaryColor}/>
@@ -1257,8 +1278,10 @@ const carrierMarkerRef = useRef<any>(null); // add this ref near your other refs
                   numberOfLines={5}
                   multiline
                   placeholder="Describe the parcel you wish to be delivered"
-                  style={[tw`rounded-md px-4 py-2 bg-[#19488A11] h-25 border border-[0.5px] border-[#19488A22]`, {
-                    fontFamily: fontFamily.MontserratEasyRegular
+                  style={[tw`rounded-md px-4 py-2 h-40 border border-[0.5px] border-[#19488A22]`, {
+                    fontFamily: fontFamily.MontserratEasyRegular,
+                    textAlignVertical: "top",
+                    backgroundColor: themeColors.textInputBg
                   }]}
                   value={itemDescription}
                   onChangeText={setItemDescription}
@@ -1266,16 +1289,19 @@ const carrierMarkerRef = useRef<any>(null); // add this ref near your other refs
               </View>
               <View style={[tw`gap-4`]}>
                 <View style={[tw`justify-between flex-row items-center`]}>
-                <Text style={[tw`text-lg text-[#19488A]`, {
-                  fontFamily: fontFamily.MontserratEasyBold
+                <Text style={[tw`text-lg`, {
+                  fontFamily: fontFamily.MontserratEasyBold,
+                  color: themeColors.text
                   }]}>Indicate the Value</Text>
                   <TouchableOpacity>
                   <InfoIcon size={14} color={themeColors.primaryColor}/>
                   </TouchableOpacity>
                 </View>
-                <View style={[tw`flex-row justify-between items-center bg-[#19488A11] p-5 py-7 rounded-md`]}>
+                <View style={[tw`flex-row justify-between items-center bg-[#19488A11] p-5 py-7 rounded-md`, {
+                  backgroundColor: themeColors.textInputBg
+                }]}>
                   <TouchableOpacity 
-                    style={[tw`p-2 bg-white rounded-full`]}
+                    style={[tw`p-2 rounded-full bg-[#19488A11]`]}
                     onPress={() => setItemValue(prev => prev + 100)}
                   >
                     <Plus/>
@@ -1284,7 +1310,7 @@ const carrierMarkerRef = useRef<any>(null); // add this ref near your other refs
                     fontFamily: fontFamily.Medium
                   }]}>{itemValue}</Text>
                   <TouchableOpacity 
-                    style={[tw`p-2 bg-white rounded-full`]}
+                    style={[tw`p-2 bg-white rounded-full bg-[#19488A11]`]}
                     onPress={() => setItemValue(prev => Math.max(0, prev - 100))}
                   >
                   <Minus/>
@@ -1294,7 +1320,7 @@ const carrierMarkerRef = useRef<any>(null); // add this ref near your other refs
             </View>
             <View style={tw`mt-5`}>
               <SecondaryButton
-                bgColors={isOrderDetailValid ? themeColors.primaryColor : "#ccc"}
+                bgColors={isOrderDetailValid ? themeColors.primaryColor : "#D3D3D344"}
                 text="Find Rider"
                 height={50}
                 textColor={"white"}
@@ -1310,15 +1336,18 @@ const carrierMarkerRef = useRef<any>(null); // add this ref near your other refs
       <BottomSheet
         snapPoints={offerSnapPoints}
         ref={offerSheetRef}
-        onClose={() => setOfferSheet(false)}
+          onClose={() => setOfferSheet(false)}
+          backgroundStyle={{
+            backgroundColor: themeColors.background
+          }}
       >
           <BottomSheetView style={[tw`flex-1 px-5 justify-between pb-15`]}
           >
             <View style={[tw`gap-5`]}>
             <View style={[tw`flex-row justify-between items-center`]}>
                  <Text style={[tw`text-xl uppercase`, {
-                   color: themeColors.primaryColor,
-                   fontFamily: fontFamily.MontserratEasyBold
+                   fontFamily: fontFamily.MontserratEasyBold,
+                   color: themeColors.text
                   }]}>Offer your price</Text>
                   <TouchableOpacity 
                     onPress={() => {
@@ -1350,10 +1379,12 @@ const carrierMarkerRef = useRef<any>(null); // add this ref near your other refs
                   placeholder="Select payment method"
                   options={paymentaOptions}
                 />
-                <View style={[tw`flex-row justify-between items-center bg-[#19488A11] p-5 py-7 rounded-md`]}>
+                <View style={[tw`flex-row justify-between items-center bg-[#19488A11] p-5 py-7 rounded-md`, {
+                  backgroundColor: themeColors.textInputBg
+                }]}>
                   <TouchableOpacity 
                     onPress={() => setFinalPrice(finalPrice + 100)}
-                    style={[tw`p-2 bg-white rounded-full`]}
+                    style={[tw`p-2 bg-[#19488A11] rounded-full`]}
                   >
                     <Plus/>
                   </TouchableOpacity>
@@ -1362,12 +1393,11 @@ const carrierMarkerRef = useRef<any>(null); // add this ref near your other refs
                   }]}>{finalPrice}</Text>
                   <TouchableOpacity 
                     onPress={() => setFinalPrice(Math.max(0, finalPrice - 100))}
-                    style={[tw`p-2 bg-white rounded-full` ]} 
+                    style={[tw`p-2 bg-[#19488A11] rounded-full` ]} 
                   >
                   <Minus/>
                   </TouchableOpacity>
                 </View>
-              
               </View>
             </View>
             <View style={tw`mt-5`}>
